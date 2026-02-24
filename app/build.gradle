@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
 }
-
+//aa
 android {
     namespace 'com.example.migymsito'
     compileSdk {

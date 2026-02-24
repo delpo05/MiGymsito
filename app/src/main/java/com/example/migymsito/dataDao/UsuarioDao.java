@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import com.example.migymsito.data.Usuario;
 
-//Conexion con la base de datos ! aa aa aa  aa
+//Conexion con la base de datos !
 
 @Dao
 public interface UsuarioDao {

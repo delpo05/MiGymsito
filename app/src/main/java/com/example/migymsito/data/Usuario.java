@@ -1,6 +1,6 @@
 package com.example.migymsito.data;
 
-//importacion de librerias aaa aaa aa
+//importacion de librerias
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
