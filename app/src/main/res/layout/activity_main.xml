@@ -1,19 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="#000000"
+    android:gravity="center"
+    android:padding="10dp"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bienvenido a Mi Gymsito"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#fefefe"
+        android:gravity="center"
+        android:layout_marginBottom="2dp" />
+
+    <ImageView
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="2dp"
+        android:contentDescription="Logo de Mi Gymsito"
+        android:src="@drawable/logo_gym" />
+
+    <TableRow
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Integrantes test!: Felipe Delpino juampu Lautaro Luca"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="2dp"
+        android:gravity="center">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Usuario:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#fefefe"
+            android:paddingEnd="5dp" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etUsuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:textColor="#fefefe"
+            android:textColorHint="#cccccc"
+            app:backgroundTint="#fefefe"
+            android:backgroundTint="#fefefe"
+            android:inputType="text" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contraseña:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#fefefe"
+            android:paddingEnd="5dp" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:textColor="#fefefe"
+            android:textColorHint="#cccccc"
+            app:backgroundTint="#fefefe"
+            android:backgroundTint="#fefefe"
+            android:inputType="textPassword" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:backgroundTint="#fefefe"
+            android:onClick="EventoBoton"
+            android:text="Continuar" />
+    </TableRow>
+
+</TableLayout>
