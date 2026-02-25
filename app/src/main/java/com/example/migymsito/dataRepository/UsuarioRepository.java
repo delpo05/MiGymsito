@@ -50,9 +50,9 @@ public class UsuarioRepository {
     }
 
     // --- LÓGICA DE NEGOCIO: LOGIN ---
-    public void validarLogin(String correo, String pass, RepositoryCallback<Usuario> callback) {
+    public void validarLogin(String usuario, String pass, RepositoryCallback<Usuario> callback) {
         executorService.execute(() -> {
-            Usuario user = usuarioDao.login(correo, pass);
+            Usuario user = usuarioDao.login(usuario, pass);
             notificar(callback, user);
         });
     }
