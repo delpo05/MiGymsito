@@ -1,6 +1,7 @@
 package com.example.migymsito;
 
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -16,14 +17,14 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 
 public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
 
-    private EditText etUsuario, etPassword;
+    private EditText etUsuario, etPassword; // Login
+    private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegGenero; // Registro
     private UsuarioRepository usuarioRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        // Cambiamos mostrarLogin() por mostrarRegistro() para que inicie aquí
         mostrarRegistro();
     }
 
@@ -37,6 +38,12 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
 
     private void mostrarRegistro() {
         setContentView(R.layout.registro_sesion);
+        etRegNombre = findViewById(R.id.etRegNombre);
+        etRegCorreo = findViewById(R.id.etRegCorreo);
+        etRegFechaNac = findViewById(R.id.etRegFechaNac);
+        etRegPeso = findViewById(R.id.etRegPeso);
+        etRegAltura = findViewById(R.id.etRegAltura);
+        etRegGenero = findViewById(R.id.etRegGenero);
         configurarWindowInsets(R.id.registro);
     }
 
@@ -51,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
     }
 
-    // Botón "Continuar" del Login
     public void EventoBoton(View view) {
         String usuario = etUsuario.getText().toString();
         String password = etPassword.getText().toString();
@@ -63,15 +69,51 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
     }
 
-    // Texto de "Regístrate" en el Login
     public void EventoRegistrarse(View view) {
         mostrarRegistro();
     }
 
-    // Botón "Continuar" del Registro
     public void EventoBotonRegistrar(View view) {
-        //Toast.makeText(this, "Registro completado", Toast.LENGTH_SHORT).show();
-        //mostrarLogin(); // Después de registrarse, lo mandamos al login
+        validacionesRegistrarUsuario(view);
+    }
+
+    public void validacionesRegistrarUsuario(View view) {
+        boolean estado = true;
+
+        if (etRegNombre.getText().toString().isEmpty()) {
+            etRegNombre.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(etRegCorreo.getText().toString()).matches()) {
+            etRegCorreo.setError("Correo inválido");
+            estado = false;
+        }
+
+        if (etRegFechaNac.getText().toString().isEmpty()) {
+            etRegFechaNac.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegPeso.getText().toString().isEmpty()) {
+            etRegPeso.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegAltura.getText().toString().isEmpty()) {
+            etRegAltura.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegGenero.getText().toString().isEmpty()) {
+            etRegGenero.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (estado) {
+            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+            mostrarLogin();
+        }
     }
 
     @Override
