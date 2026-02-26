@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/registro"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/negro"
+    android:gravity="center"
+    android:padding="20dp"
+    android:stretchColumns="0,1">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="REGISTRO"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="@color/blanco"
+        android:gravity="center"
+        android:layout_marginBottom="30dp" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp">
+
+        <EditText
+            android:id="@+id/etRegNombre"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/edittext_border"
+            android:hint="Nombre de usuario"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/etRegCorreo"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/edittext_border"
+            android:hint="Correo electrónico"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="textEmailAddress" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp">
+
+        <EditText
+            android:id="@+id/etRegFechaNac"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/edittext_border"
+            android:hint="Fecha de nacimiento"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="date" />
+
+        <EditText
+            android:id="@+id/etRegPeso"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/edittext_border"
+            android:hint="Peso"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="numberDecimal" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp">
+
+        <EditText
+            android:id="@+id/etRegAltura"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/edittext_border"
+            android:hint="Altura"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etRegGenero"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/edittext_border"
+            android:hint="Género"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:textColorHint="@color/gris_pista"
+            android:inputType="text" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="15dp">
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:textStyle="bold"
+            android:textColor="@color/negro"
+            android:backgroundTint="@color/blanco"
+            android:onClick="EventoBotonRegistrar"
+            android:text="Iniciar" />
+    </TableRow>
+
+</TableLayout>

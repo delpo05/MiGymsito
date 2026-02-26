@@ -23,20 +23,35 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-        
-        etUsuario = findViewById(R.id.etUsuario);
-        etPassword = findViewById(R.id.etPassword);
-
-        usuarioRepository = new UsuarioRepository(getApplication());
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        // Cambiamos mostrarLogin() por mostrarRegistro() para que inicie aquí
+        mostrarRegistro();
     }
 
+    private void mostrarLogin() {
+        setContentView(R.layout.activity_main);
+        etUsuario = findViewById(R.id.etUsuario);
+        etPassword = findViewById(R.id.etPassword);
+        usuarioRepository = new UsuarioRepository(getApplication());
+        configurarWindowInsets(R.id.main);
+    }
+
+    private void mostrarRegistro() {
+        setContentView(R.layout.registro_sesion);
+        configurarWindowInsets(R.id.registro);
+    }
+
+    private void configurarWindowInsets(int layoutId) {
+        View layout = findViewById(layoutId);
+        if (layout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
+    }
+
+    // Botón "Continuar" del Login
     public void EventoBoton(View view) {
         String usuario = etUsuario.getText().toString();
         String password = etPassword.getText().toString();
@@ -48,6 +63,17 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
     }
 
+    // Texto de "Regístrate" en el Login
+    public void EventoRegistrarse(View view) {
+        mostrarRegistro();
+    }
+
+    // Botón "Continuar" del Registro
+    public void EventoBotonRegistrar(View view) {
+        //Toast.makeText(this, "Registro completado", Toast.LENGTH_SHORT).show();
+        //mostrarLogin(); // Después de registrarse, lo mandamos al login
+    }
+
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
@@ -56,7 +82,4 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
 }
