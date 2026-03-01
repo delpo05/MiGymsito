@@ -11,9 +11,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataRepository.UsuarioRepository;
+
+public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
 
     private EditText etUsuario, etPassword;
+    private UsuarioRepository usuarioRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
         
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
+
+        usuarioRepository = new UsuarioRepository(getApplication());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -38,7 +44,19 @@ public class MainActivity extends AppCompatActivity {
         if (usuario.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Bienvenido " + usuario, Toast.LENGTH_SHORT).show();
+            usuarioRepository.validarLogin(usuario, password, this);
         }
     }
+
+    @Override
+    public void onResult(Usuario result) {
+        if (result != null) {
+            Toast.makeText(this, "Bienvenido " + result.nombreUsuario, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
 }
