@@ -8,7 +8,5 @@ public class VistaRutina extends Header {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vista_rutina);
-
-        // ¡Y eso es todo! La BaseActivity se encarga del resto.
     }
 }

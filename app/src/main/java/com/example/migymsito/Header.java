@@ -33,7 +33,6 @@ public abstract class Header extends AppCompatActivity {
     }
 
     private void showPopupMenu(View view) {
-        // Crear un PopupMenu estándar. Gracias a los cambios en themes.xml, se verá oscuro.
         PopupMenu popup = new PopupMenu(this, view);
         popup.getMenuInflater().inflate(R.menu.popup_header, popup.getMenu());
 
