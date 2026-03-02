@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MiGymsito</string>
+    <string name="usuario">Usuario:</string>
+    <string name="contrasenia">Contraseña:</string>
+    <string name="no_tenes_cuenta">¿No tenes cuenta? Regístrate</string>
+    <string name="continuar">Continuar</string>
+    <string name="logo_de_mi_gymsito">Logo de Mi Gymsito</string>
 </resources>
