@@ -6,7 +6,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -14,7 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
-public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
+// Heredamos de Header para obtener la funcionalidad del toolbar automáticamente
+public class MainActivity extends Header implements UsuarioRepository.RepositoryCallback<Usuario> {
 
     private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
@@ -23,8 +23,10 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        // Al llamar a setContentView, Header.java ejecutará setupToolbar()
         setContentView(R.layout.activity_main);
-        
+
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
 
@@ -56,7 +58,4 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
 }
