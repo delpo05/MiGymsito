@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
+// Heredamos de Header para obtener la funcionalidad del toolbar automáticamente
 public class MainActivity extends Header implements UsuarioRepository.RepositoryCallback<Usuario> {
 
     private EditText etUsuario, etPassword;
@@ -21,10 +22,11 @@ public class MainActivity extends Header implements UsuarioRepository.Repository
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(
-                this);
+        EdgeToEdge.enable(this);
+
+        // Al llamar a setContentView, Header.java ejecutará setupToolbar()
         setContentView(R.layout.activity_main);
-        
+
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
 
@@ -56,7 +58,4 @@ public class MainActivity extends Header implements UsuarioRepository.Repository
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-
 }
