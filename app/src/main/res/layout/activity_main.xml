@@ -1,112 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/negro"
-    android:gravity="center"
-    android:padding="10dp"
-    android:focusable="true"
-    android:focusableInTouchMode="true">
-    <!--
-    <TextView
+    android:orientation="vertical">
+
+    <!-- INCLUIMOS EL HEADER AQUÍ -->
+    <include layout="@layout/header" />
+
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Bienvenido a Mi Gymsito"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:textColor="@color/blanco"
+        android:layout_height="match_parent"
         android:gravity="center"
-        android:layout_marginBottom="2dp" />
-        -->
+        android:padding="10dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="3dp"
-        android:contentDescription="Logo de Mi Gymsito"
-        android:src="@drawable/logo_gym2" />
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="3dp"
+            android:contentDescription="@string/logo_de_mi_gymsito"
+            android:src="@drawable/logo_gym2" />
 
-<TableRow
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="2dp"
-    android:gravity="center">
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Usuario:"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/blanco"
-        android:paddingEnd="5dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/usuario"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/blanco"
+                android:paddingEnd="5dp" />
 
-    <EditText
-        android:id="@+id/etUsuario"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="8"
-        android:textColor="@color/blanco"
-        android:textColorHint="@color/gris_pista"
-        app:backgroundTint="@color/blanco"
-        android:backgroundTint="@color/blanco"
-        android:inputType="text" />
-</TableRow>
+            <EditText
+                android:id="@+id/etUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="8"
+                android:textColor="@color/blanco"
+                android:textColorHint="@color/gris_pista"
+                app:backgroundTint="@color/blanco"
+                android:backgroundTint="@color/blanco"
+                android:inputType="text" />
+        </TableRow>
 
-<TableRow
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="2dp"
-    android:gravity="center">
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:gravity="center">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Contraseña:"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/blanco"
-        android:paddingEnd="5dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/contrasenia"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/blanco"
+                android:paddingEnd="5dp" />
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="8"
-        android:textColor="@color/blanco"
-        android:textColorHint="@color/gris_pista"
-        app:backgroundTint="@color/blanco"
-        android:backgroundTint="@color/blanco"
-        android:inputType="textPassword" />
-</TableRow>
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="8"
+                android:textColor="@color/blanco"
+                android:textColorHint="@color/gris_pista"
+                app:backgroundTint="@color/blanco"
+                android:backgroundTint="@color/blanco"
+                android:inputType="textPassword" />
+        </TableRow>
 
-<TableRow
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
 
-    <TextView
-        android:id="@+id/tvRegistrarse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_span="2"
-        android:text="¿No tenes cuenta? Regístrate"
-        android:textColor="@color/blanco"
-        android:textSize="14sp"
-        android:paddingTop="10dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:onClick="EventoRegistrarse" />
-</TableRow>
+            <TextView
+                android:id="@+id/tvRegistrarse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_span="2"
+                android:text="@string/no_tenes_cuenta"
+                android:textColor="@color/blanco"
+                android:textSize="14sp"
+                android:paddingTop="10dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:onClick="EventoRegistrarse" />
+        </TableRow>
 
-<TableRow
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:layout_marginTop="15dp">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="15dp">
+
 
     <Button
         android:id="@+id/btnLogin"
@@ -120,4 +118,6 @@
         android:text="Continuar" />
 </TableRow>
 
-</TableLayout>
+
+    </TableLayout>
+</LinearLayout>

@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,9 +17,11 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
+
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
+
 
     private EditText etUsuario, etPassword; // Login
     private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
@@ -33,11 +34,13 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         mostrarLogin();
     }
 
     private void mostrarLogin() {
         setContentView(R.layout.activity_main);
+
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
         usuarioRepository = new UsuarioRepository(getApplication());
