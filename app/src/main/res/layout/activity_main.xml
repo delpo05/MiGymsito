@@ -105,17 +105,19 @@
             android:gravity="center"
             android:layout_marginTop="15dp">
 
-            <Button
-                android:id="@+id/btnLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:textStyle="bold"
-                android:textColor="@color/negro"
-                android:backgroundTint="@color/blanco"
-                android:onClick="EventoBoton"
-                android:text="@string/continuar" />
-        </TableRow>
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_span="2"
+        android:textStyle="bold"
+        android:textColor="@color/negro"
+        android:backgroundTint="@color/blanco"
+        android:onClick="EventoBotonContinuar"
+        android:text="Continuar" />
+</TableRow>
+
 
     </TableLayout>
 </LinearLayout>
