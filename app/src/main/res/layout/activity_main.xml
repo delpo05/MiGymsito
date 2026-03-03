@@ -116,7 +116,7 @@
         android:textStyle="bold"
         android:textColor="@color/negro"
         android:backgroundTint="@color/blanco"
-        android:onClick="EventoBoton"
+        android:onClick="EventoBotonContinuar"
         android:text="Continuar" />
 </TableRow>
 
