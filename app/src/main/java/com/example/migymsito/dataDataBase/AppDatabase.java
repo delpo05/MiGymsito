@@ -1,11 +1,9 @@
 package com.example.migymsito.dataDataBase;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Historial;
@@ -20,9 +18,6 @@ import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 @Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -35,10 +30,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
 
-    private static final int NUMBER_OF_THREADS = 4;
-    static final ExecutorService databaseWriteExecutor =
-            Executors.newFixedThreadPool(NUMBER_OF_THREADS);
-
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -46,35 +37,10 @@ public abstract class AppDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "migymsito_db")
                             .fallbackToDestructiveMigration()
-                            .addCallback(sRoomDatabaseCallback)
                             .build();
                 }
             }
         }
         return INSTANCE;
     }
-
-    private static final RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
-        @Override
-        public void onOpen(@NonNull SupportSQLiteDatabase db) {
-            super.onOpen(db);
-
-            // Usamos onOpen para que se asegure de insertar el usuario cada vez que se abre la DB durante las pruebas
-            databaseWriteExecutor.execute(() -> {
-                UsuarioDao dao = INSTANCE.usuarioDao();
-                
-                // Opcional: Limpiamos para evitar conflictos y asegurar que los datos de prueba sean correctos
-                dao.deleteAll();
-
-                Usuario usuario = new Usuario();
-                usuario.nombreUsuario = "Test User";
-                usuario.correoElectronicoUsuario = "test@test.com";
-                usuario.contraseniaUsuario = "test";
-                usuario.fechaNacimiento = System.currentTimeMillis(); 
-                usuario.generoUsuario = "No especificado"; 
-                
-                dao.registrarUsuario(usuario);
-            });
-        }
-    };
 }

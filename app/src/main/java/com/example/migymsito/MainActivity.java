@@ -1,6 +1,7 @@
 package com.example.migymsito;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -41,6 +42,12 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         etPassword = findViewById(R.id.etPassword);
         usuarioRepository = new UsuarioRepository(getApplication());
         configurarWindowInsets(R.id.main);
+
+        // Botón secreto/temporal para ver usuarios (clic largo en el logo o un botón) PARA MOSTRAR LOS REGISTROS
+        findViewById(R.id.btnVerUsuarios).setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, UsuariosRegistradosActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void mostrarRegistro() {
@@ -103,48 +110,33 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         mostrarRegistro();
     }
 
-    // Funcion para volver al login desde el registro.
     public void EventoBotonVolver(View view) {
         mostrarLogin();
     }
 
     public void EventoBotonRegistrar(View view) {
-
-        // --- Validamos que los campos en el formulario esten cargados correctamente.
-
         if (!validacionesRegistrarUsuario()) {
             return;
         }
 
-        // --- Cargamos la variable de correo con el correo ingresado para utilizarla para validar.
-
         String correo = etRegCorreo.getText().toString().trim();
-
-        // --- Validamos si el correo ya existe en la BD (UsuarioExistente es el resultado de la consulta)
 
         usuarioRepository.validarCorreoExistente(correo, usuarioExistente -> {
             if (usuarioExistente != null) {
-                // El correo ya está registrado porque encontro coincidencia en la BD
                 etRegCorreo.setError("Este correo ya está registrado");
                 Toast.makeText(MainActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
             } else {
-                // El correo no existe, procedemos a registrar
                 registrarNuevoUsuario();
             }
         });
     }
 
     private void registrarNuevoUsuario() {
-
-        // --- Creamos un objeto usuario y lo cargamos con los datos ingresados en el formulario.
-
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.nombreUsuario = etRegNombre.getText().toString().trim();
         nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
         nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
         nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
-
-        // --- Seteamos el input recibido como string y lo seteamos en la fecha de nacimiento en milisegundos (LONG).
 
         String fechaString = etRegFechaNac.getText().toString();
         try {
@@ -157,13 +149,11 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
             nuevoUsuario.fechaNacimiento = 0L;
         }
 
-        // --- Creamos el historial inicial
         Historial nuevoHistorial = new Historial();
         nuevoHistorial.PesoHistorial = Double.valueOf(etRegPeso.getText().toString());
         nuevoHistorial.AlturaHistorial = Double.valueOf(etRegAltura.getText().toString());
-        nuevoHistorial.FechaHistorial = System.currentTimeMillis(); // Aquí registramos la fecha actual
+        nuevoHistorial.FechaHistorial = System.currentTimeMillis();
 
-        // --- Registramos ambos (Usuario e Historial) en una sola operación del repositorio
         usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
             if (exito) {
                 Toast.makeText(MainActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();

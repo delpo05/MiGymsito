@@ -9,6 +9,7 @@ import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,13 +43,9 @@ public class UsuarioRepository {
         executorService.execute(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
-                // 1. Insertar usuario y obtener su ID generado
                 long idGenerado = usuarioDao.registrarUsuario(usuario);
-
-                // 2. Asignar el ID al historial e insertarlo
                 historial.IdUsuario = (int) idGenerado;
                 db.historialDao().insertarHistorial(historial);
-
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {
                 mainThreadHandler.post(() -> callback.onResult(false));
@@ -60,6 +57,25 @@ public class UsuarioRepository {
         executorService.execute(() -> {
             Usuario usuario = usuarioDao.validarCorreoUsuario(correo);
             mainThreadHandler.post(() -> callback.onResult(usuario));
+        });
+    }
+
+    public void obtenerTodosLosUsuarios(RepositoryCallback<List<Usuario>> callback) {
+        executorService.execute(() -> {
+            List<Usuario> usuarios = usuarioDao.obtenerTodosLosUsuarios();
+            mainThreadHandler.post(() -> callback.onResult(usuarios));
+        });
+    }
+
+    // Nuevo método para borrar todos los usuarios
+    public void borrarTodosLosUsuarios(RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            try {
+                usuarioDao.deleteAll();
+                mainThreadHandler.post(() -> callback.onResult(true));
+            } catch (Exception e) {
+                mainThreadHandler.post(() -> callback.onResult(false));
+            }
         });
     }
 }

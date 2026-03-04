@@ -7,7 +7,8 @@
     android:background="@color/negro"
     android:orientation="vertical">
 
-
+    <!-- INCLUIMOS EL HEADER AQUÍ -->
+    <include layout="@layout/header" />
 
     <TableLayout
         android:layout_width="match_parent"
@@ -25,7 +26,6 @@
             android:contentDescription="@string/logo_de_mi_gymsito"
             android:src="@drawable/logo_gym2" />
 
-        <!-- Campo de Correo/Usuario con diseño de Registro -->
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,7 +51,6 @@
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
-        <!-- Campo de Contraseña con diseño de Registro y Ojito -->
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -113,6 +112,22 @@
                 android:onClick="EventoBotonContinuar"
                 android:text="Continuar"
                 app:cornerRadius="8dp" />
+        </TableRow>
+
+        <!-- Botón Temporal para Ver Usuarios -->
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnVerUsuarios"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VER REGISTROS"
+                android:textColor="@color/blanco"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
         </TableRow>
 
     </TableLayout>
