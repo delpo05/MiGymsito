@@ -15,7 +15,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
 
@@ -28,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
     private AutoCompleteTextView etRegGenero; // Registro
     private UsuarioRepository usuarioRepository;
-    private Usuario usuario;
 
 
     @Override
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
 
     public void EventoBotonRegistrar(View view) {
         validacionesRegistrarUsuario(view);
-        usuario = new Usuario();
+        Usuario usuario = new Usuario();
         usuario.nombreUsuario = etRegNombre.getText().toString();
         usuario.correoElectronicoUsuario = etRegCorreo.getText().toString();
         usuario.contraseniaUsuario = etRegContrasenia.getText().toString();
@@ -137,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         } catch (java.text.ParseException e) {
             usuario.fechaNacimiento = 0L; // Valor por defecto si hay error
         }
+        Historial historial = new Historial();
+        historial.AlturaHistorial = Double.parseDouble(etRegAltura.getText().toString());
+        historial.PesoHistorial = Double.parseDouble(etRegPeso.getText().toString());
     }
 
     public void validacionesRegistrarUsuario(View view) {

@@ -31,10 +31,6 @@ public class UsuarioRepository {
     public void registrarNuevoUsuario(Usuario usuario, RepositoryCallback<String> callback) {
         executorService.execute(() -> {
             // Validaciones antes de guardar
-            if (usuarioDao.validarNombreUsuario(usuario.nombreUsuario) != null) {
-                notificar(callback, "NOMBRE_REPETIDO");
-                return;
-            }
             if (usuarioDao.validarCorreoUsuario(usuario.correoElectronicoUsuario) != null) {
                 notificar(callback, "CORREO_REPETIDO");
                 return;
