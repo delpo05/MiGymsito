@@ -15,34 +15,27 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
-import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataRepository.UsuarioRepository;
-
 
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
-
 
     private EditText etUsuario, etPassword; // Login
     private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
     private AutoCompleteTextView etRegGenero; // Registro
     private UsuarioRepository usuarioRepository;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-
         mostrarLogin();
     }
 
     private void mostrarLogin() {
         setContentView(R.layout.activity_main);
-
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
         usuarioRepository = new UsuarioRepository(getApplication());
@@ -59,19 +52,11 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         etRegAltura = findViewById(R.id.etRegAltura);
         etRegGenero = findViewById(R.id.etRegGenero);
 
-        // Configuración del desplegable de Género
         String[] opcionesGenero = {"Masculino", "Femenino", "Otro"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, opcionesGenero);
         etRegGenero.setAdapter(adapter);
 
-        // Configuración del Calendario para Fecha de Nacimiento
-        etRegFechaNac.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mostrarDatePicker();
-            }
-        });
-
+        etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
         configurarWindowInsets(R.id.registro);
     }
 
@@ -83,14 +68,11 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, monthOfYear, dayOfMonth) -> {
-                    // Formateamos la fecha para que siempre tenga 2 dígitos en día y mes
                     String fechaSeleccionada = String.format("%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
                     etRegFechaNac.setText(fechaSeleccionada);
                 }, year, month, day);
 
-        // Establece la fecha máxima como "hoy" para que no puedan elegir el futuro
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-
         datePickerDialog.show();
     }
 
@@ -121,29 +103,67 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     }
 
     public void EventoBotonRegistrar(View view) {
-        validacionesRegistrarUsuario(view);
-        Usuario usuario = new Usuario();
-        usuario.nombreUsuario = etRegNombre.getText().toString();
-        usuario.correoElectronicoUsuario = etRegCorreo.getText().toString();
-        usuario.contraseniaUsuario = etRegContrasenia.getText().toString();
-        usuario.generoUsuario = etRegGenero.getText().toString();
-        // --- Conversion de string a long en fecha nacimiento ---
-        String fechaString = etRegFechaNac.getText().toString(); // "dd/MM/yyyy"
+
+        // --- Validamos que los campos en el formulario esten cargados correctamente.
+
+        if (!validacionesRegistrarUsuario()) {
+            return;
+        }
+
+        // --- Cargamos la variable de correo con el correo ingresado para utilizarla para validar.
+
+        String correo = etRegCorreo.getText().toString().trim();
+
+        // --- Validamos si el correo ya existe en la BD (UsuarioExistente es el resultado de la consulta)
+
+        usuarioRepository.validarCorreoExistente(correo, usuarioExistente -> {
+            if (usuarioExistente != null) {
+                // El correo ya está registrado porque encontro coincidencia en la BD
+                etRegCorreo.setError("Este correo ya está registrado");
+                Toast.makeText(MainActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
+            } else {
+                // El correo no existe, procedemos a registrar
+                registrarNuevoUsuario();
+            }
+        });
+    }
+
+    private void registrarNuevoUsuario() {
+
+        // --- Creamos un objeto usuario y lo cargamos con los datos ingresados en el formulario.
+
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.nombreUsuario = etRegNombre.getText().toString().trim();
+        nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
+        nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
+        nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
+        
+        // --- Seteamos el input recibido como string y lo seteamos en la fecha de nacimiento en milisegundos (LONG).
+
+        String fechaString = etRegFechaNac.getText().toString();
         try {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
             java.util.Date date = sdf.parse(fechaString);
             if (date != null) {
-                usuario.fechaNacimiento = date.getTime(); // .getTime() devuelve el LONG que necesitas
+                nuevoUsuario.fechaNacimiento = date.getTime();
             }
         } catch (java.text.ParseException e) {
-            usuario.fechaNacimiento = 0L; // Valor por defecto si hay error
+            nuevoUsuario.fechaNacimiento = 0L;
         }
-        Historial historial = new Historial();
-        historial.AlturaHistorial = Double.parseDouble(etRegAltura.getText().toString());
-        historial.PesoHistorial = Double.parseDouble(etRegPeso.getText().toString());
+
+        // --- Usamos la funcion registrar usuario para cargarlo en la BD mandandole el nuevo usuario con todos sus atributos cargados.
+
+        usuarioRepository.registrarUsuario(nuevoUsuario, exito -> {
+            if (exito) {
+                Toast.makeText(MainActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                mostrarLogin();
+            } else {
+                Toast.makeText(MainActivity.this, "Error al registrar usuario", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    public void validacionesRegistrarUsuario(View view) {
+    public boolean validacionesRegistrarUsuario() {
         boolean estado = true;
 
         if (etRegNombre.getText().toString().trim().isEmpty()) {
@@ -184,10 +204,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
             estado = false;
         }
 
-        if (estado) {
-            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-            mostrarLogin();
-        }
+        return estado;
     }
 
     @Override

@@ -4,8 +4,6 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
-// imports para que encuentre los otros archivos
-
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
@@ -13,53 +11,45 @@ import com.example.migymsito.dataDataBase.AppDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//CONTROLARRRRRRRRRRRRRRRRRRRRRRR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 public class UsuarioRepository {
 
     private final UsuarioDao usuarioDao;
     private final ExecutorService executorService;
+    private final Handler mainThreadHandler;
 
-    public UsuarioRepository(Application application) {
-        // Conectamos con la Database usando tu nueva carpeta dataDataBase
-        AppDatabase db = AppDatabase.getDatabase(application);
-        usuarioDao = db.usuarioDao();
-        this.executorService = Executors.newSingleThreadExecutor();
-    }
-
-    // --- LÓGICA DE NEGOCIO: REGISTRO ---
-    public void registrarNuevoUsuario(Usuario usuario, RepositoryCallback<String> callback) {
-        executorService.execute(() -> {
-            // Validaciones antes de guardar
-            if (usuarioDao.validarCorreoUsuario(usuario.correoElectronicoUsuario) != null) {
-                notificar(callback, "CORREO_REPETIDO");
-                return;
-            }
-
-            try {
-                usuarioDao.registrarUsuario(usuario);
-                notificar(callback, "EXITO");
-            } catch (Exception e) {
-                notificar(callback, "ERROR_DATABASE");
-            }
-        });
-    }
-
-    // --- LÓGICA DE NEGOCIO: LOGIN ---
-    public void validarLogin(String usuario, String pass, RepositoryCallback<Usuario> callback) {
-        executorService.execute(() -> {
-            Usuario user = usuarioDao.login(usuario, pass);
-            notificar(callback, user);
-        });
-    }
-
-    // Herramienta para avisar a la pantalla (FRONT) cuando termina la DB
-    private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
-        new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
-    }
-
-    // Interfaz para recibir la respuesta en la Activity
     public interface RepositoryCallback<T> {
         void onResult(T result);
+    }
+
+    public UsuarioRepository(Application application) {
+        AppDatabase db = AppDatabase.getDatabase(application);
+        usuarioDao = db.usuarioDao();
+        executorService = Executors.newSingleThreadExecutor();
+        mainThreadHandler = new Handler(Looper.getMainLooper());
+    }
+
+    public void validarLogin(String correo, String password, RepositoryCallback<Usuario> callback) {
+        executorService.execute(() -> {
+            Usuario usuario = usuarioDao.login(correo, password);
+            mainThreadHandler.post(() -> callback.onResult(usuario));
+        });
+    }
+
+    public void registrarUsuario(Usuario usuario, RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            try {
+                usuarioDao.registrarUsuario(usuario);
+                mainThreadHandler.post(() -> callback.onResult(true));
+            } catch (Exception e) {
+                mainThreadHandler.post(() -> callback.onResult(false));
+            }
+        });
+    }
+
+    public void validarCorreoExistente(String correo, RepositoryCallback<Usuario> callback) {
+        executorService.execute(() -> {
+            Usuario usuario = usuarioDao.validarCorreoUsuario(correo);
+            mainThreadHandler.post(() -> callback.onResult(usuario));
+        });
     }
 }
