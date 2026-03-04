@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
@@ -16,12 +17,14 @@ public class UsuarioRepository {
     private final UsuarioDao usuarioDao;
     private final ExecutorService executorService;
     private final Handler mainThreadHandler;
+    private final Application application;
 
     public interface RepositoryCallback<T> {
         void onResult(T result);
     }
 
     public UsuarioRepository(Application application) {
+        this.application = application;
         AppDatabase db = AppDatabase.getDatabase(application);
         usuarioDao = db.usuarioDao();
         executorService = Executors.newSingleThreadExecutor();
@@ -35,10 +38,17 @@ public class UsuarioRepository {
         });
     }
 
-    public void registrarUsuario(Usuario usuario, RepositoryCallback<Boolean> callback) {
+    public void registrarUsuarioConHistorial(Usuario usuario, Historial historial, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             try {
-                usuarioDao.registrarUsuario(usuario);
+                AppDatabase db = AppDatabase.getDatabase(application);
+                // 1. Insertar usuario y obtener su ID generado
+                long idGenerado = usuarioDao.registrarUsuario(usuario);
+
+                // 2. Asignar el ID al historial e insertarlo
+                historial.IdUsuario = (int) idGenerado;
+                db.historialDao().insertarHistorial(historial);
+
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {
                 mainThreadHandler.post(() -> callback.onResult(false));

@@ -15,6 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
@@ -102,6 +103,11 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         mostrarRegistro();
     }
 
+    // Funcion para volver al login desde el registro.
+    public void EventoBotonVolver(View view) {
+        mostrarLogin();
+    }
+
     public void EventoBotonRegistrar(View view) {
 
         // --- Validamos que los campos en el formulario esten cargados correctamente.
@@ -137,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
         nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
         nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
-        
+
         // --- Seteamos el input recibido como string y lo seteamos en la fecha de nacimiento en milisegundos (LONG).
 
         String fechaString = etRegFechaNac.getText().toString();
@@ -151,14 +157,19 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
             nuevoUsuario.fechaNacimiento = 0L;
         }
 
-        // --- Usamos la funcion registrar usuario para cargarlo en la BD mandandole el nuevo usuario con todos sus atributos cargados.
+        // --- Creamos el historial inicial
+        Historial nuevoHistorial = new Historial();
+        nuevoHistorial.PesoHistorial = Double.valueOf(etRegPeso.getText().toString());
+        nuevoHistorial.AlturaHistorial = Double.valueOf(etRegAltura.getText().toString());
+        nuevoHistorial.FechaHistorial = System.currentTimeMillis(); // Aquí registramos la fecha actual
 
-        usuarioRepository.registrarUsuario(nuevoUsuario, exito -> {
+        // --- Registramos ambos (Usuario e Historial) en una sola operación del repositorio
+        usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
             if (exito) {
                 Toast.makeText(MainActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                 mostrarLogin();
             } else {
-                Toast.makeText(MainActivity.this, "Error al registrar usuario", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
             }
         });
     }

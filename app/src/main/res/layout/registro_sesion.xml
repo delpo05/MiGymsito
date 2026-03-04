@@ -202,14 +202,16 @@
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
+        <!-- Botón REGISTRAR -->
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
 
             <Button
-                android:id="@+id/btnLogin"
-                android:layout_width="match_parent"
+                android:id="@+id/btnRegistrar"
+                android:layout_width="250dp"
                 android:layout_height="60dp"
                 android:layout_span="2"
                 android:backgroundTint="@color/blanco"
@@ -218,7 +220,27 @@
                 android:textColor="@color/negro"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:cornerRadius="8dp" />
+                app:cornerRadius="30dp" />
+        </TableRow>
+
+        <!-- Botón VOLVER con icono rodeado de un círculo -->
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="63dp"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_span="2"
+                android:background="@drawable/bg_circle_outline"
+                android:contentDescription="Volver"
+                android:onClick="EventoBotonVolver"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_back_arrow"
+                app:tint="@color/blanco" />
         </TableRow>
 
     </TableLayout>
