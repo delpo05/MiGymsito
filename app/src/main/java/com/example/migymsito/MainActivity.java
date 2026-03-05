@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -27,6 +28,9 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
     private AutoCompleteTextView etRegGenero; // Registro
     private UsuarioRepository usuarioRepository;
+
+    // VARIABLE PARA GUARDAR LA SESIÓN DEL USUARIO
+    private Usuario usuarioLogeado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,20 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
         configurarWindowInsets(R.id.registro);
     }
+
+    private void mostrarSecciones() {
+        setContentView(R.layout.secciones_rutinas);
+        // Si no querés agregar el ID al XML todavía, comentamos la siguiente línea:
+        // configurarWindowInsets(R.id.secciones_rutinas_root);
+
+        // ACTUALIZAMOS EL NOMBRE DE USUARIO EN EL HEADER
+        TextView tvUsername = findViewById(R.id.toolbar_username);
+        if (tvUsername != null && usuarioLogeado != null) {
+            tvUsername.setText(usuarioLogeado.nombreUsuario);
+        }
+    }
+
+
 
     private void mostrarDatePicker() {
         final Calendar c = Calendar.getInstance();
@@ -221,7 +239,9 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
+            this.usuarioLogeado = result;
             Toast.makeText(this, "Bienvenido " + result.nombreUsuario, Toast.LENGTH_SHORT).show();
+            mostrarSecciones();
         } else {
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }
