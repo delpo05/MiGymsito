@@ -5,16 +5,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.migymsito.data.Usuario;
+
+import com.example.migymsito.adapter.UsuariosAdapter;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import java.util.ArrayList;
-import java.util.List;
 
 public class UsuariosRegistradosActivity extends AppCompatActivity {
 
     private RecyclerView rvUsuarios;
     private UsuariosAdapter adapter;
     private UsuarioRepository usuarioRepository;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -18,7 +18,7 @@ import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
-@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 6, exportSchema = false)
+@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 8, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();

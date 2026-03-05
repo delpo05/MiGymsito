@@ -1,4 +1,4 @@
-package com.example.migymsito;
+package com.example.migymsito.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.migymsito.R;
 import com.example.migymsito.data.Usuario;
 import java.util.List;
 

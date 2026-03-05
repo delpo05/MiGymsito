@@ -24,12 +24,10 @@ public class Ejercicio {
     public int idSeccionEjercicio;  // FK
 
     @NonNull
-    public String TipoEjercicio;
+    public Boolean EsCalistenico;
 
     @NonNull
     public String NombreEjercicio;
 
     public String ImagenEjercicio; // Puede ser null si no tiene imagen
-    @NonNull
-    public boolean PesoCorporalEjercicio;
 }
