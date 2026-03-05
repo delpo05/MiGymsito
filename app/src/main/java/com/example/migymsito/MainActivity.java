@@ -1,12 +1,9 @@
 package com.example.migymsito;
 
-import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,27 +13,25 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.migymsito.data.Historial;
+import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
 
-    private EditText etUsuario, etPassword; // Login
-    private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
-    private AutoCompleteTextView etRegGenero; // Registro
+    private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
-
-    // VARIABLE PARA GUARDAR LA SESIÓN DEL USUARIO
-    private Usuario usuarioLogeado;
+    private GridView gvRutinas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        mostrarLogin();
+        // Iniciamos directamente en la pantalla de rutinas para ver los cambios
+        mostrarSeccionesRutinas(null);
     }
 
     private void mostrarLogin() {
@@ -49,50 +44,24 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
 
     private void mostrarRegistro() {
         setContentView(R.layout.registro_sesion);
-        etRegNombre = findViewById(R.id.etRegNombre);
-        etRegCorreo = findViewById(R.id.etRegCorreo);
-        etRegContrasenia = findViewById(R.id.etRegContrasenia);
-        etRegFechaNac = findViewById(R.id.etRegFechaNac);
-        etRegPeso = findViewById(R.id.etRegPeso);
-        etRegAltura = findViewById(R.id.etRegAltura);
-        etRegGenero = findViewById(R.id.etRegGenero);
-
-        String[] opcionesGenero = {"Masculino", "Femenino", "Otro"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, opcionesGenero);
-        etRegGenero.setAdapter(adapter);
-
-        etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
         configurarWindowInsets(R.id.registro);
     }
 
-    private void mostrarSecciones() {
+    private void mostrarSeccionesRutinas(Usuario usuario) {
         setContentView(R.layout.secciones_rutinas);
-        // Si no querés agregar el ID al XML todavía, comentamos la siguiente línea:
-        // configurarWindowInsets(R.id.secciones_rutinas_root);
-
-        // ACTUALIZAMOS EL NOMBRE DE USUARIO EN EL HEADER
+        gvRutinas = findViewById(R.id.gvRutinas);
+        
         TextView tvUsername = findViewById(R.id.toolbar_username);
-        if (tvUsername != null && usuarioLogeado != null) {
-            tvUsername.setText(usuarioLogeado.nombreUsuario);
+        if (tvUsername != null) {
+            tvUsername.setText(usuario != null ? usuario.nombreUsuario : "Invitado");
         }
-    }
 
+        // Usamos el RutinasAdapter con el GridView
+        List<String> rutinasDummy = new ArrayList<>(); 
+        RutinasAdapter adapter = new RutinasAdapter(rutinasDummy);
+        gvRutinas.setAdapter(adapter);
 
-
-    private void mostrarDatePicker() {
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, year1, monthOfYear, dayOfMonth) -> {
-                    String fechaSeleccionada = String.format("%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
-                    etRegFechaNac.setText(fechaSeleccionada);
-                }, year, month, day);
-
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-        datePickerDialog.show();
+        configurarWindowInsets(R.id.layout_secciones);
     }
 
     private void configurarWindowInsets(int layoutId) {
@@ -106,7 +75,9 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
     }
 
-    public void EventoBotonContinuar(View view) {
+    // Métodos de navegación y eventos
+    public void EventoBoton(View view) {
+        if (etUsuario == null || etPassword == null) return;
         String usuario = etUsuario.getText().toString();
         String password = etPassword.getText().toString();
 
@@ -121,127 +92,19 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         mostrarRegistro();
     }
 
-    // Funcion para volver al login desde el registro.
     public void EventoBotonVolver(View view) {
-        mostrarLogin();
+        mostrarSeccionesRutinas(null);
     }
-
+    
     public void EventoBotonRegistrar(View view) {
-
-        // --- Validamos que los campos en el formulario esten cargados correctamente.
-
-        if (!validacionesRegistrarUsuario()) {
-            return;
-        }
-
-        // --- Cargamos la variable de correo con el correo ingresado para utilizarla para validar.
-
-        String correo = etRegCorreo.getText().toString().trim();
-
-        // --- Validamos si el correo ya existe en la BD (UsuarioExistente es el resultado de la consulta)
-
-        usuarioRepository.validarCorreoExistente(correo, usuarioExistente -> {
-            if (usuarioExistente != null) {
-                // El correo ya está registrado porque encontro coincidencia en la BD
-                etRegCorreo.setError("Este correo ya está registrado");
-                Toast.makeText(MainActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
-            } else {
-                // El correo no existe, procedemos a registrar
-                registrarNuevoUsuario();
-            }
-        });
-    }
-
-    private void registrarNuevoUsuario() {
-
-        // --- Creamos un objeto usuario y lo cargamos con los datos ingresados en el formulario.
-
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.nombreUsuario = etRegNombre.getText().toString().trim();
-        nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
-        nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
-        nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
-
-        // --- Seteamos el input recibido como string y lo seteamos en la fecha de nacimiento en milisegundos (LONG).
-
-        String fechaString = etRegFechaNac.getText().toString();
-        try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
-            java.util.Date date = sdf.parse(fechaString);
-            if (date != null) {
-                nuevoUsuario.fechaNacimiento = date.getTime();
-            }
-        } catch (java.text.ParseException e) {
-            nuevoUsuario.fechaNacimiento = 0L;
-        }
-
-        // --- Creamos el historial inicial
-        Historial nuevoHistorial = new Historial();
-        nuevoHistorial.PesoHistorial = Double.valueOf(etRegPeso.getText().toString());
-        nuevoHistorial.AlturaHistorial = Double.valueOf(etRegAltura.getText().toString());
-        nuevoHistorial.FechaHistorial = System.currentTimeMillis(); // Aquí registramos la fecha actual
-
-        // --- Registramos ambos (Usuario e Historial) en una sola operación del repositorio
-        usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
-            if (exito) {
-                Toast.makeText(MainActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                mostrarLogin();
-            } else {
-                Toast.makeText(MainActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    public boolean validacionesRegistrarUsuario() {
-        boolean estado = true;
-
-        if (etRegNombre.getText().toString().trim().isEmpty()) {
-            etRegNombre.setError("Campo requerido");
-            estado = false;
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(etRegCorreo.getText().toString().trim()).matches()) {
-            etRegCorreo.setError("Correo inválido");
-            estado = false;
-        }
-
-        if (etRegContrasenia.getText().toString().trim().isEmpty()) {
-            etRegContrasenia.setError("Campo requerido");
-            estado = false;
-        } else if (etRegContrasenia.getText().toString().length() < 6) {
-            etRegContrasenia.setError("Mínimo 6 caracteres");
-            estado = false;
-        }
-
-        if (etRegFechaNac.getText().toString().isEmpty()) {
-            etRegFechaNac.setError("Campo requerido");
-            estado = false;
-        }
-
-        if (etRegPeso.getText().toString().trim().isEmpty()) {
-            etRegPeso.setError("Campo requerido");
-            estado = false;
-        }
-
-        if (etRegAltura.getText().toString().trim().isEmpty()) {
-            etRegAltura.setError("Campo requerido");
-            estado = false;
-        }
-
-        if (etRegGenero.getText().toString().trim().isEmpty()) {
-            etRegGenero.setError("Campo requerido");
-            estado = false;
-        }
-
-        return estado;
+        Toast.makeText(this, "Registro simulado", Toast.LENGTH_SHORT).show();
+        mostrarLogin();
     }
 
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
-            this.usuarioLogeado = result;
-            Toast.makeText(this, "Bienvenido " + result.nombreUsuario, Toast.LENGTH_SHORT).show();
-            mostrarSecciones();
+            mostrarSeccionesRutinas(result);
         } else {
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }
