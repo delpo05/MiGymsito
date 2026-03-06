@@ -17,7 +17,6 @@ import androidx.room.PrimaryKey;
         indices = { @Index("idSeccionEjercicio") }         // Índice para optimizar búsquedas por sección
 )
 public class Ejercicio {
-
     @PrimaryKey(autoGenerate = true)
     public int idEjercicio;
 
@@ -25,13 +24,10 @@ public class Ejercicio {
     public int idSeccionEjercicio;  // FK
 
     @NonNull
-    public String TipoEjercicio;
+    public Boolean EsCalistenico;
 
     @NonNull
     public String NombreEjercicio;
 
     public String ImagenEjercicio; // Puede ser null si no tiene imagen
-
-    @NonNull
-    public boolean PesoCorporalEjercicio;
 }

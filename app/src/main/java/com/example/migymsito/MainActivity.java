@@ -1,5 +1,8 @@
 package com.example.migymsito;
 
+
+import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -40,6 +43,12 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         etPassword = findViewById(R.id.etPassword);
         usuarioRepository = new UsuarioRepository(getApplication());
         configurarWindowInsets(R.id.main);
+
+        // Botón secreto/temporal para ver usuarios (clic largo en el logo o un botón) PARA MOSTRAR LOS REGISTROS
+        findViewById(R.id.btnVerUsuarios).setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, UsuariosRegistradosActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void mostrarRegistro() {
@@ -97,8 +106,102 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     }
     
     public void EventoBotonRegistrar(View view) {
+
+        if (!validacionesRegistrarUsuario()) {
+            return;
+        }
+
+        String correo = etRegCorreo.getText().toString().trim();
+
+        usuarioRepository.validarCorreoExistente(correo, usuarioExistente -> {
+            if (usuarioExistente != null) {
+                etRegCorreo.setError("Este correo ya está registrado");
+                Toast.makeText(MainActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
+            } else {
+                registrarNuevoUsuario();
+            }
+        });
+    }
+
+    private void registrarNuevoUsuario() {
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.nombreUsuario = etRegNombre.getText().toString().trim();
+        nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
+        nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
+        nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
+
+        String fechaString = etRegFechaNac.getText().toString();
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+            java.util.Date date = sdf.parse(fechaString);
+            if (date != null) {
+                nuevoUsuario.fechaNacimiento = date.getTime();
+            }
+        } catch (java.text.ParseException e) {
+            nuevoUsuario.fechaNacimiento = 0L;
+        }
+
+        Historial nuevoHistorial = new Historial();
+        nuevoHistorial.PesoHistorial = Double.valueOf(etRegPeso.getText().toString());
+        nuevoHistorial.AlturaHistorial = Double.valueOf(etRegAltura.getText().toString());
+        nuevoHistorial.FechaHistorial = System.currentTimeMillis();
+
+        usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
+            if (exito) {
+                Toast.makeText(MainActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                mostrarLogin();
+            } else {
+                Toast.makeText(MainActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public boolean validacionesRegistrarUsuario() {
+        boolean estado = true;
+
+        if (etRegNombre.getText().toString().trim().isEmpty()) {
+            etRegNombre.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(etRegCorreo.getText().toString().trim()).matches()) {
+            etRegCorreo.setError("Correo inválido");
+            estado = false;
+        }
+
+        if (etRegContrasenia.getText().toString().trim().isEmpty()) {
+            etRegContrasenia.setError("Campo requerido");
+            estado = false;
+        } else if (etRegContrasenia.getText().toString().length() < 6) {
+            etRegContrasenia.setError("Mínimo 6 caracteres");
+            estado = false;
+        }
+
+        if (etRegFechaNac.getText().toString().isEmpty()) {
+            etRegFechaNac.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegPeso.getText().toString().trim().isEmpty()) {
+            etRegPeso.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegAltura.getText().toString().trim().isEmpty()) {
+            etRegAltura.setError("Campo requerido");
+            estado = false;
+        }
+
+        if (etRegGenero.getText().toString().trim().isEmpty()) {
+            etRegGenero.setError("Campo requerido");
+            estado = false;
+        }
+
+        return estado;
+
         Toast.makeText(this, "Registro simulado", Toast.LENGTH_SHORT).show();
         mostrarLogin();
+
     }
 
     @Override
