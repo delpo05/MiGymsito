@@ -7,8 +7,7 @@
     android:background="@color/negro"
     android:orientation="vertical">
 
-    <!-- INCLUIMOS EL HEADER AQUÍ -->
-    <include layout="@layout/header" />
+
 
     <TableLayout
         android:layout_width="match_parent"
