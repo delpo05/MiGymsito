@@ -1,13 +1,13 @@
 package com.example.migymsito;
 
+
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,24 +16,25 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.migymsito.data.Historial;
+import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
 
-    private EditText etUsuario, etPassword; // Login
-    private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
-    private AutoCompleteTextView etRegGenero; // Registro
+    private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
+    private GridView gvRutinas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        mostrarLogin();
+        // Iniciamos directamente en la pantalla de rutinas para ver los cambios
+        mostrarSeccionesRutinas(null);
     }
 
     private void mostrarLogin() {
@@ -52,36 +53,24 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
 
     private void mostrarRegistro() {
         setContentView(R.layout.registro_sesion);
-        etRegNombre = findViewById(R.id.etRegNombre);
-        etRegCorreo = findViewById(R.id.etRegCorreo);
-        etRegContrasenia = findViewById(R.id.etRegContrasenia);
-        etRegFechaNac = findViewById(R.id.etRegFechaNac);
-        etRegPeso = findViewById(R.id.etRegPeso);
-        etRegAltura = findViewById(R.id.etRegAltura);
-        etRegGenero = findViewById(R.id.etRegGenero);
-
-        String[] opcionesGenero = {"Masculino", "Femenino", "Otro"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, opcionesGenero);
-        etRegGenero.setAdapter(adapter);
-
-        etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
         configurarWindowInsets(R.id.registro);
     }
 
-    private void mostrarDatePicker() {
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
+    private void mostrarSeccionesRutinas(Usuario usuario) {
+        setContentView(R.layout.secciones_rutinas);
+        gvRutinas = findViewById(R.id.gvRutinas);
+        
+        TextView tvUsername = findViewById(R.id.toolbar_username);
+        if (tvUsername != null) {
+            tvUsername.setText(usuario != null ? usuario.nombreUsuario : "Invitado");
+        }
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, year1, monthOfYear, dayOfMonth) -> {
-                    String fechaSeleccionada = String.format("%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
-                    etRegFechaNac.setText(fechaSeleccionada);
-                }, year, month, day);
+        // Usamos el RutinasAdapter con el GridView
+        List<String> rutinasDummy = new ArrayList<>(); 
+        RutinasAdapter adapter = new RutinasAdapter(rutinasDummy);
+        gvRutinas.setAdapter(adapter);
 
-        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
-        datePickerDialog.show();
+        configurarWindowInsets(R.id.layout_secciones);
     }
 
     private void configurarWindowInsets(int layoutId) {
@@ -95,7 +84,9 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
     }
 
-    public void EventoBotonContinuar(View view) {
+    // Métodos de navegación y eventos
+    public void EventoBoton(View view) {
+        if (etUsuario == null || etPassword == null) return;
         String usuario = etUsuario.getText().toString();
         String password = etPassword.getText().toString();
 
@@ -111,10 +102,11 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     }
 
     public void EventoBotonVolver(View view) {
-        mostrarLogin();
+        mostrarSeccionesRutinas(null);
     }
-
+    
     public void EventoBotonRegistrar(View view) {
+
         if (!validacionesRegistrarUsuario()) {
             return;
         }
@@ -206,12 +198,16 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         }
 
         return estado;
+
+        Toast.makeText(this, "Registro simulado", Toast.LENGTH_SHORT).show();
+        mostrarLogin();
+
     }
 
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
-            Toast.makeText(this, "Bienvenido " + result.nombreUsuario, Toast.LENGTH_SHORT).show();
+            mostrarSeccionesRutinas(result);
         } else {
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/container_item"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/card_border_white"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <!-- Este será el botón + para el primer elemento -->
+        <Button
+            android:id="@+id/btn_item_add"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_circle_white"
+            app:backgroundTint="@color/blanco"
+            android:text="+"
+            android:textColor="@color/negro"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:visibility="visible"
+            android:clickable="false"
+            android:focusable="false" />
+
+        <!-- Este será el texto para las rutinas reales -->
+        <TextView
+            android:id="@+id/tv_nombre_rutina"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre Rutina"
+            android:textColor="@color/blanco"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</FrameLayout>
