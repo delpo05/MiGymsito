@@ -65,14 +65,6 @@
             android:backgroundTint="#6D3B3B" />
     </LinearLayout>
 
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_back_arrow"
-        android:rotation="90"
-        android:layout_marginBottom="32dp"
-        android:alpha="0.6" />
 
     <LinearLayout
         android:layout_width="match_parent"
