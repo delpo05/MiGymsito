@@ -1,11 +1,11 @@
 package com.example.migymsito.data;
 
-//importacion de librerias
-
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
+import java.io.Serializable;
 
 //definicion de la estructura de la tabla Usuario
 @Entity(tableName = "Usuario",
@@ -14,8 +14,7 @@ import androidx.room.PrimaryKey;
                 @Index(value = {"nombreUsuario"}, unique = true)
         }
 )
-
-public class Usuario {
+public class Usuario implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
