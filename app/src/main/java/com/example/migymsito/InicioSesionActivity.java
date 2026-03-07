@@ -2,7 +2,6 @@ package com.example.migymsito;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -16,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
-public class MainActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
+public class InicioSesionActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
 
     private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
@@ -25,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_inicio_sesion);
 
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
@@ -34,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
         configurarWindowInsets(R.id.main);
 
         findViewById(R.id.btnVerUsuarios).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, UsuariosRegistradosActivity.class);
+            Intent intent = new Intent(InicioSesionActivity.this, UsuariosRegistradosActivity.class);
             startActivity(intent);
         });
     }
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements UsuarioRepository
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
-            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+            Intent intent = new Intent(InicioSesionActivity.this, VistaRegistrosActivity.class);
             intent.putExtra("usuario",  result); // Pasar el objeto usuario a la Home
             startActivity(intent);
             finish(); // Cerramos el login para que no se pueda volver atrás con el botón back

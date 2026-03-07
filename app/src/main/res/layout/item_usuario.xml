@@ -32,10 +32,10 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/tvGeneroItem"
+            android:id="@+id/tvPasswordItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Género"
+            android:text="Password"
             android:textColor="@color/blanco"
             android:textSize="14sp" />
 

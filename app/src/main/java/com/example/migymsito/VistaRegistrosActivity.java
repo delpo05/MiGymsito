@@ -16,7 +16,7 @@ import com.example.migymsito.data.Usuario;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity {
+public class VistaRegistrosActivity extends AppCompatActivity {
 
     private GridView gvRutinas;
     private Usuario usuarioActual;

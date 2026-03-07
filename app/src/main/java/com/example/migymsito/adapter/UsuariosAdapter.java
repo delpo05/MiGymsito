@@ -31,7 +31,7 @@ public class UsuariosAdapter extends RecyclerView.Adapter<UsuariosAdapter.Usuari
         Usuario usuario = listaUsuarios.get(position);
         holder.tvNombre.setText(usuario.nombreUsuario);
         holder.tvCorreo.setText(usuario.correoElectronicoUsuario);
-        holder.tvGenero.setText("Género: " + usuario.generoUsuario);
+        holder.tvPassword.setText(usuario.contraseniaUsuario);
     }
 
     @Override
@@ -40,13 +40,13 @@ public class UsuariosAdapter extends RecyclerView.Adapter<UsuariosAdapter.Usuari
     }
 
     public static class UsuarioViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvCorreo, tvGenero;
+        TextView tvNombre, tvCorreo, tvPassword;
 
         public UsuarioViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombreItem);
             tvCorreo = itemView.findViewById(R.id.tvCorreoItem);
-            tvGenero = itemView.findViewById(R.id.tvGeneroItem);
+            tvPassword = itemView.findViewById(R.id.tvPasswordItem);
         }
     }
 }

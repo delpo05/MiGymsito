@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".InicioSesionActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,9 +26,9 @@
             android:exported="false" />
 
         <activity
-            android:name=".HomeActivity"
+            android:name=".VistaRegistrosActivity"
             android:exported="false" />
-        
+
         <activity
             android:name=".VistaRutina"
             android:exported="false" />
