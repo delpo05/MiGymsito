@@ -8,9 +8,10 @@
     android:layout_gravity="center">
 
     <TextView
+        android:id="@+id/tvTituloPopUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Crea rutina"
+        android:text="Modificar rutina"
         android:textColor="@color/negro"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -37,7 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Nombre/obligatorio"
+            android:hint="Ingrese el nuevo nombre"
             android:textColorHint="@color/gris_pista"
             android:background="@null"
             android:textSize="14sp" />
@@ -88,7 +89,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Crear"
+            android:text="Guardar"
             android:textAllCaps="false"
             android:backgroundTint="#545B61"
             android:textColor="@color/white" />

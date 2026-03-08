@@ -10,7 +10,7 @@ import com.example.migymsito.adapter.UsuariosAdapter;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import java.util.ArrayList;
 
-public class UsuariosRegistradosActivity extends AppCompatActivity {
+public class DebugUsuariosRegistradosActivity extends AppCompatActivity {
 
     private RecyclerView rvUsuarios;
     private UsuariosAdapter adapter;
@@ -20,7 +20,7 @@ public class UsuariosRegistradosActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_usuarios_registrados);
+        setContentView(R.layout.debug_usuarios_registrados_activity);
 
         rvUsuarios = findViewById(R.id.rvUsuarios);
         rvUsuarios.setLayoutManager(new LinearLayoutManager(this));

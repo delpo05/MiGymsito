@@ -22,26 +22,27 @@
         </activity>
 
         <activity
-            android:name=".RegistroActivity"
+            android:name=".RegistroSesionActivity"
+            android:exported="false" />
+
+        <!-- Cambiado de VistaRegistrosActivity a VistaRutinasActivity -->
+        <activity
+            android:name=".RutinasActivity"
             android:exported="false" />
 
         <activity
-            android:name=".VistaRegistrosActivity"
+            android:name=".SeccionesActivity"
             android:exported="false" />
 
+
         <activity
-            android:name=".VistaRutina"
-            android:exported="false" />
-            
-        <activity
-            android:name=".UsuariosRegistradosActivity"
+            android:name=".DebugUsuariosRegistradosActivity"
             android:exported="false"
             android:label="Usuarios Registrados" />
 
         <activity
-            android:name=".CargarRegistro"
+            android:name=".CargarRegistroActivity"
             android:exported="true">
-
        </activity>
 
     </application>
