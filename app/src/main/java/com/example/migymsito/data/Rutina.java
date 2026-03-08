@@ -6,6 +6,8 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Rutina",
         indices = {
@@ -20,13 +22,13 @@ import androidx.annotation.NonNull;
                 )
         }
 )
-public class Rutina {
+public class Rutina implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public int idRutina;
 
     @NonNull
-    public int IdUsuarioRutina; // Cambiado de Integer a int para consistencia
+    public int IdUsuarioRutina;
 
     @NonNull
     public String NombreRutina;

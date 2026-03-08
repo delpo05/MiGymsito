@@ -24,7 +24,7 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_inicio_sesion);
+        setContentView(R.layout.inicio_sesion_activity);
 
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
@@ -33,7 +33,7 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
         configurarWindowInsets(R.id.main);
 
         findViewById(R.id.btnVerUsuarios).setOnClickListener(v -> {
-            Intent intent = new Intent(InicioSesionActivity.this, UsuariosRegistradosActivity.class);
+            Intent intent = new Intent(InicioSesionActivity.this, DebugUsuariosRegistradosActivity.class);
             startActivity(intent);
         });
     }
@@ -61,17 +61,18 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     }
 
     public void EventoRegistrarse(View view) {
-        Intent intent = new Intent(this, RegistroActivity.class);
+        Intent intent = new Intent(this, RegistroSesionActivity.class);
         startActivity(intent);
     }
 
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
-            Intent intent = new Intent(InicioSesionActivity.this, VistaRegistrosActivity.class);
-            intent.putExtra("usuario",  result); // Pasar el objeto usuario a la Home
+            // Cambiado a VistaRutinasActivity
+            Intent intent = new Intent(InicioSesionActivity.this, RutinasActivity.class);
+            intent.putExtra("usuario",  result);
             startActivity(intent);
-            finish(); // Cerramos el login para que no se pueda volver atrás con el botón back
+            finish();
         } else {
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }

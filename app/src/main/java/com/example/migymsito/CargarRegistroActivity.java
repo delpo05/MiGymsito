@@ -28,7 +28,7 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CargarRegistro extends Header {
+public class CargarRegistroActivity extends HeaderActivity {
 
     private TextView tvNombreEjercicio, tvSerieValue;
     private EditText etRepeticiones, etPeso;
@@ -53,7 +53,7 @@ public class CargarRegistro extends Header {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cargar_registro);
+        setContentView(R.layout.cargar_registro_activity);
 
         registroRepository = new RegistroRepository(getApplication());
         usuarioRepository = new UsuarioRepository(getApplication());

@@ -8,40 +8,40 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.migymsito.R;
-import com.example.migymsito.data.Rutina;
+import com.example.migymsito.data.Seccion;
 
 import java.util.List;
 
-public class RutinasAdapter extends BaseAdapter {
+public class SeccionesAdapter extends BaseAdapter {
 
-    private List<Rutina> rutinas;
-    private OnRutinaClickListener listener;
+    private List<Seccion> secciones;
+    private OnSeccionClickListener listener;
 
-    public interface OnRutinaClickListener {
+    public interface OnSeccionClickListener {
         void onAddClick();
-        void onRutinaClick(Rutina rutina);
-        void onOptionsClick(View view, Rutina rutina);
+        void onSeccionClick(Seccion seccion);
+        void onOptionsClick(View view, Seccion seccion);
     }
 
-    public RutinasAdapter(List<Rutina> rutinas, OnRutinaClickListener listener) {
-        this.rutinas = rutinas;
+    public SeccionesAdapter(List<Seccion> secciones, OnSeccionClickListener listener) {
+        this.secciones = secciones;
         this.listener = listener;
     }
 
-    public void setRutinas(List<Rutina> rutinas) {
-        this.rutinas = rutinas;
+    public void setSecciones(List<Seccion> secciones) {
+        this.secciones = secciones;
         notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return rutinas != null ? rutinas.size() + 1 : 1;
+        return secciones != null ? secciones.size() + 1 : 1;
     }
 
     @Override
     public Object getItem(int position) {
-        if (rutinas != null && position < rutinas.size()) {
-            return rutinas.get(position);
+        if (secciones != null && position < secciones.size()) {
+            return secciones.get(position);
         }
         return null;
     }
@@ -61,7 +61,7 @@ public class RutinasAdapter extends BaseAdapter {
         TextView txtNombre = convertView.findViewById(R.id.tv_nombre_rutina);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
 
-        if (rutinas == null || position == rutinas.size()) {
+        if (secciones == null || position == secciones.size()) {
             btnAdd.setVisibility(View.VISIBLE);
             txtNombre.setVisibility(View.GONE);
             tvOpciones.setVisibility(View.GONE);
@@ -70,19 +70,19 @@ public class RutinasAdapter extends BaseAdapter {
                 if (listener != null) listener.onAddClick();
             });
         } else {
-            Rutina rutina = rutinas.get(position);
+            Seccion seccion = secciones.get(position);
             btnAdd.setVisibility(View.GONE);
             txtNombre.setVisibility(View.VISIBLE);
             tvOpciones.setVisibility(View.VISIBLE);
 
-            txtNombre.setText(rutina.NombreRutina);
+            txtNombre.setText(seccion.NombreSeccion);
 
             tvOpciones.setOnClickListener(v -> {
-                if (listener != null) listener.onOptionsClick(v, rutina);
+                if (listener != null) listener.onOptionsClick(v, seccion);
             });
 
             convertView.setOnClickListener(v -> {
-                if (listener != null) listener.onRutinaClick(rutina);
+                if (listener != null) listener.onSeccionClick(seccion);
             });
         }
 

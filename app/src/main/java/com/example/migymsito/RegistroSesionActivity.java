@@ -24,7 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class RegistroActivity extends AppCompatActivity {
+public class RegistroSesionActivity extends AppCompatActivity {
 
     private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
     private AutoCompleteTextView etRegGenero;
@@ -33,7 +33,7 @@ public class RegistroActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.registro_sesion);
+        setContentView(R.layout.registro_sesion_activity);
 
         usuarioRepository = new UsuarioRepository(getApplication());
 
@@ -91,7 +91,7 @@ public class RegistroActivity extends AppCompatActivity {
         usuarioRepository.validarCorreoExistente(correo, usuarioExistente -> {
             if (usuarioExistente != null) {
                 etRegCorreo.setError("Este correo ya está registrado");
-                Toast.makeText(RegistroActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegistroSesionActivity.this, "El correo ya existe", Toast.LENGTH_SHORT).show();
             } else {
                 registrarNuevoUsuario();
             }
@@ -123,10 +123,10 @@ public class RegistroActivity extends AppCompatActivity {
 
         usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
             if (exito) {
-                Toast.makeText(RegistroActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegistroSesionActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                 finish(); // Volver al login
             } else {
-                Toast.makeText(RegistroActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegistroSesionActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
             }
         });
     }

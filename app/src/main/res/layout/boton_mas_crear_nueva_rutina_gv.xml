@@ -5,20 +5,32 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/container_item"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:background="@drawable/card_border_white"
-        android:gravity="center"
-        android:orientation="vertical"
         android:padding="10dp">
 
-        <!-- Este será el botón + para el primer elemento -->
+        <!-- Opciones (tres puntos) -->
+        <TextView
+            android:id="@+id/tv_opciones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:text="⋮"
+            android:textColor="@color/blanco"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <!-- Botón + para añadir -->
         <Button
             android:id="@+id/btn_item_add"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:layout_centerInParent="true"
             android:background="@drawable/bg_circle_white"
             app:backgroundTint="@color/blanco"
             android:text="+"
@@ -29,16 +41,18 @@
             android:clickable="false"
             android:focusable="false" />
 
-        <!-- Este será el texto para las rutinas reales -->
+        <!-- Nombre de la rutina -->
         <TextView
             android:id="@+id/tv_nombre_rutina"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
             android:text="Nombre Rutina"
             android:textColor="@color/blanco"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:visibility="gone" />
 
-    </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>
