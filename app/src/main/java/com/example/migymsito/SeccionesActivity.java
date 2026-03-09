@@ -95,7 +95,7 @@ public class SeccionesActivity extends AppCompatActivity {
 
     private void cargarSeccionesDesdeDB() {
         if (rutinaActual != null) {
-            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.idRutina, secciones -> {
+            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
                 adapter.setSecciones(secciones);
             });
         }
@@ -130,8 +130,7 @@ public class SeccionesActivity extends AppCompatActivity {
                 if (seccionExistente == null) {
                     Seccion nueva = new Seccion();
                     nueva.NombreSeccion = nombre;
-                    nueva.IdRutinaSeccion = rutinaActual.idRutina;
-                    nueva.ColorSeccion = "#FFFFFF";
+                    nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
                 } else {
                     seccionExistente.NombreSeccion = nombre;

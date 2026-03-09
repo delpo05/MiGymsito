@@ -18,7 +18,8 @@ import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
-@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 8, exportSchema = false)
+// Subimos la versión a 7 para que Room sepa que hubo cambios estructurales
+@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 7, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();

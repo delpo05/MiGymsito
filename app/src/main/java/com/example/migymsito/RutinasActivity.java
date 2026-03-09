@@ -3,6 +3,7 @@ package com.example.migymsito;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -36,7 +37,12 @@ public class RutinasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        // Casteo robusto para diferentes versiones de Android
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
+        } else {
+            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        }
 
         gvRutinas = findViewById(R.id.gvRutinas);
         TextView tvUsername = findViewById(R.id.toolbar_username);
@@ -136,7 +142,6 @@ public class RutinasActivity extends AppCompatActivity {
                     Rutina nueva = new Rutina();
                     nueva.NombreRutina = nombre;
                     nueva.IdUsuarioRutina = usuarioActual.id;
-                    nueva.ColorRutina = "#FFFFFF";
                     rutinaRepository.insertarRutina(nueva);
                 } else {
                     rutinaExistente.NombreRutina = nombre;
