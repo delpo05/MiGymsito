@@ -1,7 +1,9 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -37,8 +39,14 @@ public class SeccionesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
-        usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        // Recuperar objetos de forma segura según la versión de Android
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
+            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
+        } else {
+            rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
+            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        }
 
         gvSecciones = findViewById(R.id.gvRutinas);
         TextView tvUsername = findViewById(R.id.toolbar_username);
@@ -63,7 +71,11 @@ public class SeccionesActivity extends AppCompatActivity {
 
             @Override
             public void onSeccionClick(Seccion seccion) {
-                // Acción futura para ejercicios
+                // REDIRECCIÓN A EJERCICIOS
+                Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
+                intent.putExtra("seccion", seccion);
+                intent.putExtra("usuario", usuarioActual);
+                startActivity(intent);
             }
 
             @Override

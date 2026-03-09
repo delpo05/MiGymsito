@@ -25,7 +25,6 @@
             android:name=".RegistroSesionActivity"
             android:exported="false" />
 
-        <!-- Cambiado de VistaRegistrosActivity a VistaRutinasActivity -->
         <activity
             android:name=".RutinasActivity"
             android:exported="false" />
@@ -34,6 +33,9 @@
             android:name=".SeccionesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".EjerciciosActivity"
+            android:exported="false" />
 
         <activity
             android:name=".DebugUsuariosRegistradosActivity"
@@ -42,8 +44,7 @@
 
         <activity
             android:name=".CargarRegistroActivity"
-            android:exported="true">
-       </activity>
+            android:exported="true" />
 
     </application>
 
