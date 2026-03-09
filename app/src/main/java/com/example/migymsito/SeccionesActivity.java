@@ -66,7 +66,7 @@ public class SeccionesActivity extends AppCompatActivity {
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
             public void onAddClick() {
-                mostrarPopUpSeccion(null);
+                mostrarPopUpAnadirSeccion();
             }
 
             @Override
@@ -95,7 +95,7 @@ public class SeccionesActivity extends AppCompatActivity {
         
         popup.setOnMenuItemClickListener(item -> {
             if (item.getTitle().equals("Editar")) {
-                mostrarPopUpSeccion(seccion);
+                mostrarPopUpCrearSeccion(seccion);
             } else if (item.getTitle().equals("Eliminar")) {
                 seccionRepository.eliminarSeccion(seccion);
                 new Handler().postDelayed(this::cargarSeccionesDesdeDB, 200);
@@ -113,7 +113,29 @@ public class SeccionesActivity extends AppCompatActivity {
         }
     }
 
-    private void mostrarPopUpSeccion(Seccion seccionExistente) {
+    private void mostrarPopUpAnadirSeccion() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_anadir_seccion_o_seleccionar_anterior);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        dialog.findViewById(R.id.btn_cancelar_seccion).setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.findViewById(R.id.btn_nueva_seccion).setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpCrearSeccion(null);
+        });
+
+        dialog.findViewById(R.id.btn_seccion_previa).setOnClickListener(v -> {
+            // Lógica para sección previa
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void mostrarPopUpCrearSeccion(Seccion seccionExistente) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
         if (dialog.getWindow() != null) {
