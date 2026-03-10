@@ -44,7 +44,7 @@ public class RutinasActivity extends AppCompatActivity {
             usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
         }
 
-        gvRutinas = findViewById(R.id.gvRutinas);
+        gvRutinas = findViewById(R.id.gvGenerico);
         TextView tvUsername = findViewById(R.id.toolbar_username);
 
         if (tvUsername != null && usuarioActual != null) {
@@ -54,11 +54,11 @@ public class RutinasActivity extends AppCompatActivity {
         }
 
         configurarGridView();
-        configurarWindowInsets(R.id.layout_secciones);
+        configurarWindowInsets(R.id.layout_contenedor_grid);
     }
 
     private void configurarGridView() {
-        TextView tituloGv = findViewById(R.id.tvGvTitulo);
+        TextView tituloGv = findViewById(R.id.tvTituloGrid);
         tituloGv.setText("Mis Rutinas");
 
         rutinaRepository = new RutinaRepository(getApplication());

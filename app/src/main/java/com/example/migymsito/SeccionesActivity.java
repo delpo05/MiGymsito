@@ -48,18 +48,18 @@ public class SeccionesActivity extends AppCompatActivity {
             usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
         }
 
-        gvSecciones = findViewById(R.id.gvRutinas);
+        gvSecciones = findViewById(R.id.gvGenerico);
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.nombreUsuario);
         }
 
         configurarGridView();
-        configurarWindowInsets(R.id.layout_secciones);
+        configurarWindowInsets(R.id.layout_contenedor_grid);
     }
 
     private void configurarGridView() {
-        TextView tituloGv = findViewById(R.id.tvGvTitulo);
+        TextView tituloGv = findViewById(R.id.tvTituloGrid);
         tituloGv.setText("Mis Secciones");
         seccionRepository = new SeccionRepository(getApplication());
         
@@ -115,19 +115,29 @@ public class SeccionesActivity extends AppCompatActivity {
 
     private void mostrarPopUpAnadirSeccion() {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_anadir_seccion_o_seleccionar_anterior);
+        dialog.setContentView(R.layout.pop_up_dos_opciones);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        dialog.findViewById(R.id.btn_cancelar_seccion).setOnClickListener(v -> dialog.dismiss());
+        // Configurar Textos
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
+        TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
+        TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
+
+        tvTitulo.setText("Añadir Sección");
+        tvOpcionIzq.setText("Sección\nPrevia");
+        tvOpcionDer.setText("Nueva\nSección");
+
+        // Configurar Clicks
+        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
         
-        dialog.findViewById(R.id.btn_nueva_seccion).setOnClickListener(v -> {
+        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpCrearSeccion(null);
         });
 
-        dialog.findViewById(R.id.btn_seccion_previa).setOnClickListener(v -> {
+        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             // Lógica para sección previa
             dialog.dismiss();
         });

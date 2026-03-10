@@ -6,15 +6,18 @@
     android:background="@drawable/bg_dialog_white"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="24dp"
+    android:layout_gravity="center">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tvTituloPopUp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:text="Añadir Ejercicio"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="Título del Pop-up"
         android:textColor="@color/negro"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -23,84 +26,82 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <!-- Ejercicio Preestablecido -->
+        <!-- Opción Izquierda -->
         <LinearLayout
-            android:id="@+id/btn_ejercicio_preestablecido"
-            android:layout_width="0dp"
-            android:layout_height="140dp"
+            android:id="@+id/btnOpcionIzquierda"
+            android:layout_width="50dp"
+            android:layout_height="120dp"
             android:layout_margin="8dp"
             android:layout_weight="1"
-            android:background="@drawable/edittext_border"
-            android:backgroundTint="@color/negro"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="10dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="12dp">
 
             <TextView
+                android:id="@+id/tvTextoIzquierda"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center"
-                android:text="Ejercicio\nPreestablecido"
-                android:textColor="@color/blanco"
-                android:textSize="12sp"
+                android:text="Opción 1"
+                android:textColor="@color/negro"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/bg_circle_white"
-                android:padding="8dp"
+                android:backgroundTint="#E9EBF1"
+                android:padding="12dp"
                 android:src="@drawable/ic_add"
                 app:tint="@color/negro" />
         </LinearLayout>
 
-        <!-- Ejercicio Personalizado -->
+        <!-- Opción Derecha -->
         <LinearLayout
-            android:id="@+id/btn_ejercicio_personalizado"
-            android:layout_width="0dp"
-            android:layout_height="140dp"
+            android:id="@+id/btnOpcionDerecha"
+            android:layout_width="50dp"
+            android:layout_height="120dp"
             android:layout_margin="8dp"
             android:layout_weight="1"
-            android:background="@drawable/edittext_border"
-            android:backgroundTint="@color/negro"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="10dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="12dp">
 
             <TextView
+                android:id="@+id/tvTextoDerecha"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center"
-                android:text="Ejercicio\nPersonalizado"
-                android:textColor="@color/blanco"
-                android:textSize="12sp"
+                android:text="Opción 2"
+                android:textColor="@color/negro"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/bg_circle_white"
-                android:padding="8dp"
+                android:backgroundTint="#E9EBF1"
+                android:padding="12dp"
                 android:src="@drawable/ic_add"
                 app:tint="@color/negro" />
         </LinearLayout>
     </LinearLayout>
 
     <Button
-        android:id="@+id/btn_cancelar_ejercicio"
+        android:id="@+id/btnCancelar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="@color/rojo"
-        android:minWidth="120dp"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#6E6E6E"
+        android:minWidth="140dp"
         android:text="Cancelar"
         android:textAllCaps="false"
         android:textColor="@color/blanco"
