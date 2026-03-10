@@ -54,12 +54,17 @@ public class RutinasAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.boton_mas_crear_nueva_rutina_gv, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.boton_agregar_gv, parent, false);
         }
 
+        View container = convertView.findViewById(R.id.container_item);
         Button btnAdd = convertView.findViewById(R.id.btn_item_add);
-        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_rutina);
+        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
+
+        if (container != null) {
+            container.setBackgroundResource(R.drawable.card_border_white);
+        }
 
         if (rutinas == null || position == rutinas.size()) {
             btnAdd.setVisibility(View.VISIBLE);

@@ -54,11 +54,11 @@ public class SeccionesAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.boton_mas_crear_nueva_rutina_gv, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.boton_agregar_gv, parent, false);
         }
 
         Button btnAdd = convertView.findViewById(R.id.btn_item_add);
-        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_rutina);
+        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
 
         if (secciones == null || position == secciones.size()) {

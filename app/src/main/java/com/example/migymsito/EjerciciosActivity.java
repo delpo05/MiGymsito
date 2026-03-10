@@ -1,10 +1,13 @@
 package com.example.migymsito;
 
+import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -53,8 +56,12 @@ public class EjerciciosActivity extends AppCompatActivity {
     }
 
     private void configurarGridView() {
-        // Adaptador configurado sin el método onAddClick que eliminamos
         adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
+            @Override
+            public void onAddClick() {
+                mostrarPopUpAnadirEjercicio();
+            }
+
             @Override
             public void onEjercicioClick(Ejercicio ejercicio) {
                 // Acción al tocar un ejercicio
@@ -68,6 +75,38 @@ public class EjerciciosActivity extends AppCompatActivity {
 
         gvEjercicios.setAdapter(adapter);
         cargarEjerciciosDesdeDB();
+    }
+
+    private void mostrarPopUpAnadirEjercicio() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.pop_up_anadir_ejercicio_o_seleccionar_anterior, null);
+        builder.setView(view);
+
+        AlertDialog dialog = builder.create();
+
+        LinearLayout btnPreestablecido = view.findViewById(R.id.btn_ejercicio_preestablecido);
+        LinearLayout btnPersonalizado = view.findViewById(R.id.btn_ejercicio_personalizado);
+        View btnCancelar = view.findViewById(R.id.btn_cancelar_ejercicio);
+
+        if (btnPreestablecido != null) {
+            btnPreestablecido.setOnClickListener(v -> {
+                Toast.makeText(this, "Ejercicios Preestablecidos (Próximamente)", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+        }
+
+        if (btnPersonalizado != null) {
+            btnPersonalizado.setOnClickListener(v -> {
+                Toast.makeText(this, "Ejercicio Personalizado (Próximamente)", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            });
+        }
+
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void cargarEjerciciosDesdeDB() {

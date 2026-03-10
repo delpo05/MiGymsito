@@ -41,14 +41,14 @@
             android:clickable="false"
             android:focusable="false" />
 
-        <!-- Nombre de la rutina -->
+        <!-- Nombre del Item -->
         <TextView
-            android:id="@+id/tv_nombre_rutina"
+            android:id="@+id/tv_nombre_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="Nombre Rutina"
+            android:text="Nombre"
             android:textColor="@color/blanco"
             android:textStyle="bold"
             android:textSize="18sp"
