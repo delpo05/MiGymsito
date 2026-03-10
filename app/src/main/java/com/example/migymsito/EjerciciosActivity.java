@@ -5,7 +5,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +39,6 @@ public class EjerciciosActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Recuperar objetos enviados desde SeccionesActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
             seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
@@ -48,7 +50,6 @@ public class EjerciciosActivity extends AppCompatActivity {
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
         
-        // Configurar Header
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.nombreUsuario);
@@ -95,7 +96,6 @@ public class EjerciciosActivity extends AppCompatActivity {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        // Configurar Textos
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
         TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
         TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
@@ -104,7 +104,6 @@ public class EjerciciosActivity extends AppCompatActivity {
         tvOpcionIzq.setText("Ejercicio\nPreestablecido");
         tvOpcionDer.setText("Ejercicio\nPersonalizado");
 
-        // Configurar Clicks
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
 
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
@@ -113,8 +112,52 @@ public class EjerciciosActivity extends AppCompatActivity {
         });
 
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
-            Toast.makeText(this, "Ejercicio Personalizado (Próximamente)", Toast.LENGTH_SHORT).show();
+            dialog.dismiss(); // Cierra el primer pop-up
+            mostrarPopUpCrearEjercicioPersonalizado(); // Abre el de creación
+        });
+
+        dialog.show();
+    }
+
+    private void mostrarPopUpCrearEjercicioPersonalizado() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_aniadir_ej_personalizado);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
+        ImageView ivImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
+
+        // Al tocar el cuadro grande de imagen
+        ivImagen.setOnClickListener(v -> {
+            Toast.makeText(this, "Abriendo Galería...", Toast.LENGTH_SHORT).show();
+            // Aquí irá la lógica para elegir la foto
+        });
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        btnAceptar.setOnClickListener(v -> {
+            String nombre = etNombre.getText().toString().trim();
+            if (nombre.isEmpty()) {
+                etNombre.setError("Campo obligatorio");
+                return;
+            }
+
+            // Lógica para guardar en la DB (Room)
+            Ejercicio nuevo = new Ejercicio();
+            nuevo.NombreEjercicio = nombre;
+            nuevo.idSeccionEjercicio = seccionActual.idSeccion;
+            nuevo.EsCalistenico = false; 
+            // nuevo.ImagenEjercicio = ... (Aquí guardaremos la URI más adelante)
+
+            ejercicioRepository.insertarEjercicio(nuevo);
+            Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
+            
             dialog.dismiss();
+            cargarEjerciciosDesdeDB(); // Actualiza la lista en pantalla
         });
 
         dialog.show();
@@ -124,10 +167,10 @@ public class EjerciciosActivity extends AppCompatActivity {
         if (seccionActual != null) {
             ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.idSeccion, ejercicios -> {
                 adapter.setEjercicios(ejercicios);
-                
-                // Control de visibilidad del mensaje de bienvenida si está vacío
                 if (ejercicios == null || ejercicios.isEmpty()) {
                     tvTituloGrid.setText("Añade tu primer ejercicio");
+                } else {
+                    tvTituloGrid.setText("Ejercicios de " + seccionActual.NombreSeccion);
                 }
             });
         }
