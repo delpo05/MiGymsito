@@ -31,7 +31,7 @@ import com.example.migymsito.dataRepository.EjercicioRepository;
 
 import java.util.ArrayList;
 
-public class EjerciciosActivity extends AppCompatActivity {
+public class EjerciciosActivity extends HeaderActivity {
 
     private Usuario usuarioActual;
     private Seccion seccionActual;

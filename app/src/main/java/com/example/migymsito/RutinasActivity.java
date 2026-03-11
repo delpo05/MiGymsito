@@ -25,7 +25,7 @@ import com.example.migymsito.dataRepository.RutinaRepository;
 
 import java.util.ArrayList;
 
-public class RutinasActivity extends AppCompatActivity {
+public class RutinasActivity extends HeaderActivity {
 
     private GridView gvRutinas;
     private Usuario usuarioActual;
