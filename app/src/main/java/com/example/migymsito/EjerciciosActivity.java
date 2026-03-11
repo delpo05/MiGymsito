@@ -3,6 +3,7 @@ package com.example.migymsito;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -37,10 +40,30 @@ public class EjerciciosActivity extends AppCompatActivity {
     private EjercicioRepository ejercicioRepository;
     private EjerciciosAdapter adapter;
 
+    // Variables para manejar la selección de imagen
+    private Uri uriImagenSeleccionada;
+    private ImageView ivPreviewImagen; // Para actualizar el preview en el pop-up activo
+    private ActivityResultLauncher<String> galleryLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
+
+        // Inicializar el launcher para la galería
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        uriImagenSeleccionada = uri;
+                        if (ivPreviewImagen != null) {
+                            ivPreviewImagen.setImageURI(uri);
+                            // Opcional: Darle persistencia al permiso de lectura del URI
+                            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        }
+                    }
+                }
+        );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
@@ -79,7 +102,6 @@ public class EjerciciosActivity extends AppCompatActivity {
 
             @Override
             public void onEjercicioClick(Ejercicio ejercicio) {
-                // REDIRECCIÓN A CARGAR REGISTRO
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
                 intent.putExtra("usuario", usuarioActual);
@@ -136,8 +158,8 @@ public class EjerciciosActivity extends AppCompatActivity {
         });
 
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
-            dialog.dismiss(); // Cierra el primer pop-up
-            mostrarPopUpCrearEjercicioPersonalizado(null); // Abre el de creación
+            dialog.dismiss();
+            mostrarPopUpCrearEjercicioPersonalizado(null);
         });
 
         dialog.show();
@@ -152,21 +174,24 @@ public class EjerciciosActivity extends AppCompatActivity {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
-        ImageView ivImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
+        ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
+
+        uriImagenSeleccionada = null; // Resetear para nueva creación
 
         if (ejercicioExistente != null) {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
             btnAceptar.setText("Guardar");
+            if (ejercicioExistente.ImagenEjercicio != null) {
+                uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
+                ivPreviewImagen.setImageURI(uriImagenSeleccionada);
+            }
         }
 
-        // Al tocar el cuadro grande de imagen
-        ivImagen.setOnClickListener(v -> {
-            Toast.makeText(this, "Abriendo Galería...", Toast.LENGTH_SHORT).show();
-            // Aquí irá la lógica para elegir la foto
-        });
+        // Al tocar el cuadro de imagen se abre la galería
+        ivPreviewImagen.setOnClickListener(v -> galleryLauncher.launch("image/*"));
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
@@ -178,17 +203,21 @@ public class EjerciciosActivity extends AppCompatActivity {
             }
 
             if (ejercicioExistente == null) {
-                // Lógica para guardar en la DB (Room)
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.idSeccionEjercicio = seccionActual.idSeccion;
                 nuevo.EsCalistenico = false;
-                // nuevo.ImagenEjercicio = ... (Aquí guardaremos la URI más adelante)
+                if (uriImagenSeleccionada != null) {
+                    nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
+                }
 
                 ejercicioRepository.insertarEjercicio(nuevo);
                 Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;
+                if (uriImagenSeleccionada != null) {
+                    ejercicioExistente.ImagenEjercicio = uriImagenSeleccionada.toString();
+                }
                 ejercicioRepository.actualizarEjercicio(ejercicioExistente);
                 Toast.makeText(this, "Ejercicio actualizado", Toast.LENGTH_SHORT).show();
             }

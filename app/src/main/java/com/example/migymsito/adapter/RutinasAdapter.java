@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.migymsito.R;
@@ -61,6 +62,14 @@ public class RutinasAdapter extends BaseAdapter {
         Button btnAdd = convertView.findViewById(R.id.btn_item_add);
         TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
+        View ivImagen = convertView.findViewById(R.id.iv_item_imagen);
+
+        if (ivImagen != null) ivImagen.setVisibility(View.GONE);
+
+        // Asegurar que el nombre esté centrado para Rutinas
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
+        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        txtNombre.setLayoutParams(params);
 
         if (container != null) {
             container.setBackgroundResource(R.drawable.card_border_white);
