@@ -1,8 +1,7 @@
 package com.example.migymsito;
 
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,16 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.RegistroAdapter;
 import com.example.migymsito.data.Ejercicio;
-import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
-import com.example.migymsito.data.Rutina;
-import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.Usuario;
-import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
-import com.example.migymsito.dataRepository.RutinaRepository;
-import com.example.migymsito.dataRepository.SeccionRepository;
-import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +31,10 @@ public class CargarRegistroActivity extends HeaderActivity {
     private List<Registro> listaHistorial = new ArrayList<>();
 
     private RegistroRepository registroRepository;
-    private UsuarioRepository usuarioRepository;
-    private RutinaRepository rutinaRepository;
-    private SeccionRepository seccionRepository;
-    private EjercicioRepository ejercicioRepository;
 
     private int serieActual = 1;
-    private int idEjercicio = 1;
-    private int idUsuario = 1;
+    private int idEjercicio;
+    private int idUsuario;
     private String nombreEjercicio;
 
     @Override
@@ -54,17 +42,32 @@ public class CargarRegistroActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cargar_registro_activity);
 
+        // Recuperar datos del Intent de forma segura
+        Usuario usuario;
+        Ejercicio ejercicio;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            usuario = getIntent().getSerializableExtra("usuario", Usuario.class);
+            ejercicio = getIntent().getSerializableExtra("ejercicio", Ejercicio.class);
+        } else {
+            usuario = (Usuario) getIntent().getSerializableExtra("usuario");
+            ejercicio = (Ejercicio) getIntent().getSerializableExtra("ejercicio");
+        }
+
+        if (usuario != null && ejercicio != null) {
+            idUsuario = usuario.id;
+            idEjercicio = ejercicio.idEjercicio;
+            nombreEjercicio = ejercicio.NombreEjercicio;
+        }
+
         registroRepository = new RegistroRepository(getApplication());
-        usuarioRepository = new UsuarioRepository(getApplication());
-        rutinaRepository = new RutinaRepository(getApplication());
-        seccionRepository = new SeccionRepository(getApplication());
-        ejercicioRepository = new EjercicioRepository(getApplication());
 
         initViews();
         setupListeners();
         setupRecyclerView();
 
-        verificarOPrepararEntorno();
+        if (idUsuario != 0 && idEjercicio != 0) {
+            cargarHistorial();
+        }
     }
 
     private void initViews() {
@@ -81,7 +84,6 @@ public class CargarRegistroActivity extends HeaderActivity {
         rvHistorial = findViewById(R.id.rvHistorial);
 
         tvNombreEjercicio.setText(nombreEjercicio);
-        btnCargar.setEnabled(false);
     }
 
     private void setupListeners() {
@@ -101,7 +103,8 @@ public class CargarRegistroActivity extends HeaderActivity {
 
     private void modificarValor(EditText et, double delta) {
         try {
-            double val = Double.parseDouble(et.getText().toString());
+            String text = et.getText().toString();
+            double val = text.isEmpty() ? 0 : Double.parseDouble(text);
             val += delta;
             if (val < 0) val = 0;
             if (et.getId() == R.id.etRepeticiones) {
@@ -175,61 +178,5 @@ public class CargarRegistroActivity extends HeaderActivity {
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
         Toast.makeText(this, "Último registro eliminado", Toast.LENGTH_SHORT).show();
-    }
-
-    private void verificarOPrepararEntorno() {
-        usuarioRepository.validarCorreoExistente("prueba@gym.com", u -> {
-            if (u == null) {
-                Usuario newU = new Usuario();
-                newU.nombreUsuario = "Admin Test";
-                newU.correoElectronicoUsuario = "prueba@gym.com";
-                newU.contraseniaUsuario = "1234";
-                newU.generoUsuario = "M";
-                newU.fechaNacimiento = System.currentTimeMillis();
-                usuarioRepository.registrarUsuarioConHistorial(newU, new Historial(), success -> {
-                    new Handler(Looper.getMainLooper()).postDelayed(this::verificarOPrepararEntorno, 300);
-                });
-            } else {
-                idUsuario = u.id;
-                rutinaRepository.obtenerRutinasDeUsuario(idUsuario, rutinas -> {
-                    if (rutinas.isEmpty()) {
-                        Rutina r = new Rutina();
-                        r.IdUsuarioRutina = idUsuario;
-                        r.NombreRutina = "Rutina de Prueba";
-                        rutinaRepository.insertarRutina(r);
-                        new Handler(Looper.getMainLooper()).postDelayed(this::verificarOPrepararEntorno, 300);
-                    } else {
-                        int idRutina = rutinas.get(0).IdRutina;
-                        seccionRepository.obtenerSeccionesDeRutina(idRutina, secciones -> {
-                            if (secciones.isEmpty()) {
-                                Seccion s = new Seccion();
-                                s.IdRutinaSeccion = idRutina;
-                                s.NombreSeccion = "Pecho";
-                                seccionRepository.insertarSeccion(s);
-                                new Handler(Looper.getMainLooper()).postDelayed(this::verificarOPrepararEntorno, 300);
-                            } else {
-                                int idSeccion = secciones.get(0).idSeccion;
-                                ejercicioRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
-                                    if (ejercicios.isEmpty()) {
-                                        Ejercicio e = new Ejercicio();
-                                        e.idSeccionEjercicio = idSeccion;
-                                        e.NombreEjercicio = "Press de Banca";
-                                        e.EsCalistenico = false;
-                                        ejercicioRepository.insertarEjercicio(e);
-                                        new Handler(Looper.getMainLooper()).postDelayed(this::verificarOPrepararEntorno, 300);
-                                    } else {
-                                        Ejercicio e = ejercicios.get(0);
-                                        idEjercicio = e.idEjercicio;
-                                        nombreEjercicio = e.NombreEjercicio;
-                                        tvNombreEjercicio.setText(nombreEjercicio);
-                                        cargarHistorial();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
     }
 }

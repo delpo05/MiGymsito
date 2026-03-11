@@ -1,14 +1,17 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,17 +79,38 @@ public class EjerciciosActivity extends AppCompatActivity {
 
             @Override
             public void onEjercicioClick(Ejercicio ejercicio) {
-                // Acción al tocar un ejercicio
+                // REDIRECCIÓN A CARGAR REGISTRO
+                Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
+                intent.putExtra("ejercicio", ejercicio);
+                intent.putExtra("usuario", usuarioActual);
+                startActivity(intent);
             }
 
             @Override
             public void onOptionsClick(View view, Ejercicio ejercicio) {
-                // Acción al tocar los tres puntitos
+                mostrarMenuOpciones(view, ejercicio);
             }
         });
 
         gvEjercicios.setAdapter(adapter);
         cargarEjerciciosDesdeDB();
+    }
+
+    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenu().add("Editar");
+        popup.getMenu().add("Eliminar");
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getTitle().equals("Editar")) {
+                mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
+            } else if (item.getTitle().equals("Eliminar")) {
+                ejercicioRepository.eliminarEjercicio(ejercicio);
+                new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
+            }
+            return true;
+        });
+        popup.show();
     }
 
     private void mostrarPopUpAnadirEjercicio() {
@@ -113,23 +137,30 @@ public class EjerciciosActivity extends AppCompatActivity {
 
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss(); // Cierra el primer pop-up
-            mostrarPopUpCrearEjercicioPersonalizado(); // Abre el de creación
+            mostrarPopUpCrearEjercicioPersonalizado(null); // Abre el de creación
         });
 
         dialog.show();
     }
 
-    private void mostrarPopUpCrearEjercicioPersonalizado() {
+    private void mostrarPopUpCrearEjercicioPersonalizado(Ejercicio ejercicioExistente) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_aniadir_ej_personalizado);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
         ImageView ivImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
+
+        if (ejercicioExistente != null) {
+            tvTitulo.setText("Editar ejercicio");
+            etNombre.setText(ejercicioExistente.NombreEjercicio);
+            btnAceptar.setText("Guardar");
+        }
 
         // Al tocar el cuadro grande de imagen
         ivImagen.setOnClickListener(v -> {
@@ -146,18 +177,24 @@ public class EjerciciosActivity extends AppCompatActivity {
                 return;
             }
 
-            // Lógica para guardar en la DB (Room)
-            Ejercicio nuevo = new Ejercicio();
-            nuevo.NombreEjercicio = nombre;
-            nuevo.idSeccionEjercicio = seccionActual.idSeccion;
-            nuevo.EsCalistenico = false; 
-            // nuevo.ImagenEjercicio = ... (Aquí guardaremos la URI más adelante)
+            if (ejercicioExistente == null) {
+                // Lógica para guardar en la DB (Room)
+                Ejercicio nuevo = new Ejercicio();
+                nuevo.NombreEjercicio = nombre;
+                nuevo.idSeccionEjercicio = seccionActual.idSeccion;
+                nuevo.EsCalistenico = false;
+                // nuevo.ImagenEjercicio = ... (Aquí guardaremos la URI más adelante)
 
-            ejercicioRepository.insertarEjercicio(nuevo);
-            Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
+                ejercicioRepository.insertarEjercicio(nuevo);
+                Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
+            } else {
+                ejercicioExistente.NombreEjercicio = nombre;
+                ejercicioRepository.actualizarEjercicio(ejercicioExistente);
+                Toast.makeText(this, "Ejercicio actualizado", Toast.LENGTH_SHORT).show();
+            }
             
             dialog.dismiss();
-            cargarEjerciciosDesdeDB(); // Actualiza la lista en pantalla
+            new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 300);
         });
 
         dialog.show();

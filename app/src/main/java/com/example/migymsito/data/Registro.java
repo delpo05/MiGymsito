@@ -6,6 +6,8 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Registro",
         foreignKeys = {
@@ -27,7 +29,7 @@ import androidx.room.PrimaryKey;
                 @Index("IdEjercicioRegistro")
         }
 )
-public class Registro {
+public class Registro implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public int idRegistro;
