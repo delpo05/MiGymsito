@@ -26,7 +26,7 @@ import com.example.migymsito.dataRepository.SeccionRepository;
 
 import java.util.ArrayList;
 
-public class SeccionesActivity extends AppCompatActivity {
+public class SeccionesActivity extends HeaderActivity {
 
     private GridView gvSecciones;
     private Rutina rutinaActual;

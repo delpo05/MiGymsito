@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class EjerciciosActivity extends AppCompatActivity {
+public class EjerciciosActivity extends HeaderActivity {
 
     private Usuario usuarioActual;
     private Seccion seccionActual;
