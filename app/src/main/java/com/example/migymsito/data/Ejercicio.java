@@ -6,6 +6,8 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Ejercicio",
         foreignKeys = @ForeignKey(
@@ -16,7 +18,7 @@ import androidx.room.PrimaryKey;
         ),
         indices = { @Index("idSeccionEjercicio") }         // Índice para optimizar búsquedas por sección
 )
-public class Ejercicio {
+public class Ejercicio implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int idEjercicio;
 

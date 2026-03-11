@@ -25,7 +25,6 @@
             android:name=".RegistroSesionActivity"
             android:exported="false" />
 
-        <!-- Cambiado de VistaRegistrosActivity a VistaRutinasActivity -->
         <activity
             android:name=".RutinasActivity"
             android:exported="false" />
@@ -34,6 +33,9 @@
             android:name=".SeccionesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".EjerciciosActivity"
+            android:exported="false" />
 
         <activity
             android:name=".DebugUsuariosRegistradosActivity"
@@ -42,8 +44,18 @@
 
         <activity
             android:name=".CargarRegistroActivity"
-            android:exported="true">
-       </activity>
+            android:exported="true" />
+
+        <!-- Configuración para la cámara y compartir archivos -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.migymsito.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

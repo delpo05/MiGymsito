@@ -6,17 +6,19 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Seccion",
         foreignKeys = @ForeignKey(
-                entity = Rutina.class,                     // Relación con la tabla Rutina
-                parentColumns = "idRutina",                // PK de Rutina
-                childColumns = "IdRutinaSeccion",          // FK en Seccion
-                onDelete = ForeignKey.CASCADE              // Si se borra la rutina → borrar sus secciones
+                entity = Rutina.class,
+                parentColumns = "IdRutina",
+                childColumns = "IdRutinaSeccion",
+                onDelete = ForeignKey.CASCADE
         ),
-        indices = { @Index("IdRutinaSeccion") }            // Index para mejorar queries por FK
+        indices = { @Index("IdRutinaSeccion") }
 )
-public class Seccion {
+public class Seccion implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public int idSeccion;
@@ -26,7 +28,4 @@ public class Seccion {
 
     @NonNull
     public String NombreSeccion;
-
-    @NonNull
-    public String ColorSeccion;
 }

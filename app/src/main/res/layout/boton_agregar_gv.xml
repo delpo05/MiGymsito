@@ -8,7 +8,7 @@
     <RelativeLayout
         android:id="@+id/container_item"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="170dp"
         android:background="@drawable/card_border_white"
         android:padding="10dp">
 
@@ -23,6 +23,30 @@
             android:textColor="@color/blanco"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:visibility="gone"
+            android:elevation="2dp" />
+
+        <!-- Nombre del Item -->
+        <TextView
+            android:id="@+id/tv_nombre_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="Nombre"
+            android:textColor="@color/blanco"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <!-- Imagen del Ejercicio -->
+        <ImageView
+            android:id="@+id/iv_item_imagen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tv_nombre_item"
+            android:layout_marginTop="5dp"
+            android:scaleType="centerCrop"
             android:visibility="gone" />
 
         <!-- Botón + para añadir -->
@@ -40,19 +64,6 @@
             android:visibility="visible"
             android:clickable="false"
             android:focusable="false" />
-
-        <!-- Nombre de la rutina -->
-        <TextView
-            android:id="@+id/tv_nombre_rutina"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:text="Nombre Rutina"
-            android:textColor="@color/blanco"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:visibility="gone" />
 
     </RelativeLayout>
 </FrameLayout>

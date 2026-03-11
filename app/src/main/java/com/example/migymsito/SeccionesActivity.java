@@ -1,7 +1,9 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -37,33 +39,43 @@ public class SeccionesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
-        usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        // Recuperar objetos de forma segura según la versión de Android
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
+            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
+        } else {
+            rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
+            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        }
 
-        gvSecciones = findViewById(R.id.gvRutinas);
+        gvSecciones = findViewById(R.id.gvGenerico);
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.nombreUsuario);
         }
 
         configurarGridView();
-        configurarWindowInsets(R.id.layout_secciones);
+        configurarWindowInsets(R.id.layout_contenedor_grid);
     }
 
     private void configurarGridView() {
-        TextView tituloGv = findViewById(R.id.tvGvTitulo);
+        TextView tituloGv = findViewById(R.id.tvTituloGrid);
         tituloGv.setText("Mis Secciones");
         seccionRepository = new SeccionRepository(getApplication());
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
             public void onAddClick() {
-                mostrarPopUpSeccion(null);
+                mostrarPopUpAnadirSeccion();
             }
 
             @Override
             public void onSeccionClick(Seccion seccion) {
-                // Acción futura para ejercicios
+                // REDIRECCIÓN A EJERCICIOS
+                Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
+                intent.putExtra("seccion", seccion);
+                intent.putExtra("usuario", usuarioActual);
+                startActivity(intent);
             }
 
             @Override
@@ -83,7 +95,7 @@ public class SeccionesActivity extends AppCompatActivity {
         
         popup.setOnMenuItemClickListener(item -> {
             if (item.getTitle().equals("Editar")) {
-                mostrarPopUpSeccion(seccion);
+                mostrarPopUpCrearSeccion(seccion);
             } else if (item.getTitle().equals("Eliminar")) {
                 seccionRepository.eliminarSeccion(seccion);
                 new Handler().postDelayed(this::cargarSeccionesDesdeDB, 200);
@@ -95,13 +107,45 @@ public class SeccionesActivity extends AppCompatActivity {
 
     private void cargarSeccionesDesdeDB() {
         if (rutinaActual != null) {
-            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.idRutina, secciones -> {
+            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
                 adapter.setSecciones(secciones);
             });
         }
     }
 
-    private void mostrarPopUpSeccion(Seccion seccionExistente) {
+    private void mostrarPopUpAnadirSeccion() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_dos_opciones);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        // Configurar Textos
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
+        TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
+        TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
+
+        tvTitulo.setText("Añadir Sección");
+        tvOpcionIzq.setText("Sección\nPrevia");
+        tvOpcionDer.setText("Nueva\nSección");
+
+        // Configurar Clicks
+        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpCrearSeccion(null);
+        });
+
+        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
+            // Lógica para sección previa
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void mostrarPopUpCrearSeccion(Seccion seccionExistente) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
         if (dialog.getWindow() != null) {
@@ -130,8 +174,7 @@ public class SeccionesActivity extends AppCompatActivity {
                 if (seccionExistente == null) {
                     Seccion nueva = new Seccion();
                     nueva.NombreSeccion = nombre;
-                    nueva.IdRutinaSeccion = rutinaActual.idRutina;
-                    nueva.ColorSeccion = "#FFFFFF";
+                    nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
                 } else {
                     seccionExistente.NombreSeccion = nombre;
