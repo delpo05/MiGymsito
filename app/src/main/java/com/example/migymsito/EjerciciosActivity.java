@@ -6,7 +6,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -29,7 +32,12 @@ import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class EjerciciosActivity extends AppCompatActivity {
 
@@ -40,17 +48,18 @@ public class EjerciciosActivity extends AppCompatActivity {
     private EjercicioRepository ejercicioRepository;
     private EjerciciosAdapter adapter;
 
-    // Variables para manejar la selección de imagen
     private Uri uriImagenSeleccionada;
-    private ImageView ivPreviewImagen; // Para actualizar el preview en el pop-up activo
+    private ImageView ivPreviewImagen;
     private ActivityResultLauncher<String> galleryLauncher;
+    private ActivityResultLauncher<Uri> cameraLauncher;
+    private Uri uriFotoCamara; // Para guardar la ruta de la foto sacada con la cámara
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Inicializar el launcher para la galería
+        // Launcher para Galería
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -58,8 +67,20 @@ public class EjerciciosActivity extends AppCompatActivity {
                         uriImagenSeleccionada = uri;
                         if (ivPreviewImagen != null) {
                             ivPreviewImagen.setImageURI(uri);
-                            // Opcional: Darle persistencia al permiso de lectura del URI
                             getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        }
+                    }
+                }
+        );
+
+        // Launcher para Cámara
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                success -> {
+                    if (success && uriFotoCamara != null) {
+                        uriImagenSeleccionada = uriFotoCamara;
+                        if (ivPreviewImagen != null) {
+                            ivPreviewImagen.setImageURI(uriFotoCamara);
                         }
                     }
                 }
@@ -83,6 +104,45 @@ public class EjerciciosActivity extends AppCompatActivity {
 
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
+    }
+
+    private void abrirCamara() {
+        File photoFile = null;
+        try {
+            photoFile = crearArchivoImagen();
+        } catch (IOException ex) {
+            Toast.makeText(this, "Error al crear el archivo de imagen", Toast.LENGTH_SHORT).show();
+        }
+
+        if (photoFile != null) {
+            uriFotoCamara = FileProvider.getUriForFile(this,
+                    "com.example.migymsito.fileprovider",
+                    photoFile);
+            cameraLauncher.launch(uriFotoCamara);
+        }
+    }
+
+    private File crearArchivoImagen() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
+    }
+
+    private void mostrarOpcionesImagen(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenu().add("Cámara");
+        popup.getMenu().add("Galería");
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getTitle().equals("Cámara")) {
+                abrirCamara();
+            } else if (item.getTitle().equals("Galería")) {
+                galleryLauncher.launch("image/*");
+            }
+            return true;
+        });
+        popup.show();
     }
 
     private void configurarGridView() {
@@ -178,7 +238,7 @@ public class EjerciciosActivity extends AppCompatActivity {
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
 
-        uriImagenSeleccionada = null; // Resetear para nueva creación
+        uriImagenSeleccionada = null; 
 
         if (ejercicioExistente != null) {
             tvTitulo.setText("Editar ejercicio");
@@ -190,8 +250,8 @@ public class EjerciciosActivity extends AppCompatActivity {
             }
         }
 
-        // Al tocar el cuadro de imagen se abre la galería
-        ivPreviewImagen.setOnClickListener(v -> galleryLauncher.launch("image/*"));
+        // Ahora muestra opciones: Cámara o Galería
+        ivPreviewImagen.setOnClickListener(v -> mostrarOpcionesImagen(v));
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
