@@ -10,12 +10,12 @@
     android:layout_gravity="center">
 
     <TextView
-        android:id="@+id/tvTituloPopUp"
+        android:id="@+id/tvNombrePopUp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:gravity="center"
-        android:text="Título del Pop-up"
+        android:text="@nombre"
         android:textColor="@color/negro"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -26,11 +26,11 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <!-- Opción Izquierda -->
+        <!-- Opción Eliminar -->
         <LinearLayout
-            android:id="@+id/btnOpcionIzquierda"
-            android:layout_width="50dp"
-            android:layout_height="120dp"
+            android:id="@+id/btnEliminarPopUp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="1"
             android:clickable="true"
@@ -40,31 +40,28 @@
             android:padding="12dp">
 
             <TextView
-                android:id="@+id/tvTextoIzquierda"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:gravity="center"
-                android:text="Opción 1"
+                android:text="Eliminar"
                 android:textColor="@color/negro"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_circle_white"
-                android:backgroundTint="#E9EBF1"
-                android:padding="12dp"
-                android:src="@drawable/ic_add"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_delete"
                 app:tint="@color/negro" />
         </LinearLayout>
 
-        <!-- Opción Derecha -->
+        <!-- Opción Modificar -->
         <LinearLayout
-            android:id="@+id/btnOpcionDerecha"
-            android:layout_width="50dp"
-            android:layout_height="120dp"
+            android:id="@+id/btnModificarPopUp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="1"
             android:clickable="true"
@@ -74,29 +71,26 @@
             android:padding="12dp">
 
             <TextView
-                android:id="@+id/tvTextoDerecha"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:gravity="center"
-                android:text="Opción 2"
+                android:text="Modificar"
                 android:textColor="@color/negro"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/bg_circle_white"
-                android:backgroundTint="#E9EBF1"
-                android:padding="12dp"
-                android:src="@drawable/ic_add"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_edit_outline"
                 app:tint="@color/negro" />
         </LinearLayout>
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnCancelar"
+        android:id="@+id/btnCancelarPopUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

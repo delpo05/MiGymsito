@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,7 +38,6 @@ public class SeccionesActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Recuperar objetos de forma segura según la versión de Android
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
             usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
@@ -71,7 +69,6 @@ public class SeccionesActivity extends HeaderActivity {
 
             @Override
             public void onSeccionClick(Seccion seccion) {
-                // REDIRECCIÓN A EJERCICIOS
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
                 intent.putExtra("usuario", usuarioActual);
@@ -89,20 +86,40 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void mostrarMenuOpciones(View view, Seccion seccion) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Editar");
-        popup.getMenu().add("Eliminar");
-        
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Editar")) {
-                mostrarPopUpCrearSeccion(seccion);
-            } else if (item.getTitle().equals("Eliminar")) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
+        if (tvNombre != null) {
+            tvNombre.setText(seccion.NombreSeccion);
+        }
+
+        View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
+        if (btnEliminar != null) {
+            btnEliminar.setOnClickListener(v -> {
                 seccionRepository.eliminarSeccion(seccion);
+                dialog.dismiss();
                 new Handler().postDelayed(this::cargarSeccionesDesdeDB, 200);
-            }
-            return true;
-        });
-        popup.show();
+            });
+        }
+
+        View btnModificar = dialog.findViewById(R.id.btnModificarPopUp);
+        if (btnModificar != null) {
+            btnModificar.setOnClickListener(v -> {
+                dialog.dismiss();
+                mostrarPopUpCrearSeccion(seccion);
+            });
+        }
+
+        View btnCancelar = dialog.findViewById(R.id.btnCancelarPopUp);
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void cargarSeccionesDesdeDB() {
@@ -120,7 +137,6 @@ public class SeccionesActivity extends HeaderActivity {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        // Configurar Textos
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
         TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
         TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
@@ -129,7 +145,6 @@ public class SeccionesActivity extends HeaderActivity {
         tvOpcionIzq.setText("Sección\nPrevia");
         tvOpcionDer.setText("Nueva\nSección");
 
-        // Configurar Clicks
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
         
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
@@ -138,7 +153,6 @@ public class SeccionesActivity extends HeaderActivity {
         });
 
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
-            // Lógica para sección previa
             dialog.dismiss();
         });
 

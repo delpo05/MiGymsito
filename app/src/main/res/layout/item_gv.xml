@@ -12,19 +12,21 @@
         android:background="@drawable/card_border_white"
         android:padding="10dp">
 
-        <!-- Opciones (tres puntos) -->
+        <!-- Opciones (tres puntos) - Área de toque aumentada pero alineado a la esquina -->
         <TextView
             android:id="@+id/tv_opciones"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
+            android:gravity="top|end"
             android:text="⋮"
             android:textColor="@color/blanco"
             android:textSize="24sp"
             android:textStyle="bold"
             android:visibility="gone"
-            android:elevation="2dp" />
+            android:elevation="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <!-- Nombre del Item -->
         <TextView
@@ -33,6 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:gravity="center"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="40dp"
             android:text="Nombre"
             android:textColor="@color/blanco"
             android:textStyle="bold"
