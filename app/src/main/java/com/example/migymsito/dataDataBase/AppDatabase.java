@@ -10,16 +10,18 @@ import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionesXEjercicios;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.EjercicioDao;
 import com.example.migymsito.dataDao.HistorialDao;
 import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
+import com.example.migymsito.dataDao.SeccionesXEjerciciosDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
-// Subimos la versión a 7 para que Room sepa que hubo cambios estructurales
-@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 7, exportSchema = false)
+// Subimos la versión a 8 para incluir la nueva tabla SeccionesXEjercicios
+@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class, SeccionesXEjercicios.class}, version = 8, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -28,6 +30,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract EjercicioDao ejercicioDao();
     public abstract RegistroDao registroDao();
     public abstract HistorialDao historialDao();
+    public abstract SeccionesXEjerciciosDao seccionesXEjerciciosDao(); // Agregado el nuevo DAO
 
     private static volatile AppDatabase INSTANCE;
 

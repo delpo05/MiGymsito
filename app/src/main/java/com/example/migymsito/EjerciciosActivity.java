@@ -265,13 +265,13 @@ public class EjerciciosActivity extends HeaderActivity {
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
-                nuevo.idSeccionEjercicio = seccionActual.idSeccion;
                 nuevo.EsCalistenico = false;
                 if (uriImagenSeleccionada != null) {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
 
-                ejercicioRepository.insertarEjercicio(nuevo);
+                // He modificado esta llamada para usar el nuevo método que guarda tanto el ejercicio como su relación
+                ejercicioRepository.insertarEjercicioEnSeccion(nuevo, seccionActual.idSeccion);
                 Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;

@@ -8,23 +8,20 @@ import androidx.room.Update;
 
 import com.example.migymsito.data.Ejercicio;
 
-import java.util.List;
-
+// Se eliminó la importación de List ya que no se usa en este DAO.
+// Este DAO ahora solo maneja operaciones CRUD básicas de la tabla Ejercicio.
 @Dao
 public interface EjercicioDao {
 
+    // Devuelve long para obtener el ID generado (necesario para la tabla intermedia).
     @Insert
-    void insertarEjercicio(Ejercicio ejercicio);
+    long insertarEjercicio(Ejercicio ejercicio);
 
     @Update
     void actualizarEjercicio(Ejercicio ejercicio);
 
     @Delete
     void eliminarEjercicio(Ejercicio ejercicio);
-
-    // Obtener todos los ejercicios de una sección (ej. Pecho, Espalda, etc.)
-    @Query("SELECT * FROM Ejercicio WHERE idSeccionEjercicio = :idSeccion")
-    List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);
 
     @Query("DELETE FROM Ejercicio")
     void borrarTodo();

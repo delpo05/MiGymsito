@@ -2,28 +2,15 @@ package com.example.migymsito.data;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-@Entity(
-        tableName = "Ejercicio",
-        foreignKeys = @ForeignKey(
-                entity = Seccion.class,                    // Relación con la tabla Seccion
-                parentColumns = "idSeccion",               // PK de Seccion
-                childColumns = "idSeccionEjercicio",       // FK en Ejercicio
-                onDelete = ForeignKey.CASCADE              // Borrado en cascada
-        ),
-        indices = { @Index("idSeccionEjercicio") }         // Índice para optimizar búsquedas por sección
-)
+// He eliminado la relación directa con Seccion, ya que ahora se gestiona a través de SeccionesXEjercicios
+@Entity(tableName = "Ejercicio")
 public class Ejercicio implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int idEjercicio;
-
-    @NonNull
-    public int idSeccionEjercicio;  // FK
 
     @NonNull
     public Boolean EsCalistenico;
