@@ -67,7 +67,7 @@ public class UsuarioRepository {
         });
     }
 
-    // Nuevo método para borrar todos los usuarios
+
     public void borrarTodosLosUsuarios(RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             try {
