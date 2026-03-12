@@ -38,7 +38,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Ingrese el nombre"
+            android:textColor="@color/negro"
             android:textColorHint="@color/gris_pista"
+            android:textCursorDrawable="@null"
             android:background="@null"
             android:textSize="14sp" />
     </LinearLayout>

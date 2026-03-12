@@ -75,6 +75,7 @@
             android:textColorHint="@color/gris_pista"
             android:background="@null"
             android:textColor="@color/negro"
+            android:textCursorDrawable="@null"
             android:textSize="14sp"
             android:inputType="textPersonName" />
     </LinearLayout>

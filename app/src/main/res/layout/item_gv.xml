@@ -50,17 +50,16 @@
             android:visibility="gone" />
 
         <!-- Botón + para añadir -->
-        <Button
+        <ImageView
             android:id="@+id/btn_item_add"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_centerInParent="true"
             android:background="@drawable/bg_circle_white"
-            app:backgroundTint="@color/blanco"
-            android:text="+"
-            android:textColor="@color/negro"
-            android:textSize="30sp"
-            android:textStyle="bold"
+            android:backgroundTint="@color/blanco"
+            android:src="@drawable/ic_add"
+            android:padding="15dp"
+            app:tint="@color/negro"
             android:visibility="visible"
             android:clickable="false"
             android:focusable="false" />

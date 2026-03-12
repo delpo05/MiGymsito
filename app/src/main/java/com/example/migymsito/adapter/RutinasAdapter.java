@@ -4,7 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -55,11 +55,11 @@ public class RutinasAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.boton_agregar_gv, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gv, parent, false);
         }
 
         View container = convertView.findViewById(R.id.container_item);
-        Button btnAdd = convertView.findViewById(R.id.btn_item_add);
+        ImageView btnAdd = convertView.findViewById(R.id.btn_item_add);
         TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
         View ivImagen = convertView.findViewById(R.id.iv_item_imagen);
