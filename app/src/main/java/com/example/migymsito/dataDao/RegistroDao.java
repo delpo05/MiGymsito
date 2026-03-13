@@ -22,12 +22,23 @@ public interface RegistroDao {
     @Delete
     void eliminarRegistro(Registro registro);
 
-    // Obtener todos los registros de un usuario para un ejercicio específico, ordenados por fecha (más reciente primero)
-    @Query("SELECT * FROM Registro WHERE IdUsuarioRegistro = :idUsuario AND IdEjercicioRegistro = :idEjercicio ORDER BY FechaRegistro DESC")
-    List<Registro> obtenerHistorialPorEjercicio(int idUsuario, int idEjercicio);
+    @Query("SELECT * FROM Registro WHERE IdEntrenamiento = :idEntrenamiento")
+    List<Registro> obtenerRegistrosPorEntrenamiento(int idEntrenamiento);
 
-    // Obtener todos los registros de un usuario
-    @Query("SELECT * FROM Registro WHERE IdUsuarioRegistro = :idUsuario ORDER BY FechaRegistro DESC")
+    @Query("SELECT * FROM Registro WHERE IdSeccionXejercicio = :idSeccionXejercicio")
+    List<Registro> obtenerRegistrosPorSeccionXejercicio(int idSeccionXejercicio);
+
+    @Query("SELECT Registro.* FROM Registro " +
+           "JOIN SeccionXejercicio ON Registro.IdSeccionXejercicio = SeccionXejercicio.IdSeccionXejercicio " +
+           "JOIN Entrenamiento ON Registro.IdEntrenamiento = Entrenamiento.IdEntrenamiento " +
+           "WHERE SeccionXejercicio.IdEjercicio = :idEjercicio AND Entrenamiento.IdUsuario = :idUsuario " +
+           "ORDER BY Registro.FechaRegistro DESC")
+    List<Registro> obtenerHistorialPorEjercicioYUsuario(int idUsuario, int idEjercicio);
+
+    @Query("SELECT Registro.* FROM Registro " +
+           "JOIN Entrenamiento ON Registro.IdEntrenamiento = Entrenamiento.IdEntrenamiento " +
+           "WHERE Entrenamiento.IdUsuario = :idUsuario " +
+           "ORDER BY Registro.FechaRegistro DESC")
     List<Registro> obtenerTodosLosRegistrosDelUsuario(int idUsuario);
 
     @Query("DELETE FROM Registro")

@@ -45,7 +45,7 @@ public class RutinasActivity extends HeaderActivity {
         TextView tvUsername = findViewById(R.id.toolbar_username);
 
         if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.nombreUsuario);
+            tvUsername.setText(usuarioActual.NombreUsuario);
         } else if (tvUsername != null) {
             tvUsername.setText("Invitado");
         }
@@ -123,7 +123,7 @@ public class RutinasActivity extends HeaderActivity {
 
     private void cargarRutinasDesdeDB() {
         if (usuarioActual != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioActual.id, rutinas -> {
+            rutinaRepository.obtenerRutinasDeUsuario(usuarioActual.IdUsuario, rutinas -> {
                 adapter.setRutinas(rutinas);
             });
         }
@@ -158,7 +158,7 @@ public class RutinasActivity extends HeaderActivity {
                 if (rutinaExistente == null) {
                     Rutina nueva = new Rutina();
                     nueva.NombreRutina = nombre;
-                    nueva.IdUsuarioRutina = usuarioActual.id;
+                    nueva.IdUsuarioRutina = usuarioActual.IdUsuario;
                     rutinaRepository.insertarRutina(nueva);
                 } else {
                     rutinaExistente.NombreRutina = nombre;

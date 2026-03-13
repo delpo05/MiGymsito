@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.migymsito.adapter.RegistroAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.RegistroRepository;
 
@@ -35,6 +36,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private int serieActual = 1;
     private int idEjercicio;
     private int idUsuario;
+    private int idSeccion;
     private String nombreEjercicio;
 
     @Override
@@ -45,18 +47,25 @@ public class CargarRegistroActivity extends HeaderActivity {
         // Recuperar datos del Intent de forma segura
         Usuario usuario;
         Ejercicio ejercicio;
+        Seccion seccion;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             usuario = getIntent().getSerializableExtra("usuario", Usuario.class);
             ejercicio = getIntent().getSerializableExtra("ejercicio", Ejercicio.class);
+            seccion = getIntent().getSerializableExtra("seccion", Seccion.class);
         } else {
             usuario = (Usuario) getIntent().getSerializableExtra("usuario");
             ejercicio = (Ejercicio) getIntent().getSerializableExtra("ejercicio");
+            seccion = (Seccion) getIntent().getSerializableExtra("seccion");
         }
 
         if (usuario != null && ejercicio != null) {
-            idUsuario = usuario.id;
-            idEjercicio = ejercicio.idEjercicio;
+            idUsuario = usuario.IdUsuario;
+            idEjercicio = ejercicio.IdEjercicio;
             nombreEjercicio = ejercicio.NombreEjercicio;
+        }
+        
+        if (seccion != null) {
+            idSeccion = seccion.IdSeccion;
         }
 
         registroRepository = new RegistroRepository(getApplication());
@@ -147,23 +156,24 @@ public class CargarRegistroActivity extends HeaderActivity {
             return;
         }
 
-        Registro nuevo = new Registro();
-        nuevo.IdUsuarioRegistro = idUsuario;
-        nuevo.IdEjercicioRegistro = idEjercicio;
-        nuevo.NumSeriesRegistro = serieActual;
-        nuevo.RepeticionesRegistro = Integer.parseInt(repStr);
-        nuevo.PesoRegistro = Double.parseDouble(pesoStr);
-        nuevo.FechaRegistro = System.currentTimeMillis();
+        double peso = Double.parseDouble(pesoStr);
+        int reps = Integer.parseInt(repStr);
 
-        registroRepository.insertarRegistro(nuevo);
+        btnCargar.setEnabled(false);
+        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, nuevo -> {
+            if (nuevo != null) {
+                listaHistorial.add(0, nuevo);
+                adapter.notifyItemInserted(0);
+                rvHistorial.scrollToPosition(0);
 
-        listaHistorial.add(0, nuevo);
-        adapter.notifyItemInserted(0);
-        rvHistorial.scrollToPosition(0);
-
-        serieActual++;
-        tvSerieValue.setText(String.valueOf(serieActual));
-        Toast.makeText(this, "Serie " + (serieActual-1) + " guardada", Toast.LENGTH_SHORT).show();
+                serieActual++;
+                tvSerieValue.setText(String.valueOf(serieActual));
+                Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
+            }
+            btnCargar.setEnabled(true);
+        });
     }
 
     private void eliminarUltimoRegistro() {

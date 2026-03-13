@@ -100,20 +100,20 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
     private void registrarNuevoUsuario() {
         Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.nombreUsuario = etRegNombre.getText().toString().trim();
-        nuevoUsuario.correoElectronicoUsuario = etRegCorreo.getText().toString().trim();
-        nuevoUsuario.contraseniaUsuario = etRegContrasenia.getText().toString().trim();
-        nuevoUsuario.generoUsuario = etRegGenero.getText().toString();
+        nuevoUsuario.NombreUsuario = etRegNombre.getText().toString().trim();
+        nuevoUsuario.CorreoElectronicoUsuario = etRegCorreo.getText().toString().trim();
+        nuevoUsuario.ContraseniaUsuario = etRegContrasenia.getText().toString().trim();
+        nuevoUsuario.GeneroUsuario = etRegGenero.getText().toString();
 
         String fechaString = etRegFechaNac.getText().toString();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             Date date = sdf.parse(fechaString);
             if (date != null) {
-                nuevoUsuario.fechaNacimiento = date.getTime();
+                nuevoUsuario.FechaNacimientoUsuario = date.getTime();
             }
         } catch (ParseException e) {
-            nuevoUsuario.fechaNacimiento = 0L;
+            nuevoUsuario.FechaNacimientoUsuario = 0L;
         }
 
         Historial nuevoHistorial = new Historial();
