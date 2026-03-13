@@ -10,13 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.graphics.Insets;
 
 import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Rutina;
@@ -37,7 +35,6 @@ public class RutinasActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Casteo robusto para diferentes versiones de Android
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
         } else {
@@ -88,20 +85,40 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void mostrarMenuOpciones(View view, Rutina rutina) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Editar");
-        popup.getMenu().add("Eliminar");
-        
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Editar")) {
-                mostrarPopUpRutina(rutina);
-            } else if (item.getTitle().equals("Eliminar")) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
+        if (tvNombre != null) {
+            tvNombre.setText(rutina.NombreRutina);
+        }
+
+        View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
+        if (btnEliminar != null) {
+            btnEliminar.setOnClickListener(v -> {
                 rutinaRepository.eliminarRutina(rutina);
+                dialog.dismiss();
                 new Handler().postDelayed(this::cargarRutinasDesdeDB, 200);
-            }
-            return true;
-        });
-        popup.show();
+            });
+        }
+
+        View btnModificar = dialog.findViewById(R.id.btnModificarPopUp);
+        if (btnModificar != null) {
+            btnModificar.setOnClickListener(v -> {
+                dialog.dismiss();
+                mostrarPopUpRutina(rutina);
+            });
+        }
+
+        View btnCancelar = dialog.findViewById(R.id.btnCancelarPopUp);
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void cargarRutinasDesdeDB() {

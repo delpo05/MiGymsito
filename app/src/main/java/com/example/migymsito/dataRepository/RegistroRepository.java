@@ -34,8 +34,7 @@ public class RegistroRepository {
     public void eliminarRegistro(Registro registro) {
         executorService.execute(() -> registroDao.eliminarRegistro(registro));
     }
-
-    // Obtener historial de un ejercicio específico para un usuario
+    
     public void obtenerHistorialPorEjercicio(int idUsuario, int idEjercicio, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerHistorialPorEjercicio(idUsuario, idEjercicio);
@@ -43,7 +42,6 @@ public class RegistroRepository {
         });
     }
 
-    // Obtener todos los registros de un usuario (para un resumen general)
     public void obtenerTodosLosRegistrosDelUsuario(int idUsuario, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerTodosLosRegistrosDelUsuario(idUsuario);
@@ -51,7 +49,6 @@ public class RegistroRepository {
         });
     }
 
-    // Mensajero para volver al hilo principal de la UI
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
         new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
     }

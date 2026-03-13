@@ -52,14 +52,13 @@ public class EjerciciosActivity extends HeaderActivity {
     private ImageView ivPreviewImagen;
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<Uri> cameraLauncher;
-    private Uri uriFotoCamara; // Para guardar la ruta de la foto sacada con la cámara
+    private Uri uriFotoCamara; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Launcher para Galería
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -73,7 +72,6 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
         );
 
-        // Launcher para Cámara
         cameraLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 success -> {
@@ -179,20 +177,40 @@ public class EjerciciosActivity extends HeaderActivity {
     }
 
     private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Editar");
-        popup.getMenu().add("Eliminar");
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
 
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Editar")) {
-                mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
-            } else if (item.getTitle().equals("Eliminar")) {
+        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
+        if (tvNombre != null) {
+            tvNombre.setText(ejercicio.NombreEjercicio);
+        }
+
+        View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
+        if (btnEliminar != null) {
+            btnEliminar.setOnClickListener(v -> {
                 ejercicioRepository.eliminarEjercicio(ejercicio);
+                dialog.dismiss();
                 new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
-            }
-            return true;
-        });
-        popup.show();
+            });
+        }
+
+        View btnModificar = dialog.findViewById(R.id.btnModificarPopUp);
+        if (btnModificar != null) {
+            btnModificar.setOnClickListener(v -> {
+                dialog.dismiss();
+                mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
+            });
+        }
+
+        View btnCancelar = dialog.findViewById(R.id.btnCancelarPopUp);
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void mostrarPopUpAnadirEjercicio() {
@@ -211,11 +229,6 @@ public class EjerciciosActivity extends HeaderActivity {
         tvOpcionDer.setText("Ejercicio\nPersonalizado");
 
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
-
-        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
-            Toast.makeText(this, "Ejercicios Preestablecidos (Próximamente)", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
 
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
@@ -250,7 +263,6 @@ public class EjerciciosActivity extends HeaderActivity {
             }
         }
 
-        // Ahora muestra opciones: Cámara o Galería
         ivPreviewImagen.setOnClickListener(v -> mostrarOpcionesImagen(v));
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
@@ -272,14 +284,12 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
 
                 ejercicioRepository.insertarEjercicio(nuevo);
-                Toast.makeText(this, "Ejercicio '" + nombre + "' creado", Toast.LENGTH_SHORT).show();
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;
                 if (uriImagenSeleccionada != null) {
                     ejercicioExistente.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
                 ejercicioRepository.actualizarEjercicio(ejercicioExistente);
-                Toast.makeText(this, "Ejercicio actualizado", Toast.LENGTH_SHORT).show();
             }
             
             dialog.dismiss();
@@ -293,11 +303,6 @@ public class EjerciciosActivity extends HeaderActivity {
         if (seccionActual != null) {
             ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.idSeccion, ejercicios -> {
                 adapter.setEjercicios(ejercicios);
-                if (ejercicios == null || ejercicios.isEmpty()) {
-                    tvTituloGrid.setText("Añade tu primer ejercicio");
-                } else {
-                    tvTituloGrid.setText("Ejercicios de " + seccionActual.NombreSeccion);
-                }
             });
         }
     }
