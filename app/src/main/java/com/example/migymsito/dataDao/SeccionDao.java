@@ -14,7 +14,7 @@ import java.util.List;
 public interface SeccionDao {
 
     @Insert
-    void insertarSeccion(Seccion seccion);
+    long insertarSeccion(Seccion seccion);
 
     @Update
     void actualizarSeccion(Seccion seccion);
@@ -24,6 +24,10 @@ public interface SeccionDao {
 
     @Query("SELECT * FROM Seccion WHERE IdRutinaSeccion = :idRutina")
     List<Seccion> obtenerSeccionesPorRutina(int idRutina);
+
+    // Participa en SeccionesActivity para traer todas las secciones y el nombre de su rutina para el popup de secciones previas
+    @Query("SELECT s.*, r.NombreRutina as nombreRutina FROM Seccion s INNER JOIN Rutina r ON s.IdRutinaSeccion = r.IdRutina")
+    List<Seccion> obtenerTodasLasSeccionesConRutina();
 
     @Query("DELETE FROM Seccion")
     void borrarTodo();

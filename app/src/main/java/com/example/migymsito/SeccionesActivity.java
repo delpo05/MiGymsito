@@ -2,11 +2,17 @@ package com.example.migymsito;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -24,6 +30,7 @@ import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.SeccionRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SeccionesActivity extends HeaderActivity {
 
@@ -152,8 +159,128 @@ public class SeccionesActivity extends HeaderActivity {
             mostrarPopUpCrearSeccion(null);
         });
 
+        // Participa en SeccionesActivity para abrir el popup de secciones previas
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
+            mostrarPopUpSeccionesPrevias();
+        });
+
+        dialog.show();
+    }
+
+    // Participa en SeccionesActivity para mostrar todas las secciones previas en un popup blanco estético y profesional
+    private void mostrarPopUpSeccionesPrevias() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.pop_up_secciones_previas);
+        
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        // Participa en SeccionesActivity: Adapter interno para manejar el nuevo diseño de tarjeta del popup
+        BaseAdapter adapterPrevias = new BaseAdapter() {
+            private List<Seccion> lista = new ArrayList<>();
+
+            public void setData(List<Seccion> nuevaLista) {
+                this.lista = nuevaLista;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public int getCount() { return lista.size(); }
+            @Override
+            public Object getItem(int i) { return lista.get(i); }
+            @Override
+            public long getItemId(int i) { return i; }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
+                }
+
+                Seccion s = lista.get(position);
+                TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
+                TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
+                View container = convertView.findViewById(R.id.container_item_previa);
+
+                tvNombre.setText(s.NombreSeccion);
+                tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
+
+                // Borde negro estético para la tarjeta
+                GradientDrawable shape = new GradientDrawable();
+                shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
+                shape.setStroke(4, Color.BLACK);
+                shape.setColor(Color.WHITE);
+                container.setBackground(shape);
+
+                convertView.setOnClickListener(v -> {
+                    seccionRepository.clonarSeccion(s, rutinaActual.IdRutina, result -> {
+                        cargarSeccionesDesdeDB();
+                        dialog.dismiss();
+                    });
+                });
+
+                return convertView;
+            }
+        };
+
+        gvPopup.setAdapter(adapterPrevias);
+
+        seccionRepository.obtenerTodasLasSecciones(secciones -> {
+            ((BaseAdapter)gvPopup.getAdapter()).notifyDataSetChanged();
+            // Casting para llamar a setData si es necesario o manejar la lista
+            // En este caso usamos una implementación directa para asegurar el refresco
+            if (adapterPrevias instanceof BaseAdapter) {
+                // Re-alimentamos la lista interna del adapter anónimo
+                try {
+                    java.lang.reflect.Field field = adapterPrevias.getClass().getDeclaredField("lista");
+                    field.setAccessible(true);
+                    field.set(adapterPrevias, secciones);
+                    adapterPrevias.notifyDataSetChanged();
+                } catch (Exception e) {
+                    // Si falla el reflejo, simplemente volvemos a cargar o usamos una lista final
+                }
+            }
+        });
+
+        // Alternativa más limpia para cargar datos sin Reflection
+        seccionRepository.obtenerTodasLasSecciones(secciones -> {
+             // Re-creamos el adapter con la lista final para evitar problemas de refresco
+             gvPopup.setAdapter(new BaseAdapter() {
+                 @Override public int getCount() { return secciones.size(); }
+                 @Override public Object getItem(int i) { return secciones.get(i); }
+                 @Override public long getItemId(int i) { return i; }
+                 @Override public View getView(int position, View convertView, ViewGroup parent) {
+                     if (convertView == null) {
+                         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
+                     }
+                     Seccion s = secciones.get(position);
+                     TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
+                     TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
+                     View container = convertView.findViewById(R.id.container_item_previa);
+                     tvNombre.setText(s.NombreSeccion);
+                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "General"));
+                     GradientDrawable shape = new GradientDrawable();
+                     shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
+                     shape.setStroke(4, Color.BLACK);
+                     shape.setColor(Color.WHITE);
+                     container.setBackground(shape);
+                     convertView.setOnClickListener(v -> {
+                         seccionRepository.clonarSeccion(s, rutinaActual.IdRutina, result -> {
+                             cargarSeccionesDesdeDB();
+                             dialog.dismiss();
+                         });
+                     });
+                     return convertView;
+                 }
+             });
         });
 
         dialog.show();
