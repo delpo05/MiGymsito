@@ -29,6 +29,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 
@@ -97,7 +98,7 @@ public class EjerciciosActivity extends HeaderActivity {
         
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.nombreUsuario);
+            tvUsername.setText(usuarioActual.NombreUsuario);
         }
 
         configurarGridView();
@@ -163,6 +164,7 @@ public class EjerciciosActivity extends HeaderActivity {
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
                 intent.putExtra("usuario", usuarioActual);
+                intent.putExtra("seccion", seccionActual);
                 startActivity(intent);
             }
 
@@ -277,13 +279,18 @@ public class EjerciciosActivity extends HeaderActivity {
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
-                nuevo.idSeccionEjercicio = seccionActual.idSeccion;
-                nuevo.EsCalistenico = false;
+                nuevo.TipoEjercicio = "Personalizado";
+                nuevo.PesoCorporalEjercicio = false;
                 if (uriImagenSeleccionada != null) {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
 
-                ejercicioRepository.insertarEjercicio(nuevo);
+                // Aquí hay un detalle: insertarEjercicio debería devolver el ID o manejar la relación.
+                // Por ahora, asumimos que el repositorio maneja la relación si le pasamos la sección.
+                // Pero el DAO solo inserta el ejercicio. Necesitamos insertar en SeccionXejercicio también.
+                // Modificaré el repositorio para que acepte la sección.
+                
+                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion);
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;
                 if (uriImagenSeleccionada != null) {
@@ -301,7 +308,7 @@ public class EjerciciosActivity extends HeaderActivity {
 
     private void cargarEjerciciosDesdeDB() {
         if (seccionActual != null) {
-            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.idSeccion, ejercicios -> {
+            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> {
                 adapter.setEjercicios(ejercicios);
             });
         }

@@ -7,30 +7,29 @@ import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-//definicion de la estructura de la tabla Usuario
+// Definición de la estructura de la tabla Usuario
 @Entity(tableName = "Usuario",
         indices = {
-                @Index(value = {"correoElectronicoUsuario"}, unique = true),
-                @Index(value = {"nombreUsuario"}, unique = true)
+                @Index(value = {"CorreoElectronicoUsuario"}, unique = true),
+                @Index(value = {"NombreUsuario"}, unique = true)
         }
 )
 public class Usuario implements Serializable {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public int IdUsuario;
 
     @NonNull
-    public String nombreUsuario;
+    public String NombreUsuario;
 
     @NonNull
-    public String correoElectronicoUsuario;
+    public Long FechaNacimientoUsuario;
 
     @NonNull
-    public Long fechaNacimiento;
+    public String CorreoElectronicoUsuario;
 
     @NonNull
-    public String generoUsuario;
+    public String GeneroUsuario;
 
     @NonNull
-    public String contraseniaUsuario;
-
+    public String ContraseniaUsuario;
 }

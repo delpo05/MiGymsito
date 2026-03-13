@@ -14,7 +14,7 @@ import java.util.List;
 public interface EjercicioDao {
 
     @Insert
-    void insertarEjercicio(Ejercicio ejercicio);
+    long insertarEjercicio(Ejercicio ejercicio);
 
     @Update
     void actualizarEjercicio(Ejercicio ejercicio);
@@ -22,9 +22,11 @@ public interface EjercicioDao {
     @Delete
     void eliminarEjercicio(Ejercicio ejercicio);
 
-    // Obtener todos los ejercicios de una sección (ej. Pecho, Espalda, etc.)
-    @Query("SELECT * FROM Ejercicio WHERE idSeccionEjercicio = :idSeccion")
-    List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);
+    @Query("SELECT * FROM Ejercicio")
+    List<Ejercicio> obtenerTodosLosEjercicios();
+
+    @Query("SELECT * FROM Ejercicio WHERE IdEjercicio = :id")
+    Ejercicio obtenerEjercicioPorId(int id);
 
     @Query("DELETE FROM Ejercicio")
     void borrarTodo();

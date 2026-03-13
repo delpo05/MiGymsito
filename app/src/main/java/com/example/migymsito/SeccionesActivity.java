@@ -49,7 +49,7 @@ public class SeccionesActivity extends HeaderActivity {
         gvSecciones = findViewById(R.id.gvGenerico);
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.nombreUsuario);
+            tvUsername.setText(usuarioActual.NombreUsuario);
         }
 
         configurarGridView();

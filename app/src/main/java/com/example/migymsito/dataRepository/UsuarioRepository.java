@@ -44,7 +44,7 @@ public class UsuarioRepository {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
                 long idGenerado = usuarioDao.registrarUsuario(usuario);
-                historial.IdUsuario = (int) idGenerado;
+                historial.IdUsuarioHistorial = (int) idGenerado;
                 db.historialDao().insertarHistorial(historial);
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {

@@ -21,7 +21,7 @@ import java.io.Serializable;
 public class Seccion implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
-    public int idSeccion;
+    public int IdSeccion;
 
     @NonNull
     public int IdRutinaSeccion;  // FK

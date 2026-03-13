@@ -2,34 +2,23 @@ package com.example.migymsito.data;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-@Entity(
-        tableName = "Ejercicio",
-        foreignKeys = @ForeignKey(
-                entity = Seccion.class,                    // Relación con la tabla Seccion
-                parentColumns = "idSeccion",               // PK de Seccion
-                childColumns = "idSeccionEjercicio",       // FK en Ejercicio
-                onDelete = ForeignKey.CASCADE              // Borrado en cascada
-        ),
-        indices = { @Index("idSeccionEjercicio") }         // Índice para optimizar búsquedas por sección
-)
+@Entity(tableName = "Ejercicio")
 public class Ejercicio implements Serializable {
     @PrimaryKey(autoGenerate = true)
-    public int idEjercicio;
+    public int IdEjercicio;
 
     @NonNull
-    public int idSeccionEjercicio;  // FK
-
-    @NonNull
-    public Boolean EsCalistenico;
+    public String TipoEjercicio;
 
     @NonNull
     public String NombreEjercicio;
 
-    public String ImagenEjercicio; // Puede ser null si no tiene imagen
+    public String ImagenEjercicio;
+
+    @NonNull
+    public Boolean PesoCorporalEjercicio;
 }
