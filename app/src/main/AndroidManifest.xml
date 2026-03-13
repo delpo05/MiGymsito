@@ -57,6 +57,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity android:name=".DatosPersonalesActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

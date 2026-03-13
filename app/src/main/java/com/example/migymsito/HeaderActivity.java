@@ -1,5 +1,6 @@
 package com.example.migymsito;
 
+import android.content.Intent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -50,7 +51,9 @@ public abstract class HeaderActivity extends AppCompatActivity {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.MiPerfil) {
-                    Toast.makeText(this, "Mi Perfil", Toast.LENGTH_SHORT).show();
+                    // UNIMOS CON LA PANTALLA DE DATOS PERSONALES
+                    Intent intent = new Intent(this, DatosPersonalesActivity.class);
+                    startActivity(intent);
                 } else if (itemId == R.id.Historial) {
                     Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.MiProgreso) {
