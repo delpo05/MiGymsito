@@ -48,8 +48,42 @@ public class EjercicioRepository {
         executorService.execute(() -> ejercicioDao.actualizarEjercicio(ejercicio));
     }
 
+    // NUEVO: Modifica el ejercicio creando una copia para no afectar a otras secciones
+    public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion) {
+        executorService.execute(() -> {
+            // 1. Crear una copia del ejercicio con los nuevos datos (Nombre/Imagen)
+            Ejercicio nuevoEj = new Ejercicio();
+            nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
+            nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
+            nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
+            nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
+            
+            // 2. Insertarlo como un ejercicio nuevo
+            long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
+            
+            // 3. Buscar la relación actual de esta sección
+            SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
+            
+            if (relacion != null) {
+                // 4. Actualizar la relación para que apunte al nuevo ID
+                relacion.IdEjercicio = (int) nuevoIdEjercicio;
+                seccionXejercicioDao.update(relacion);
+            }
+        });
+    }
+
     public void eliminarEjercicio(Ejercicio ejercicio) {
         executorService.execute(() -> ejercicioDao.eliminarEjercicio(ejercicio));
+    }
+
+    // NUEVO: Elimina solo el vínculo entre el ejercicio y la sección actual
+    public void eliminarEjercicioDeSeccion(int idEjercicio, int idSeccion) {
+        executorService.execute(() -> {
+            SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, idEjercicio);
+            if (relacion != null) {
+                seccionXejercicioDao.delete(relacion);
+            }
+        });
     }
 
     public void obtenerEjerciciosPorSeccion(int idSeccion, RepositoryCallback<List<Ejercicio>> callback) {
@@ -67,7 +101,9 @@ public class EjercicioRepository {
     }
 
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
-        new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
+        if (callback != null) {
+            new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
+        }
     }
 
     public interface RepositoryCallback<T> {

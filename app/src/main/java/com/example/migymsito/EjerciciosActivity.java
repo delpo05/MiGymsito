@@ -193,7 +193,8 @@ public class EjerciciosActivity extends HeaderActivity {
         View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> {
-                ejercicioRepository.eliminarEjercicio(ejercicio);
+                // CAMBIO: Solo eliminamos la relación con esta sección
+                ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
                 dialog.dismiss();
                 new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
             });
@@ -285,18 +286,17 @@ public class EjerciciosActivity extends HeaderActivity {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
 
-                // Aquí hay un detalle: insertarEjercicio debería devolver el ID o manejar la relación.
-                // Por ahora, asumimos que el repositorio maneja la relación si le pasamos la sección.
-                // Pero el DAO solo inserta el ejercicio. Necesitamos insertar en SeccionXejercicio también.
-                // Modificaré el repositorio para que acepte la sección.
-                
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion);
             } else {
-                ejercicioExistente.NombreEjercicio = nombre;
-                if (uriImagenSeleccionada != null) {
-                    ejercicioExistente.ImagenEjercicio = uriImagenSeleccionada.toString();
-                }
-                ejercicioRepository.actualizarEjercicio(ejercicioExistente);
+                // CAMBIO: Creamos un objeto con los cambios y llamamos a la actualización independiente
+                Ejercicio editado = new Ejercicio();
+                editado.IdEjercicio = ejercicioExistente.IdEjercicio; // Para identificar la relación actual
+                editado.NombreEjercicio = nombre;
+                editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
+                editado.TipoEjercicio = ejercicioExistente.TipoEjercicio;
+                editado.PesoCorporalEjercicio = ejercicioExistente.PesoCorporalEjercicio;
+
+                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion);
             }
             
             dialog.dismiss();
