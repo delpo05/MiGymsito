@@ -117,7 +117,7 @@ public class SeccionesActivity extends HeaderActivity {
         if (btnModificar != null) {
             btnModificar.setOnClickListener(v -> {
                 dialog.dismiss();
-                mostrarPopUpCrearSeccion(seccion);
+                mostrarPopUpCrearSeccion(seccion, false);
             });
         }
 
@@ -156,7 +156,7 @@ public class SeccionesActivity extends HeaderActivity {
         
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
-            mostrarPopUpCrearSeccion(null);
+            mostrarPopUpCrearSeccion(null, false);
         });
 
         // Participa en SeccionesActivity para abrir el popup de secciones previas
@@ -183,76 +183,7 @@ public class SeccionesActivity extends HeaderActivity {
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
-        // Participa en SeccionesActivity: Adapter interno para manejar el nuevo diseño de tarjeta del popup
-        BaseAdapter adapterPrevias = new BaseAdapter() {
-            private List<Seccion> lista = new ArrayList<>();
-
-            public void setData(List<Seccion> nuevaLista) {
-                this.lista = nuevaLista;
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public int getCount() { return lista.size(); }
-            @Override
-            public Object getItem(int i) { return lista.get(i); }
-            @Override
-            public long getItemId(int i) { return i; }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
-                }
-
-                Seccion s = lista.get(position);
-                TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
-                TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
-                View container = convertView.findViewById(R.id.container_item_previa);
-
-                tvNombre.setText(s.NombreSeccion);
-                tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
-
-                // Borde negro estético para la tarjeta
-                GradientDrawable shape = new GradientDrawable();
-                shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
-                shape.setStroke(4, Color.BLACK);
-                shape.setColor(Color.WHITE);
-                container.setBackground(shape);
-
-                convertView.setOnClickListener(v -> {
-                    seccionRepository.clonarSeccion(s, rutinaActual.IdRutina, result -> {
-                        cargarSeccionesDesdeDB();
-                        dialog.dismiss();
-                    });
-                });
-
-                return convertView;
-            }
-        };
-
-        gvPopup.setAdapter(adapterPrevias);
-
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
-            ((BaseAdapter)gvPopup.getAdapter()).notifyDataSetChanged();
-            // Casting para llamar a setData si es necesario o manejar la lista
-            // En este caso usamos una implementación directa para asegurar el refresco
-            if (adapterPrevias instanceof BaseAdapter) {
-                // Re-alimentamos la lista interna del adapter anónimo
-                try {
-                    java.lang.reflect.Field field = adapterPrevias.getClass().getDeclaredField("lista");
-                    field.setAccessible(true);
-                    field.set(adapterPrevias, secciones);
-                    adapterPrevias.notifyDataSetChanged();
-                } catch (Exception e) {
-                    // Si falla el reflejo, simplemente volvemos a cargar o usamos una lista final
-                }
-            }
-        });
-
-        // Alternativa más limpia para cargar datos sin Reflection
-        seccionRepository.obtenerTodasLasSecciones(secciones -> {
-             // Re-creamos el adapter con la lista final para evitar problemas de refresco
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
                  @Override public Object getItem(int i) { return secciones.get(i); }
@@ -265,18 +196,20 @@ public class SeccionesActivity extends HeaderActivity {
                      TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
                      TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
                      View container = convertView.findViewById(R.id.container_item_previa);
+                     
                      tvNombre.setText(s.NombreSeccion);
                      tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "General"));
+                     
                      GradientDrawable shape = new GradientDrawable();
                      shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
                      shape.setStroke(4, Color.BLACK);
                      shape.setColor(Color.WHITE);
                      container.setBackground(shape);
+                     
                      convertView.setOnClickListener(v -> {
-                         seccionRepository.clonarSeccion(s, rutinaActual.IdRutina, result -> {
-                             cargarSeccionesDesdeDB();
-                             dialog.dismiss();
-                         });
+                         dialog.dismiss();
+                         // Abrir popup de creación/clonación con la info de la sección seleccionada
+                         mostrarPopUpCrearSeccion(s, true);
                      });
                      return convertView;
                  }
@@ -286,7 +219,7 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
-    private void mostrarPopUpCrearSeccion(Seccion seccionExistente) {
+    private void mostrarPopUpCrearSeccion(Seccion seccionBase, boolean esClonacion) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
         if (dialog.getWindow() != null) {
@@ -298,12 +231,16 @@ public class SeccionesActivity extends HeaderActivity {
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarGenerico);
         Button btnAceptar = dialog.findViewById(R.id.btnConfirmarGenerico);
 
-        if (seccionExistente == null) {
+        if (seccionBase == null) {
             tvTitulo.setText("Crear Sección");
             btnAceptar.setText("Crear");
+        } else if (esClonacion) {
+            tvTitulo.setText("Clonar Sección");
+            etNombre.setText(seccionBase.NombreSeccion);
+            btnAceptar.setText("Clonar");
         } else {
             tvTitulo.setText("Editar Sección");
-            etNombre.setText(seccionExistente.NombreSeccion);
+            etNombre.setText(seccionBase.NombreSeccion);
             btnAceptar.setText("Guardar");
         }
 
@@ -312,17 +249,24 @@ public class SeccionesActivity extends HeaderActivity {
         btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
             if (!nombre.isEmpty()) {
-                if (seccionExistente == null) {
+                if (seccionBase == null) {
                     Seccion nueva = new Seccion();
                     nueva.NombreSeccion = nombre;
                     nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
+                    dialog.dismiss();
+                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
+                } else if (esClonacion) {
+                    seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
+                        cargarSeccionesDesdeDB();
+                    });
+                    dialog.dismiss();
                 } else {
-                    seccionExistente.NombreSeccion = nombre;
-                    seccionRepository.actualizarSeccion(seccionExistente);
+                    seccionBase.NombreSeccion = nombre;
+                    seccionRepository.actualizarSeccion(seccionBase);
+                    dialog.dismiss();
+                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 }
-                dialog.dismiss();
-                new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
             }
         });
         dialog.show();

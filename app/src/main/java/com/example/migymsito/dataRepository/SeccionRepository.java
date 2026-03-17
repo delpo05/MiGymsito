@@ -33,10 +33,15 @@ public class SeccionRepository {
 
     // Participa en SeccionesActivity para clonar una sección previa con sus ejercicios
     public void clonarSeccion(Seccion seccionOriginal, int idNuevaRutina, RepositoryCallback<Void> callback) {
+        clonarSeccionConNombre(seccionOriginal, idNuevaRutina, seccionOriginal.NombreSeccion, callback);
+    }
+
+    // Nueva versión que permite especificar el nombre al clonar
+    public void clonarSeccionConNombre(Seccion seccionOriginal, int idNuevaRutina, String nuevoNombre, RepositoryCallback<Void> callback) {
         executorService.execute(() -> {
-            // 1. Insertar la nueva sección
+            // 1. Insertar la nueva sección con el nuevo nombre
             Seccion nuevaSeccion = new Seccion();
-            nuevaSeccion.NombreSeccion = seccionOriginal.NombreSeccion;
+            nuevaSeccion.NombreSeccion = nuevoNombre;
             nuevaSeccion.IdRutinaSeccion = idNuevaRutina;
             long nuevaSeccionId = seccionDao.insertarSeccion(nuevaSeccion);
 
