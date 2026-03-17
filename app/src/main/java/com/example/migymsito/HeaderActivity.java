@@ -20,19 +20,29 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-    protected Usuario usuarioLogueado; // VARIABLE DECLARADA PARA TODAS LAS VISTAS
+    
+    // Variable estática para que todas las pantallas compartan la misma sesión
+    public static Usuario usuarioLogueado; 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Recuperamos el usuario automáticamente en cada pantalla que use el Header
-        if (getIntent() != null) {
+        
+        // Si el Intent trae un usuario (ej. desde el Login), actualizamos la sesión global
+        if (getIntent() != null && getIntent().hasExtra("usuario")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 usuarioLogueado = getIntent().getSerializableExtra("usuario", Usuario.class);
             } else {
                 usuarioLogueado = (Usuario) getIntent().getSerializableExtra("usuario");
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cada vez que volvemos a una pantalla, refrescamos el nombre del header
+        actualizarNombreHeader();
     }
 
     @Override
@@ -63,7 +73,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
         }
     }
 
-    private void actualizarNombreHeader() {
+    protected void actualizarNombreHeader() {
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioLogueado != null) {
             tvUsername.setText(usuarioLogueado.nombreUsuario);
@@ -79,7 +89,8 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.MiPerfil) {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                    intent.putExtra("usuario", usuarioLogueado); // Pasamos la sesión
+                    // Ya no es estrictamente necesario pasar el extra, pero lo dejamos por compatibilidad
+                    intent.putExtra("usuario", usuarioLogueado); 
                     startActivity(intent);
                 } else if (itemId == R.id.Historial) {
                     Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();

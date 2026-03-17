@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +19,6 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,7 +27,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 
 import java.io.File;
@@ -41,7 +38,6 @@ import java.util.Locale;
 
 public class EjerciciosActivity extends HeaderActivity {
 
-    private Usuario usuarioActual;
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
@@ -84,22 +80,19 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
         );
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
-            seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
-        } else {
-            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
-            seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+        if (getIntent() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+            } else {
+                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+            }
         }
 
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
         
-        TextView tvUsername = findViewById(R.id.toolbar_username);
-        if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.nombreUsuario);
-        }
-
+        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
+        
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
     }
@@ -162,7 +155,7 @@ public class EjerciciosActivity extends HeaderActivity {
             public void onEjercicioClick(Ejercicio ejercicio) {
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
-                intent.putExtra("usuario", usuarioActual);
+                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 

@@ -1,10 +1,13 @@
 package com.example.migymsito;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
@@ -74,19 +77,25 @@ public class DatosPersonalesActivity extends HeaderActivity {
     }
 
     public void EventoBotonActualizar(View view) {
-        if (usuarioLogueado == null) return;
+        if (usuarioLogueado == null) {
+            Toast.makeText(this, "Error: Sesión no válida", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevoCorreo = etCorreo.getText().toString().trim();
         String nuevaPass = etPassword.getText().toString().trim();
         String nuevoGenero = etGenero.getText().toString().trim();
         String fechaStr = etFecha.getText().toString().trim();
+        String pesoStr = etPeso.getText().toString().trim();
+        String alturaStr = etAltura.getText().toString().trim();
 
         if (nuevoNombre.isEmpty() || nuevoCorreo.isEmpty() || nuevaPass.isEmpty()) {
             Toast.makeText(this, "Nombre, Correo y Contraseña obligatorios", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Actualizamos los datos del objeto local
         usuarioLogueado.nombreUsuario = nuevoNombre;
         usuarioLogueado.correoElectronicoUsuario = nuevoCorreo;
         usuarioLogueado.contraseniaUsuario = nuevaPass;
@@ -99,17 +108,38 @@ public class DatosPersonalesActivity extends HeaderActivity {
                 usuarioLogueado.fechaNacimiento = date.getTime();
             }
         } catch (ParseException e) {
-            // Error de formato, no cambiamos la fecha
+            Log.e("DatosPersonales", "Error parseando fecha: " + fechaStr);
         }
 
-        // LLAMADA CON DEBUG PARA VER EL ERROR REAL
-        usuarioRepository.actualizarPerfilUsuario(usuarioLogueado, null, (success, errorMessage) -> {
+        Historial nuevoHistorial = null;
+        try {
+            if (!pesoStr.isEmpty() && !alturaStr.isEmpty()) {
+                nuevoHistorial = new Historial();
+                nuevoHistorial.IdUsuario = usuarioLogueado.id;
+                nuevoHistorial.PesoHistorial = Double.parseDouble(pesoStr);
+                nuevoHistorial.AlturaHistorial = Double.parseDouble(alturaStr);
+                nuevoHistorial.FechaHistorial = System.currentTimeMillis();
+            }
+        } catch (NumberFormatException e) {
+            Log.e("DatosPersonales", "Error en formato de peso/altura");
+        }
+
+        // LLAMADA AL REPOSITORIO
+        usuarioRepository.actualizarPerfilUsuario(usuarioLogueado, nuevoHistorial, (success, errorMessage) -> {
             if (success) {
                 Toast.makeText(this, "Datos actualizados correctamente", Toast.LENGTH_SHORT).show();
-                if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
+                
+                // REFRESCAR EL HEADER Y EL SALUDO
+                actualizarNombreHeader(); 
+                if (tvHolaNombre != null) {
+                    tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
+                }
             } else {
-                // MUESTRA EL ERROR TÉCNICO REAL EN PANTALLA
-                Toast.makeText(this, "ERROR DE BASE DE DATOS: " + errorMessage, Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(this)
+                        .setTitle("Error de Base de Datos")
+                        .setMessage(errorMessage)
+                        .setPositiveButton("Cerrar", null)
+                        .show();
             }
         });
     }
