@@ -183,6 +183,7 @@ public class SeccionesActivity extends HeaderActivity {
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
+        // MODIFICACIÓN: La función obtenerTodasLasSecciones ahora utiliza el JOIN en SeccionDao para traer el nombre de la rutina
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
@@ -198,7 +199,8 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "General"));
+                     // CAMBIO: Se usa el campo nombreRutina obtenido del JOIN SQL
+                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
                      
                      GradientDrawable shape = new GradientDrawable();
                      shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);

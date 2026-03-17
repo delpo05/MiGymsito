@@ -6,9 +6,11 @@ import androidx.room.Query;
 import androidx.room.Delete;
 import androidx.room.Update;
 
+import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 
 import java.util.List;
+import java.util.Map;
 
 @Dao
 public interface SeccionDao {
@@ -25,9 +27,12 @@ public interface SeccionDao {
     @Query("SELECT * FROM Seccion WHERE IdRutinaSeccion = :idRutina")
     List<Seccion> obtenerSeccionesPorRutina(int idRutina);
 
-    // Participa en SeccionesActivity para traer todas las secciones y el nombre de su rutina para el popup de secciones previas
-    @Query("SELECT s.*, r.NombreRutina as nombreRutina FROM Seccion s INNER JOIN Rutina r ON s.IdRutinaSeccion = r.IdRutina")
-    List<Seccion> obtenerTodasLasSeccionesConRutina();
+    /**
+     * MODIFICACIÓN: Ahora devuelve un Mapa que relaciona la Sección con su Rutina.
+     * Room se encarga de hacer el JOIN internamente y mapear ambos objetos.
+     */
+    @Query("SELECT * FROM Seccion JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina")
+    Map<Seccion, Rutina> obtenerTodasLasSeccionesConRutina();
 
     @Query("DELETE FROM Seccion")
     void borrarTodo();

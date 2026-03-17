@@ -4,13 +4,16 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.SeccionXejercicioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -74,11 +77,27 @@ public class SeccionRepository {
         });
     }
 
-    // Participa en SeccionesActivity para obtener todas las secciones de la base para el popup de secciones previas
+    /**
+     * MODIFICADO: Ahora procesa el Mapa devuelto por el DAO para asignar el nombre de la rutina.
+     * Esto soluciona el problema de que aparezca "Desconocida" o "General".
+     */
     public void obtenerTodasLasSecciones(RepositoryCallback<List<Seccion>> callback) {
         executorService.execute(() -> {
-            List<Seccion> lista = seccionDao.obtenerTodasLasSeccionesConRutina();
-            notificar(callback, lista);
+            Map<Seccion, Rutina> mapa = seccionDao.obtenerTodasLasSeccionesConRutina();
+            List<Seccion> listaCompleta = new ArrayList<>();
+            
+            if (mapa != null) {
+                for (Map.Entry<Seccion, Rutina> entry : mapa.entrySet()) {
+                    Seccion seccion = entry.getKey();
+                    Rutina rutina = entry.getValue();
+                    if (rutina != null) {
+                        // Asignamos el nombre de la rutina al campo @Ignore de la sección
+                        seccion.nombreRutina = rutina.NombreRutina;
+                    }
+                    listaCompleta.add(seccion);
+                }
+            }
+            notificar(callback, listaCompleta);
         });
     }
 
