@@ -1,6 +1,6 @@
 package com.example.migymsito;
 
-import android.view.View;
+import android.content.Intent;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.LayoutRes;
@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import com.example.migymsito.data.Usuario;
 import com.google.android.material.navigation.NavigationView;
 
 public abstract class HeaderActivity extends AppCompatActivity {
@@ -26,7 +27,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
@@ -49,12 +49,20 @@ public abstract class HeaderActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
+                
                 if (itemId == R.id.MiPerfil) {
                     Toast.makeText(this, "Mi Perfil", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.Historial) {
+                    // Volvemos a dejarlo como estaba antes
                     Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.MiProgreso) {
-                    Toast.makeText(this, "Mi Progreso", Toast.LENGTH_SHORT).show();
+                    // Intentamos obtener el usuario actual de la actividad que lanza el intent
+                    Usuario usuario = (Usuario) getIntent().getSerializableExtra("usuario");
+                    Intent intent = new Intent(this, MiProgresoActivity.class);
+                    if (usuario != null) {
+                        intent.putExtra("usuario", usuario);
+                    }
+                    startActivity(intent);
                 }
                 
                 if (drawerLayout != null) {

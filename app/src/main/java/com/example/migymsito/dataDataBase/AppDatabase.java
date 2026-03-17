@@ -16,6 +16,7 @@ import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.EjercicioDao;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.HistorialDao;
+import com.example.migymsito.dataDao.ProgresoDao;
 import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
@@ -31,7 +32,7 @@ import com.example.migymsito.dataDao.UsuarioDao;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 8, exportSchema = false)
+}, version = 9, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -42,6 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract HistorialDao historialDao();
     public abstract EntrenamientoDao entrenamientoDao();
     public abstract SeccionXejercicioDao seccionXejercicioDao();
+    public abstract ProgresoDao progresoDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -57,5 +59,9 @@ public abstract class AppDatabase extends RoomDatabase {
             }
         }
         return INSTANCE;
+    }
+
+    public static AppDatabase getInstance(Context context) {
+        return getDatabase(context);
     }
 }
