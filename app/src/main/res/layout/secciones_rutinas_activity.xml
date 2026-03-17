@@ -29,34 +29,31 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-    <GridView
-        android:id="@+id/gvGenerico"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:horizontalSpacing="10dp"
-        android:numColumns="2"
-        android:padding="8dp"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        <GridView
+            android:id="@+id/gvGenerico"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="2"
+            android:padding="8dp"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp" />
 
-    <Button
-        android:id="@+id/btnFinalizarEntrenamiento"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Finalizar Entrenamiento"
-        android:textColor="@color/negro"
-        android:textStyle="bold"
-        app:backgroundTint="@color/blanco"
-        app:cornerRadius="8dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinalizarEntrenamiento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="Finalizar Entrenamiento"
+            android:textColor="@color/negro"
+            android:textStyle="bold"
+            app:backgroundTint="@color/blanco"
+            app:cornerRadius="8dp" />
 
-</LinearLayout>
+    </LinearLayout>
 
-
-
-    <!-- El menú lateral -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -27,6 +28,7 @@ import com.example.migymsito.adapter.SeccionesAdapter;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 
 import java.util.ArrayList;
@@ -38,7 +40,9 @@ public class SeccionesActivity extends HeaderActivity {
     private Rutina rutinaActual;
     private Usuario usuarioActual;
     private SeccionRepository seccionRepository;
+    private EntrenamientoRepository entrenamientoRepository;
     private SeccionesAdapter adapter;
+    private Button btnFinalizarEntrenamiento;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,19 +58,44 @@ public class SeccionesActivity extends HeaderActivity {
         }
 
         gvSecciones = findViewById(R.id.gvGenerico);
+        btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
+        
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.NombreUsuario);
         }
 
+        seccionRepository = new SeccionRepository(getApplication());
+        entrenamientoRepository = new EntrenamientoRepository(getApplication());
+
         configurarGridView();
+        configurarBotonFinalizar();
         configurarWindowInsets(R.id.layout_contenedor_grid);
+    }
+
+    private void configurarBotonFinalizar() {
+        if (btnFinalizarEntrenamiento != null) {
+            btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                if (usuarioActual != null && rutinaActual != null) {
+                    entrenamientoRepository.finalizarEntrenamientosActivosDeRutina(
+                            usuarioActual.IdUsuario, 
+                            rutinaActual.IdRutina, 
+                            success -> {
+                                if (success) {
+                                    Toast.makeText(this, "Entrenamiento finalizado. ¡Buen trabajo!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(this, "No hay entrenamientos activos para finalizar", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                }
+            });
+        }
     }
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
         tituloGv.setText("Mis Secciones");
-        seccionRepository = new SeccionRepository(getApplication());
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
