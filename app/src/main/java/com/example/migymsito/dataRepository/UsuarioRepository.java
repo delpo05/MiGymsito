@@ -53,10 +53,34 @@ public class UsuarioRepository {
         });
     }
 
+    public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(application);
+                usuarioDao.actualizarUsuario(usuario);
+                if (nuevoHistorial != null) {
+                    db.historialDao().insertarHistorial(nuevoHistorial);
+                }
+                mainThreadHandler.post(() -> callback.onResult(true));
+            } catch (Exception e) {
+                mainThreadHandler.post(() -> callback.onResult(false));
+            }
+        });
+    }
+
     public void validarCorreoExistente(String correo, RepositoryCallback<Usuario> callback) {
         executorService.execute(() -> {
             Usuario usuario = usuarioDao.validarCorreoUsuario(correo);
             mainThreadHandler.post(() -> callback.onResult(usuario));
+        });
+    }
+
+    // MÉTODO AÑADIDO PARA SOLUCIONAR EL ERROR EN DATOSPERSONALESACTIVITY
+    public void obtenerUltimoHistorial(int idUsuario, RepositoryCallback<Historial> callback) {
+        executorService.execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(application);
+            Historial historial = db.historialDao().obtenerUltimoHistorial(idUsuario);
+            mainThreadHandler.post(() -> callback.onResult(historial));
         });
     }
 
