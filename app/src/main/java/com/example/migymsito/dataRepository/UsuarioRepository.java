@@ -3,6 +3,7 @@ package com.example.migymsito.dataRepository;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
@@ -22,6 +23,11 @@ public class UsuarioRepository {
 
     public interface RepositoryCallback<T> {
         void onResult(T result);
+    }
+
+    // Callback especial para depuración
+    public interface DebugCallback {
+        void onResult(boolean success, String errorMessage);
     }
 
     public UsuarioRepository(Application application) {
@@ -48,22 +54,30 @@ public class UsuarioRepository {
                 db.historialDao().insertarHistorial(historial);
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {
+                Log.e("UsuarioRepository", "Error en registro: " + e.getMessage());
                 mainThreadHandler.post(() -> callback.onResult(false));
             }
         });
     }
 
-    public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, RepositoryCallback<Boolean> callback) {
+    // MÉTODO ACTUALIZADO PARA MOSTRAR EL ERROR REAL
+    public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, DebugCallback callback) {
         executorService.execute(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
+                
+                // Intentamos actualizar
                 usuarioDao.actualizarUsuario(usuario);
+                
                 if (nuevoHistorial != null) {
                     db.historialDao().insertarHistorial(nuevoHistorial);
                 }
-                mainThreadHandler.post(() -> callback.onResult(true));
+                
+                mainThreadHandler.post(() -> callback.onResult(true, null));
             } catch (Exception e) {
-                mainThreadHandler.post(() -> callback.onResult(false));
+                Log.e("UsuarioRepository", "ERROR REAL DE BASE DE DATOS: ", e);
+                // Enviamos el mensaje de error de la excepción (ej: UNIQUE constraint failed)
+                mainThreadHandler.post(() -> callback.onResult(false, e.getMessage()));
             }
         });
     }
@@ -75,7 +89,6 @@ public class UsuarioRepository {
         });
     }
 
-    // MÉTODO AÑADIDO PARA SOLUCIONAR EL ERROR EN DATOSPERSONALESACTIVITY
     public void obtenerUltimoHistorial(int idUsuario, RepositoryCallback<Historial> callback) {
         executorService.execute(() -> {
             AppDatabase db = AppDatabase.getDatabase(application);
@@ -90,7 +103,6 @@ public class UsuarioRepository {
             mainThreadHandler.post(() -> callback.onResult(usuarios));
         });
     }
-
 
     public void borrarTodosLosUsuarios(RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
