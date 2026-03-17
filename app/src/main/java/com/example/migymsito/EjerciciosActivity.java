@@ -286,23 +286,23 @@ public class EjerciciosActivity extends HeaderActivity {
         // Muestra las secciones preestablecidas por el sistema
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion(true);
+            mostrarPopUpSeccionesParaSeleccion("Preestablecido");
         });
 
         // Muestra las secciones creadas por el usuario
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion(false);
+            mostrarPopUpSeccionesParaSeleccion("Personalizado");
         });
 
         dialog.show();
     }
 
     /**
-     * Muestra un popup con una lista de secciones (preestablecidas o personalizadas).
-     * @param preestablecidas true para mostrar las del sistema, false para las del usuario.
+     * Muestra un popup con una lista de secciones filtradas por tipo.
+     * @param tipo "Preestablecido" para las del sistema, "Personalizado" para las del usuario.
      */
-    private void mostrarPopUpSeccionesParaSeleccion(boolean preestablecidas) {
+    private void mostrarPopUpSeccionesParaSeleccion(String tipo) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_secciones_previas);
@@ -313,7 +313,7 @@ public class EjerciciosActivity extends HeaderActivity {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpPrevias);
         if (tvTitulo != null) {
-            tvTitulo.setText(preestablecidas ? "Secciones Prestablecidas" : "Secciones Personalizadas");
+            tvTitulo.setText(tipo.equals("Preestablecido") ? "Secciones Prestablecidas" : "Secciones Personalizadas");
         }
 
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
@@ -327,32 +327,29 @@ public class EjerciciosActivity extends HeaderActivity {
 
         SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
             // FILTRADO: Si son secciones personalizadas, quitamos la sección en la que estamos parados
-            List<Seccion> listaAMostrar = secciones;
-            if (!preestablecidas && seccionActual != null) {
-                listaAMostrar = new ArrayList<>();
-                for (Seccion s : secciones) {
-                    if (s.IdSeccion != seccionActual.IdSeccion) {
-                        listaAMostrar.add(s);
-                    }
+            List<Seccion> listaAMostrar = new ArrayList<>();
+            for (Seccion s : secciones) {
+                if (seccionActual != null && s.IdSeccion == seccionActual.IdSeccion) {
+                    continue; // Saltar la sección actual
                 }
+                listaAMostrar.add(s);
             }
 
-            List<Seccion> finalListaAMostrar = listaAMostrar;
             gvPopup.setAdapter(new BaseAdapter() {
-                @Override public int getCount() { return finalListaAMostrar.size(); }
-                @Override public Object getItem(int i) { return finalListaAMostrar.get(i); }
+                @Override public int getCount() { return listaAMostrar.size(); }
+                @Override public Object getItem(int i) { return listaAMostrar.get(i); }
                 @Override public long getItemId(int i) { return i; }
                 @Override public View getView(int position, View convertView, ViewGroup parent) {
                     if (convertView == null) {
                         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
                     }
-                    Seccion s = finalListaAMostrar.get(position);
+                    Seccion s = listaAMostrar.get(position);
                     TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
                     TextView tvDetalle = convertView.findViewById(R.id.tv_nombre_rutina_previa);
                     View container = convertView.findViewById(R.id.container_item_previa);
                     
                     tvNombre.setText(s.NombreSeccion);
-                    tvDetalle.setText(preestablecidas ? "Sistema" : "Usuario");
+                    tvDetalle.setText(s.TipoSeccion);
                     
                     GradientDrawable shape = new GradientDrawable();
                     shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
@@ -369,7 +366,7 @@ public class EjerciciosActivity extends HeaderActivity {
             });
         };
 
-        if (preestablecidas) {
+        if (tipo.equals("Preestablecido")) {
             seccionRepository.obtenerSeccionesPreestablecidas(callback);
         } else {
             seccionRepository.obtenerSeccionesPersonalizadas(callback);
@@ -399,10 +396,10 @@ public class EjerciciosActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicios);
 
-        // Al hacer clic en cancelar, vuelve al popup anterior
+        // Al hacer clic en cancelar, vuelve al popup anterior (Listado de secciones del mismo tipo)
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion(seccionSeleccionada.EsPreestablecido);
+            mostrarPopUpSeccionesParaSeleccion(seccionSeleccionada.TipoSeccion);
         });
 
         ejercicioRepository.obtenerEjerciciosPorSeccion(seccionSeleccionada.IdSeccion, ejercicios -> {
@@ -501,7 +498,6 @@ public class EjerciciosActivity extends HeaderActivity {
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
                 nuevo.PesoCorporalEjercicio = false;
-                nuevo.EsPreestablecido = false;
                 if (uriImagenSeleccionada != null) {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
@@ -513,7 +509,7 @@ public class EjerciciosActivity extends HeaderActivity {
                 editado.IdEjercicio = ejercicioExistente.IdEjercicio; 
                 editado.NombreEjercicio = nombre;
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
-                editado.TipoEjercicio = ejercicioExistente.TipoEjercicio;
+                editado.TipoEjercicio = "Personalizado"; // Al editarlo, siempre queda como personalizado
                 editado.PesoCorporalEjercicio = ejercicioExistente.PesoCorporalEjercicio;
 
                 ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion);

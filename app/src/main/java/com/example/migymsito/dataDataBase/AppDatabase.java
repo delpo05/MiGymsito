@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 9, exportSchema = false)
+}, version = 10, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -94,21 +94,21 @@ public abstract class AppDatabase extends RoomDatabase {
             
             // Sección Pecho
             long idPecho = insertarSeccion(seccionDao, "Pecho");
-            insertarEjercicio(ejercicioDao, sxeDao, "Pecho", "Press de banca", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Pecho", "Apertura de pecho", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Press de banca", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Apertura de pecho", idPecho);
 
             // Sección Espalda
             long idEspalda = insertarSeccion(seccionDao, "Espalda");
-            insertarEjercicio(ejercicioDao, sxeDao, "Espalda", "Dominada", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Espalda", "Remo con barra", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Dominada", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Remo con barra", idEspalda);
 
             // Sección Bicep
             long idBicep = insertarSeccion(seccionDao, "Bicep");
-            insertarEjercicio(ejercicioDao, sxeDao, "Bicep", "Curl de bicep con barra", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl de bicep con barra", idBicep);
 
             // Sección Tricep
             long idTricep = insertarSeccion(seccionDao, "Tricep");
-            insertarEjercicio(ejercicioDao, sxeDao, "Tricep", "Extensión de tricep", idTricep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Extensión de tricep", idTricep);
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class AppDatabase extends RoomDatabase {
     private static long insertarSeccion(SeccionDao dao, String nombre) {
         Seccion s = new Seccion();
         s.NombreSeccion = nombre;
-        s.EsPreestablecido = true;
+        s.TipoSeccion = "Preestablecido";
         s.IdRutinaSeccion = null;
         return dao.insertarSeccion(s);
     }
@@ -126,11 +126,10 @@ public abstract class AppDatabase extends RoomDatabase {
     /**
      * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
      */
-    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String tipo, String nombre, long idSeccion) {
+    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
         Ejercicio e = new Ejercicio();
-        e.TipoEjercicio = tipo;
+        e.TipoEjercicio = "Preestablecido";
         e.NombreEjercicio = nombre;
-        e.EsPreestablecido = true;
         e.PesoCorporalEjercicio = false;
         long idEjercicio = ejDao.insertarEjercicio(e);
 

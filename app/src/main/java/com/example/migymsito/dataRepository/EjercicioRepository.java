@@ -67,9 +67,9 @@ public class EjercicioRepository {
             Ejercicio nuevoEj = new Ejercicio();
             nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
             nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
-            nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
+            // Al editarlo de forma independiente, se marca como Personalizado
+            nuevoEj.TipoEjercicio = "Personalizado";
             nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
-            nuevoEj.EsPreestablecido = false; // Al editarlo, deja de ser preestablecido para este usuario
             
             long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
             

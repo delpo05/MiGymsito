@@ -34,7 +34,10 @@ public class Seccion implements Serializable {
     @Ignore
     public String nombreRutina;
 
-    // Determina si la sección es preestablecida por el sistema o creada por el usuario
+    /**
+     * Define el origen de la sección.
+     * Puede ser "Preestablecido" o "Personalizado".
+     */
     @NonNull
-    public boolean EsPreestablecido = false;
+    public String TipoSeccion = "Personalizado";
 }

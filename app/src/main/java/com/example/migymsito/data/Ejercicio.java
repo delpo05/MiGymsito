@@ -11,6 +11,10 @@ public class Ejercicio implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int IdEjercicio;
 
+    /**
+     * Define el origen del ejercicio.
+     * Puede ser "Preestablecido" o "Personalizado".
+     */
     @NonNull
     public String TipoEjercicio;
 
@@ -21,8 +25,4 @@ public class Ejercicio implements Serializable {
 
     @NonNull
     public Boolean PesoCorporalEjercicio;
-
-    // Determina si el ejercicio es preestablecido por el sistema o creado por el usuario
-    @NonNull
-    public boolean EsPreestablecido = false;
 }

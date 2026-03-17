@@ -32,8 +32,8 @@ public interface EjercicioDao {
     @Query("SELECT e.* FROM Ejercicio e INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio WHERE sxe.IdSeccion = :idSeccion")
     List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);
 
-    // Obtiene todos los ejercicios preestablecidos
-    @Query("SELECT * FROM Ejercicio WHERE EsPreestablecido = 1")
+    // Obtiene todos los ejercicios preestablecidos usando el campo TipoEjercicio
+    @Query("SELECT * FROM Ejercicio WHERE TipoEjercicio = 'Preestablecido'")
     List<Ejercicio> obtenerEjerciciosPreestablecidos();
 
     @Query("DELETE FROM Ejercicio")
