@@ -3,6 +3,7 @@ package com.example.migymsito.data;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -21,11 +22,15 @@ import java.io.Serializable;
 public class Seccion implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
-    public int idSeccion;
+    public int IdSeccion;
 
     @NonNull
     public int IdRutinaSeccion;  // FK
 
     @NonNull
     public String NombreSeccion;
+
+    // Participa en SeccionesActivity para mostrar el nombre de la rutina en el popup de secciones previas
+    @Ignore
+    public String nombreRutina;
 }

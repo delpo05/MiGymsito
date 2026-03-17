@@ -5,15 +5,21 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
 
 public abstract class HeaderActivity extends AppCompatActivity {
+
+    protected DrawerLayout drawerLayout;
+    protected NavigationView navigationView;
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(layoutResID);
         setupToolbar();
+        setupNavigationDrawer();
     }
 
     protected void setupToolbar() {
@@ -27,30 +33,44 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
             ImageButton menuButton = findViewById(R.id.toolbar_menu_button);
             if (menuButton != null) {
-                menuButton.setOnClickListener(this::showPopupMenu);
+                menuButton.setOnClickListener(v -> {
+                    if (drawerLayout != null) {
+                        drawerLayout.openDrawer(GravityCompat.START);
+                    }
+                });
             }
         }
     }
 
-    private void showPopupMenu(View view) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenuInflater().inflate(R.menu.popup_header, popup.getMenu());
+    protected void setupNavigationDrawer() {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
 
-        popup.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.MiPerfil) {
-                Toast.makeText(this, "Mi Perfil presionado", Toast.LENGTH_SHORT).show();
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.MiPerfil) {
+                    Toast.makeText(this, "Mi Perfil", Toast.LENGTH_SHORT).show();
+                } else if (itemId == R.id.Historial) {
+                    Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();
+                } else if (itemId == R.id.MiProgreso) {
+                    Toast.makeText(this, "Mi Progreso", Toast.LENGTH_SHORT).show();
+                }
+                
+                if (drawerLayout != null) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
                 return true;
-            } else if (itemId == R.id.Historial) {
-                Toast.makeText(this, "Historial presionado", Toast.LENGTH_SHORT).show();
-                return true;
-            } else if (itemId == R.id.MiProgreso) {
-                Toast.makeText(this, "Mi Progreso presionado", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
+            });
+        }
+    }
 
-        popup.show();
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

@@ -22,8 +22,7 @@ public interface HistorialDao {
     @Delete
     void eliminarHistorial(Historial historial);
 
-    // Obtener todo el historial de un usuario (peso/altura) ordenado por fecha reciente
-    @Query("SELECT * FROM Historial WHERE IdUsuario = :idUsuario ORDER BY FechaHistorial DESC")
+    @Query("SELECT * FROM Historial WHERE IdUsuarioHistorial = :idUsuario ORDER BY FechaHistorial DESC")
     List<Historial> obtenerHistorialPorUsuario(int idUsuario);
 
     @Query("DELETE FROM Historial")

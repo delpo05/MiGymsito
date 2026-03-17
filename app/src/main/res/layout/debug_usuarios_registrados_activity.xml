@@ -32,6 +32,16 @@
         android:textColor="@color/blanco"
         android:layout_marginTop="8dp"/>
 
+
+    <Button
+        android:id="@+id/btnBorrarBaseDeDatos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BORRAR TODA LA BASE DE DATOS"
+        android:backgroundTint="#0000FF"
+        android:textColor="@color/blanco"
+        android:layout_marginTop="8dp"/>
+
     <Button
         android:id="@+id/btnVolverAdmin"
         android:layout_width="match_parent"

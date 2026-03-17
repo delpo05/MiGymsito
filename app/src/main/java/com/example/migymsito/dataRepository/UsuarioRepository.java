@@ -44,7 +44,7 @@ public class UsuarioRepository {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
                 long idGenerado = usuarioDao.registrarUsuario(usuario);
-                historial.IdUsuario = (int) idGenerado;
+                historial.IdUsuarioHistorial = (int) idGenerado;
                 db.historialDao().insertarHistorial(historial);
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {
@@ -72,6 +72,19 @@ public class UsuarioRepository {
         executorService.execute(() -> {
             try {
                 usuarioDao.deleteAll();
+                mainThreadHandler.post(() -> callback.onResult(true));
+            } catch (Exception e) {
+                mainThreadHandler.post(() -> callback.onResult(false));
+            }
+        });
+    }
+    //Code para debug
+
+    public void borrarTodaLaBaseDeDatos(RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(application);
+                db.clearAllTables();
                 mainThreadHandler.post(() -> callback.onResult(true));
             } catch (Exception e) {
                 mainThreadHandler.post(() -> callback.onResult(false));

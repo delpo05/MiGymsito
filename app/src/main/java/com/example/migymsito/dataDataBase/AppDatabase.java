@@ -6,20 +6,32 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.EjercicioDao;
+import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.HistorialDao;
 import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
+import com.example.migymsito.dataDao.SeccionXejercicioDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
-// Subimos la versión a 7 para que Room sepa que hubo cambios estructurales
-@Database(entities = {Usuario.class, Rutina.class, Seccion.class, Ejercicio.class, Registro.class, Historial.class}, version = 7, exportSchema = false)
+@Database(entities = {
+        Usuario.class,
+        Rutina.class,
+        Seccion.class,
+        Ejercicio.class,
+        Registro.class,
+        Historial.class,
+        Entrenamiento.class,
+        SeccionXejercicio.class
+}, version = 8, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -28,6 +40,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract EjercicioDao ejercicioDao();
     public abstract RegistroDao registroDao();
     public abstract HistorialDao historialDao();
+    public abstract EntrenamientoDao entrenamientoDao();
+    public abstract SeccionXejercicioDao seccionXejercicioDao();
 
     private static volatile AppDatabase INSTANCE;
 

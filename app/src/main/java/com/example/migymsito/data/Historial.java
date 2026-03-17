@@ -6,23 +6,25 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(
         tableName = "Historial",
         foreignKeys = @ForeignKey(
                 entity = Usuario.class,
-                parentColumns = "id",
-                childColumns = "IdUsuario",
+                parentColumns = "IdUsuario",
+                childColumns = "IdUsuarioHistorial",
                 onDelete = ForeignKey.CASCADE
         ),
-        indices = { @Index("IdUsuario") }
+        indices = { @Index("IdUsuarioHistorial") }
 )
-public class Historial {
+public class Historial implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public int IdHistorial;
 
     @NonNull
-    public int IdUsuario; // FK a Usuario
+    public int IdUsuarioHistorial; // FK a Usuario
 
     @NonNull
     public Double PesoHistorial;

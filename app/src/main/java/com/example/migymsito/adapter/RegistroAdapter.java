@@ -32,7 +32,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
     public void onBindViewHolder(@NonNull RegistroViewHolder holder, int position) {
         Registro registro = listaRegistros.get(position);
         holder.tvSerie.setText(String.valueOf(registro.NumSeriesRegistro));
-        holder.tvRepeticiones.setText(String.valueOf(registro.RepeticionesRegistro));
+        holder.tvRepeticiones.setText(String.valueOf(registro.Repeticiones));
         holder.tvPeso.setText(registro.PesoRegistro + " kg");
     }
 
