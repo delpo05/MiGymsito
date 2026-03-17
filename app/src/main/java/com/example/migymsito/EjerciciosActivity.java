@@ -277,7 +277,11 @@ public class EjerciciosActivity extends HeaderActivity {
         tvOpcionIzq.setText("Ejercicios\nPrestablecidos");
         tvOpcionDer.setText("Ejercicios\nPersonalizados");
 
-        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
+        // Al hacer clic en cancelar, vuelve al popup anterior
+        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpAnadirEjercicio();
+        });
 
         // Muestra las secciones preestablecidas por el sistema
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
@@ -315,18 +319,34 @@ public class EjerciciosActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Al hacer clic en cancelar, vuelve al popup anterior
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpEleccionTipoEjercicio();
+        });
 
         SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
+            // FILTRADO: Si son secciones personalizadas, quitamos la sección en la que estamos parados
+            List<Seccion> listaAMostrar = secciones;
+            if (!preestablecidas && seccionActual != null) {
+                listaAMostrar = new ArrayList<>();
+                for (Seccion s : secciones) {
+                    if (s.IdSeccion != seccionActual.IdSeccion) {
+                        listaAMostrar.add(s);
+                    }
+                }
+            }
+
+            List<Seccion> finalListaAMostrar = listaAMostrar;
             gvPopup.setAdapter(new BaseAdapter() {
-                @Override public int getCount() { return secciones.size(); }
-                @Override public Object getItem(int i) { return secciones.get(i); }
+                @Override public int getCount() { return finalListaAMostrar.size(); }
+                @Override public Object getItem(int i) { return finalListaAMostrar.get(i); }
                 @Override public long getItemId(int i) { return i; }
                 @Override public View getView(int position, View convertView, ViewGroup parent) {
                     if (convertView == null) {
                         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
                     }
-                    Seccion s = secciones.get(position);
+                    Seccion s = finalListaAMostrar.get(position);
                     TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
                     TextView tvDetalle = convertView.findViewById(R.id.tv_nombre_rutina_previa);
                     View container = convertView.findViewById(R.id.container_item_previa);
@@ -379,7 +399,11 @@ public class EjerciciosActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicios);
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Al hacer clic en cancelar, vuelve al popup anterior
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpSeccionesParaSeleccion(seccionSeleccionada.EsPreestablecido);
+        });
 
         ejercicioRepository.obtenerEjerciciosPorSeccion(seccionSeleccionada.IdSeccion, ejercicios -> {
             gvPopup.setAdapter(new BaseAdapter() {
@@ -457,7 +481,13 @@ public class EjerciciosActivity extends HeaderActivity {
 
         ivPreviewImagen.setOnClickListener(this::mostrarOpcionesImagen);
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Al hacer clic en cancelar, vuelve al popup anterior si se está creando uno nuevo
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (ejercicioExistente == null) {
+                mostrarPopUpAnadirEjercicio();
+            }
+        });
 
         btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();

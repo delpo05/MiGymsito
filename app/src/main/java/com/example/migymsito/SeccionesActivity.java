@@ -137,6 +137,10 @@ public class SeccionesActivity extends HeaderActivity {
         }
     }
 
+    /**
+     * Muestra el popup inicial para elegir entre una sección ya existente o crear una nueva.
+     * Utilizado al pulsar el botón de añadir en la cuadrícula de secciones.
+     */
     private void mostrarPopUpAnadirSeccion() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_dos_opciones);
@@ -159,7 +163,7 @@ public class SeccionesActivity extends HeaderActivity {
             mostrarPopUpCrearSeccion(null, false);
         });
 
-        // Participa en SeccionesActivity para abrir el popup de secciones previas
+        // Al hacer clic en Sección Previa, abre el listado de secciones existentes
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesPrevias();
@@ -168,7 +172,10 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
-    // Participa en SeccionesActivity para mostrar todas las secciones previas en un popup blanco estético y profesional
+    /**
+     * Muestra un popup con todas las secciones creadas anteriormente para poder clonarlas.
+     * Permite volver al popup anterior si se pulsa cancelar.
+     */
     private void mostrarPopUpSeccionesPrevias() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -181,9 +188,13 @@ public class SeccionesActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Al cancelar, vuelve al popup de "Añadir Sección"
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpAnadirSeccion();
+        });
 
-        // MODIFICACIÓN: La función obtenerTodasLasSecciones ahora utiliza el JOIN en SeccionDao para traer el nombre de la rutina
+        // Obtiene todas las secciones registradas en el repositorio
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
@@ -199,8 +210,8 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     // CAMBIO: Se usa el campo nombreRutina obtenido del JOIN SQL
-                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
+                     // Muestra el nombre de la rutina a la que pertenece la sección original
+                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Sistema"));
                      
                      GradientDrawable shape = new GradientDrawable();
                      shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
@@ -210,7 +221,7 @@ public class SeccionesActivity extends HeaderActivity {
                      
                      convertView.setOnClickListener(v -> {
                          dialog.dismiss();
-                         // Abrir popup de creación/clonación con la info de la sección seleccionada
+                         // Abre el popup de confirmación/edición de nombre para la clonación
                          mostrarPopUpCrearSeccion(s, true);
                      });
                      return convertView;
@@ -221,6 +232,11 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
+    /**
+     * Popup para crear, editar o clonar una sección.
+     * @param seccionBase Sección de referencia si se está editando o clonando.
+     * @param esClonacion Indica si se está realizando una clonación de una sección previa.
+     */
     private void mostrarPopUpCrearSeccion(Seccion seccionBase, boolean esClonacion) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
@@ -246,7 +262,15 @@ public class SeccionesActivity extends HeaderActivity {
             btnAceptar.setText("Guardar");
         }
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Si se cancela la creación o clonación, vuelve al popup correspondiente
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (esClonacion) {
+                mostrarPopUpSeccionesPrevias();
+            } else if (seccionBase == null) {
+                mostrarPopUpAnadirSeccion();
+            }
+        });
 
         btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
@@ -256,24 +280,25 @@ public class SeccionesActivity extends HeaderActivity {
                     nueva.NombreSeccion = nombre;
                     nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
-                    dialog.dismiss();
-                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 } else if (esClonacion) {
                     seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
                         cargarSeccionesDesdeDB();
                     });
-                    dialog.dismiss();
                 } else {
                     seccionBase.NombreSeccion = nombre;
                     seccionRepository.actualizarSeccion(seccionBase);
-                    dialog.dismiss();
-                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 }
+                dialog.dismiss();
+                new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
             }
         });
         dialog.show();
     }
 
+    /**
+     * Configura los márgenes de la ventana para respetar las barras del sistema (estado, navegación).
+     * @param layoutId ID del layout contenedor al que aplicar los insets.
+     */
     private void configurarWindowInsets(int layoutId) {
         View layout = findViewById(layoutId);
         if (layout != null) {

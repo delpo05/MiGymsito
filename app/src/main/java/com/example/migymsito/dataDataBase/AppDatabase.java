@@ -83,49 +83,60 @@ public abstract class AppDatabase extends RoomDatabase {
 
     /**
      * Inserta las secciones y ejercicios preestablecidos si no existen en la base de datos.
+     * Utiliza los DAOs correspondientes para realizar las inserciones.
      */
     private static void inicializarDatosPreestablecidos(AppDatabase db) {
-        if (db.seccionDao().obtenerSeccionesPreestablecidas().isEmpty()) {
+        SeccionDao seccionDao = db.seccionDao();
+        EjercicioDao ejercicioDao = db.ejercicioDao();
+        SeccionXejercicioDao sxeDao = db.seccionXejercicioDao();
+
+        if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
             
             // Sección Pecho
-            long idPecho = insertarSeccionPreestablecida(db, "Pecho");
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Press de banca", idPecho);
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Apertura de pecho", idPecho);
+            long idPecho = insertarSeccion(seccionDao, "Pecho");
+            insertarEjercicio(ejercicioDao, sxeDao, "Pecho", "Press de banca", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Pecho", "Apertura de pecho", idPecho);
 
             // Sección Espalda
-            long idEspalda = insertarSeccionPreestablecida(db, "Espalda");
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Dominada", idEspalda);
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Remo con barra", idEspalda);
+            long idEspalda = insertarSeccion(seccionDao, "Espalda");
+            insertarEjercicio(ejercicioDao, sxeDao, "Espalda", "Dominada", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Espalda", "Remo con barra", idEspalda);
 
             // Sección Bicep
-            long idBicep = insertarSeccionPreestablecida(db, "Bicep");
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Curl de bicep con barra", idBicep);
+            long idBicep = insertarSeccion(seccionDao, "Bicep");
+            insertarEjercicio(ejercicioDao, sxeDao, "Bicep", "Curl de bicep con barra", idBicep);
 
             // Sección Tricep
-            long idTricep = insertarSeccionPreestablecida(db, "Tricep");
-            insertarEjercicioPreestablecido(db, "Preestablecido", "Extensión de tricep", idTricep);
+            long idTricep = insertarSeccion(seccionDao, "Tricep");
+            insertarEjercicio(ejercicioDao, sxeDao, "Tricep", "Extensión de tricep", idTricep);
         }
     }
 
-    private static long insertarSeccionPreestablecida(AppDatabase db, String nombre) {
+    /**
+     * Método auxiliar para insertar una sección preestablecida usando el DAO.
+     */
+    private static long insertarSeccion(SeccionDao dao, String nombre) {
         Seccion s = new Seccion();
         s.NombreSeccion = nombre;
         s.EsPreestablecido = true;
-        s.IdRutinaSeccion = null; // No pertenece a ninguna rutina de usuario inicial
-        return db.seccionDao().insertarSeccion(s);
+        s.IdRutinaSeccion = null;
+        return dao.insertarSeccion(s);
     }
 
-    private static void insertarEjercicioPreestablecido(AppDatabase db, String tipo, String nombre, long idSeccion) {
+    /**
+     * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
+     */
+    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String tipo, String nombre, long idSeccion) {
         Ejercicio e = new Ejercicio();
         e.TipoEjercicio = tipo;
         e.NombreEjercicio = nombre;
         e.EsPreestablecido = true;
         e.PesoCorporalEjercicio = false;
-        long idEjercicio = db.ejercicioDao().insertarEjercicio(e);
+        long idEjercicio = ejDao.insertarEjercicio(e);
 
         SeccionXejercicio sxe = new SeccionXejercicio();
         sxe.IdSeccion = (int) idSeccion;
         sxe.IdEjercicio = (int) idEjercicio;
-        db.seccionXejercicioDao().insert(sxe);
+        sxeDao.insert(sxe);
     }
 }
