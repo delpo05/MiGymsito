@@ -32,6 +32,7 @@ import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.EntrenamientoRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,9 @@ public class EjerciciosActivity extends HeaderActivity {
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
     private EjercicioRepository ejercicioRepository;
+    private EntrenamientoRepository entrenamientoRepository;
     private EjerciciosAdapter adapter;
+    private Button btnFinalizarEntrenamiento;
 
     private Uri uriImagenSeleccionada;
     private ImageView ivPreviewImagen;
@@ -95,14 +98,39 @@ public class EjerciciosActivity extends HeaderActivity {
 
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
+        btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
         
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.NombreUsuario);
         }
 
+        entrenamientoRepository = new EntrenamientoRepository(getApplication());
+
         configurarGridView();
+        configurarBotonFinalizar();
         configurarWindowInsets(R.id.layout_contenedor_grid);
+    }
+
+    private void configurarBotonFinalizar() {
+        if (btnFinalizarEntrenamiento != null) {
+            btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
+            btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                if (usuarioActual != null && seccionActual != null) {
+                    entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
+                            usuarioActual.IdUsuario,
+                            seccionActual.IdSeccion,
+                            success -> {
+                                if (success) {
+                                    Toast.makeText(this, "Entrenamiento de " + seccionActual.NombreSeccion + " finalizado.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(this, "No hay entrenamiento activo en esta sección.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                }
+            });
+        }
     }
 
     private void abrirCamara() {
@@ -193,7 +221,6 @@ public class EjerciciosActivity extends HeaderActivity {
         View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> {
-                // CAMBIO: Solo eliminamos la relación con esta sección
                 ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
                 dialog.dismiss();
                 new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
@@ -288,9 +315,8 @@ public class EjerciciosActivity extends HeaderActivity {
 
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion);
             } else {
-                // CAMBIO: Creamos un objeto con los cambios y llamamos a la actualización independiente
                 Ejercicio editado = new Ejercicio();
-                editado.IdEjercicio = ejercicioExistente.IdEjercicio; // Para identificar la relación actual
+                editado.IdEjercicio = ejercicioExistente.IdEjercicio;
                 editado.NombreEjercicio = nombre;
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = ejercicioExistente.TipoEjercicio;

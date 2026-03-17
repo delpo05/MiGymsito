@@ -47,6 +47,19 @@ public class EntrenamientoRepository {
         });
     }
 
+    public void finalizarEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            if (e != null) {
+                e.FechaFin = System.currentTimeMillis();
+                entrenamientoDao.update(e);
+                notificar(callback, true);
+            } else {
+                notificar(callback, false);
+            }
+        });
+    }
+
     public void finalizarEntrenamientosActivosDeRutina(int idUsuario, int idRutina, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             List<Entrenamiento> activos = entrenamientoDao.getEntrenamientosActivosPorRutina(idUsuario, idRutina);
