@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -33,8 +34,10 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.EntrenamientoRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +53,9 @@ public class EjerciciosActivity extends HeaderActivity {
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
     private EjercicioRepository ejercicioRepository;
+    private EntrenamientoRepository entrenamientoRepository;
     private EjerciciosAdapter adapter;
+    private Button btnFinalizarEntrenamiento;
 
     private Uri uriImagenSeleccionada;
     private ImageView ivPreviewImagen;
@@ -98,14 +103,39 @@ public class EjerciciosActivity extends HeaderActivity {
 
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
-        
+        btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
+
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioActual != null) {
             tvUsername.setText(usuarioActual.NombreUsuario);
         }
 
+        entrenamientoRepository = new EntrenamientoRepository(getApplication());
+
         configurarGridView();
+        configurarBotonFinalizar();
         configurarWindowInsets(R.id.layout_contenedor_grid);
+    }
+
+    private void configurarBotonFinalizar() {
+        if (btnFinalizarEntrenamiento != null) {
+            btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
+            btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                if (usuarioActual != null && seccionActual != null) {
+                    entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
+                            usuarioActual.IdUsuario,
+                            seccionActual.IdSeccion,
+                            success -> {
+                                if (success) {
+                                    Toast.makeText(this, "Entrenamiento de " + seccionActual.NombreSeccion + " finalizado.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(this, "No hay entrenamiento activo en esta sección.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                }
+            });
+        }
     }
 
     private void abrirCamara() {
@@ -137,9 +167,9 @@ public class EjerciciosActivity extends HeaderActivity {
         popup.getMenu().add("Galería");
 
         popup.setOnMenuItemClickListener(item -> {
-            if ("Cámara".equals(item.getTitle())) {
+            if (item.getTitle().equals("Cámara")) {
                 abrirCamara();
-            } else if ("Galería".equals(item.getTitle())) {
+            } else if (item.getTitle().equals("Galería")) {
                 galleryLauncher.launch("image/*");
             }
             return true;
@@ -196,7 +226,7 @@ public class EjerciciosActivity extends HeaderActivity {
         View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> {
-                // MODIFICACIÓN: Ahora se elimina solo el vínculo con la sección actual usando la función del repositorio
+                // CAMBIO: Solo eliminamos la relación con esta sección
                 ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
                 dialog.dismiss();
                 new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
@@ -256,7 +286,7 @@ public class EjerciciosActivity extends HeaderActivity {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_ejercicios_preestablecidos);
-        
+
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
@@ -281,24 +311,24 @@ public class EjerciciosActivity extends HeaderActivity {
                     TextView tvTipo = convertView.findViewById(R.id.tv_tipo_ejercicio_previo);
                     ImageView ivImagen = convertView.findViewById(R.id.iv_ejercicio_previo);
                     View container = convertView.findViewById(R.id.container_item_ejercicio_previo);
-                    
+
                     tvNombre.setText(e.NombreEjercicio);
                     /// Definir si muestra el tipo de ejercicio o de si muesta si es peso corporal o no
                     tvTipo.setText("Tipo: " + e.TipoEjercicio);
-                    
+
                     if (e.ImagenEjercicio != null && !e.ImagenEjercicio.isEmpty()) {
                         ivImagen.setVisibility(View.VISIBLE);
                         ivImagen.setImageURI(Uri.parse(e.ImagenEjercicio));
                     } else {
                         ivImagen.setVisibility(View.GONE);
                     }
-                    
+
                     GradientDrawable shape = new GradientDrawable();
                     shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
                     shape.setStroke(4, Color.BLACK);
                     shape.setColor(Color.WHITE);
                     container.setBackground(shape);
-                    
+
                     convertView.setOnClickListener(v -> {
                         // Al seleccionar un ejercicio, se registra la relación en SeccionXejercicio
                         ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
@@ -338,7 +368,7 @@ public class EjerciciosActivity extends HeaderActivity {
             }
         }
 
-        ivPreviewImagen.setOnClickListener(this::mostrarOpcionesImagen);
+        ivPreviewImagen.setOnClickListener(v -> mostrarOpcionesImagen(v));
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
@@ -362,7 +392,7 @@ public class EjerciciosActivity extends HeaderActivity {
             } else {
                 // MODIFICACIÓN: Usamos actualizarEjercicioIndependiente para no afectar a otras rutinas que usen este ejercicio
                 Ejercicio editado = new Ejercicio();
-                editado.IdEjercicio = ejercicioExistente.IdEjercicio; 
+                editado.IdEjercicio = ejercicioExistente.IdEjercicio;
                 editado.NombreEjercicio = nombre;
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = ejercicioExistente.TipoEjercicio;

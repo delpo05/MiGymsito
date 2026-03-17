@@ -42,6 +42,13 @@ public class RutinasActivity extends HeaderActivity {
         }
 
         gvRutinas = findViewById(R.id.gvGenerico);
+        
+        // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
+        View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
+        if (btnFinalizar != null) {
+            btnFinalizar.setVisibility(View.GONE);
+        }
+
         TextView tvUsername = findViewById(R.id.toolbar_username);
 
         if (tvUsername != null && usuarioActual != null) {
