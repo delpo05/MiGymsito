@@ -78,4 +78,17 @@ public class UsuarioRepository {
             }
         });
     }
+    //Code para debug
+
+    public void borrarTodaLaBaseDeDatos(RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(application);
+                db.clearAllTables();
+                mainThreadHandler.post(() -> callback.onResult(true));
+            } catch (Exception e) {
+                mainThreadHandler.post(() -> callback.onResult(false));
+            }
+        });
+    }
 }
