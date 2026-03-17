@@ -21,4 +21,8 @@ public class Ejercicio implements Serializable {
 
     @NonNull
     public Boolean PesoCorporalEjercicio;
+
+    // Determina si el ejercicio es preestablecido por el sistema o creado por el usuario
+    @NonNull
+    public boolean EsPreestablecido = false;
 }

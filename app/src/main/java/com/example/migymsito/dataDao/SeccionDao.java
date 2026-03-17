@@ -34,6 +34,14 @@ public interface SeccionDao {
     @Query("SELECT * FROM Seccion JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina")
     Map<Seccion, Rutina> obtenerTodasLasSeccionesConRutina();
 
+    // Obtiene todas las secciones que son preestablecidas por el sistema
+    @Query("SELECT * FROM Seccion WHERE EsPreestablecido = 1")
+    List<Seccion> obtenerSeccionesPreestablecidas();
+
+    // Obtiene todas las secciones que no son preestablecidas (personalizadas)
+    @Query("SELECT * FROM Seccion WHERE EsPreestablecido = 0")
+    List<Seccion> obtenerSeccionesPersonalizadas();
+
     @Query("DELETE FROM Seccion")
     void borrarTodo();
 }

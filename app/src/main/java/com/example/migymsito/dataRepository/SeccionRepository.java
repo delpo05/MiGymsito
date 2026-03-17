@@ -101,6 +101,22 @@ public class SeccionRepository {
         });
     }
 
+    // Obtiene las secciones que son preestablecidas (sistema)
+    public void obtenerSeccionesPreestablecidas(RepositoryCallback<List<Seccion>> callback) {
+        executorService.execute(() -> {
+            List<Seccion> lista = seccionDao.obtenerSeccionesPreestablecidas();
+            notificar(callback, lista);
+        });
+    }
+
+    // Obtiene las secciones que son personalizadas (usuario)
+    public void obtenerSeccionesPersonalizadas(RepositoryCallback<List<Seccion>> callback) {
+        executorService.execute(() -> {
+            List<Seccion> lista = seccionDao.obtenerSeccionesPersonalizadas();
+            notificar(callback, lista);
+        });
+    }
+
     // Mensajero para volver al hilo principal de la UI
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
         if (callback != null) {
