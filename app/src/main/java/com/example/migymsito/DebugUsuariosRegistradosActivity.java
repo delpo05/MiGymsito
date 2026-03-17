@@ -28,14 +28,26 @@ public class DebugUsuariosRegistradosActivity extends AppCompatActivity {
         usuarioRepository = new UsuarioRepository(getApplication());
         findViewById(R.id.btnVolverAdmin).setOnClickListener(v -> finish());
 
-        // Configurar botón para borrar todos los registros
+        // Botón para borrar solo usuarios (btnBorrarTodo según tu layout)
         findViewById(R.id.btnBorrarTodo).setOnClickListener(v -> {
             usuarioRepository.borrarTodosLosUsuarios(exito -> {
                 if (exito) {
-                    Toast.makeText(this, "Todos los registros han sido borrados", Toast.LENGTH_SHORT).show();
-                    cargarUsuarios(); // Recargar lista (estará vacía)
+                    Toast.makeText(this, "Usuarios borrados", Toast.LENGTH_SHORT).show();
+                    cargarUsuarios();
                 } else {
-                    Toast.makeText(this, "Error al borrar registros", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error al borrar usuarios", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        // Botón para borrar toda la base de datos
+        findViewById(R.id.btnBorrarBaseDeDatos).setOnClickListener(v -> {
+            usuarioRepository.borrarTodaLaBaseDeDatos(exito -> {
+                if (exito) {
+                    Toast.makeText(this, "Base de datos reiniciada", Toast.LENGTH_SHORT).show();
+                    cargarUsuarios();
+                } else {
+                    Toast.makeText(this, "Error al limpiar base de datos", Toast.LENGTH_SHORT).show();
                 }
             });
         });
