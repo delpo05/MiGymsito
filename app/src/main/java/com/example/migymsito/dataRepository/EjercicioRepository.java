@@ -44,11 +44,24 @@ public class EjercicioRepository {
         });
     }
 
+    /**
+     * NUEVA FUNCIÓN: Inserta una relación entre un ejercicio ya existente y una sección.
+     * Se usa cuando el usuario elige un "Ejercicio Preestablecido".
+     */
+    public void insertarRelacionSeccionEjercicio(int idEjercicio, int idSeccion) {
+        executorService.execute(() -> {
+            SeccionXejercicio relacion = new SeccionXejercicio();
+            relacion.IdSeccion = idSeccion;
+            relacion.IdEjercicio = idEjercicio;
+            seccionXejercicioDao.insert(relacion);
+        });
+    }
+
     public void actualizarEjercicio(Ejercicio ejercicio) {
         executorService.execute(() -> ejercicioDao.actualizarEjercicio(ejercicio));
     }
 
-    // NUEVO: Modifica el ejercicio creando una copia para no afectar a otras secciones
+    // MODIFICADO: Modifica el ejercicio creando una copia para no afectar a otras secciones
     public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion) {
         executorService.execute(() -> {
             // 1. Crear una copia del ejercicio con los nuevos datos (Nombre/Imagen)
@@ -96,6 +109,17 @@ public class EjercicioRepository {
                     ejercicios.add(ej);
                 }
             }
+            notificar(callback, ejercicios);
+        });
+    }
+
+    /**
+     * NUEVA FUNCIÓN: Obtiene todos los ejercicios registrados en la base de datos.
+     * Se usa para mostrar el listado de ejercicios preestablecidos.
+     */
+    public void obtenerTodosLosEjercicios(RepositoryCallback<List<Ejercicio>> callback) {
+        executorService.execute(() -> {
+            List<Ejercicio> ejercicios = ejercicioDao.obtenerTodosLosEjercicios();
             notificar(callback, ejercicios);
         });
     }

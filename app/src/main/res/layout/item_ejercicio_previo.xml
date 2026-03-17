@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container_item_ejercicio_previo"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/card_border_white"
+    android:backgroundTint="#F5F5F5"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Imagen del ejercicio si existe -->
+    <ImageView
+        android:id="@+id/iv_ejercicio_previo"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <!-- Nombre del ejercicio -->
+    <TextView
+        android:id="@+id/tv_nombre_ejercicio_previo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Nombre Ejercicio"
+        android:textColor="@color/negro"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Tipo de ejercicio (Personalizado o Preestablecido) -->
+    <TextView
+        android:id="@+id/tv_tipo_ejercicio_previo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="Tipo"
+        android:textColor="#666666"
+        android:textSize="11sp"
+        android:textStyle="italic" />
+
+</LinearLayout>
