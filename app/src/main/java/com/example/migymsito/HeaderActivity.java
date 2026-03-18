@@ -87,15 +87,23 @@ public abstract class HeaderActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.MiPerfil) {
+                
+                if (itemId == R.id.Home) {
+                    if (!(this instanceof RutinasActivity)) {
+                        Intent intent = new Intent(this, RutinasActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
+                    }
+                } else if (itemId == R.id.MiPerfil) {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                    // Ya no es estrictamente necesario pasar el extra, pero lo dejamos por compatibilidad
                     intent.putExtra("usuario", usuarioLogueado); 
                     startActivity(intent);
                 } else if (itemId == R.id.Historial) {
                     Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.MiProgreso) {
                     Toast.makeText(this, "Mi Progreso", Toast.LENGTH_SHORT).show();
+                } else if (itemId == R.id.CerrarSesion) {
+                    cerrarSesion();
                 }
                 
                 if (drawerLayout != null) {
@@ -104,6 +112,19 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 return true;
             });
         }
+    }
+
+    private void cerrarSesion() {
+        // Limpiamos la sesión estática
+        usuarioLogueado = null;
+        
+        // Redireccionamos al Login y borramos toda la pila de actividades
+        Intent intent = new Intent(this, InicioSesionActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+        
+        Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 
     @Override
