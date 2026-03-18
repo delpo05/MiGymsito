@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -26,7 +25,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.SeccionesAdapter;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.SeccionRepository;
 
 import java.util.ArrayList;
@@ -36,7 +34,6 @@ public class SeccionesActivity extends HeaderActivity {
 
     private GridView gvSecciones;
     private Rutina rutinaActual;
-    private Usuario usuarioActual;
     private SeccionRepository seccionRepository;
     private SeccionesAdapter adapter;
 
@@ -45,16 +42,18 @@ public class SeccionesActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
-            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
-        } else {
-            rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
-            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+        // Ya no cargamos usuarioActual, usamos usuarioLogueado del HeaderActivity
+        if (getIntent() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
+            } else {
+                rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
+            }
         }
 
         gvSecciones = findViewById(R.id.gvGenerico);
         
+        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
         // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
@@ -72,7 +71,7 @@ public class SeccionesActivity extends HeaderActivity {
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
-        tituloGv.setText("Mis Secciones");
+        if (tituloGv != null) tituloGv.setText("Mis Secciones");
         seccionRepository = new SeccionRepository(getApplication());
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
@@ -85,7 +84,7 @@ public class SeccionesActivity extends HeaderActivity {
             public void onSeccionClick(Seccion seccion) {
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
-                intent.putExtra("usuario", usuarioActual);
+                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 

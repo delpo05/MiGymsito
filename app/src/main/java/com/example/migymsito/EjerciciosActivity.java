@@ -25,7 +25,6 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -48,7 +47,6 @@ import java.util.Locale;
 
 public class EjerciciosActivity extends HeaderActivity {
 
-    private Usuario usuarioActual;
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
@@ -93,12 +91,12 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
         );
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
-            seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
-        } else {
-            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
-            seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+        if (getIntent() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+            } else {
+                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+            }
         }
 
         gvEjercicios = findViewById(R.id.gvGenerico);
@@ -196,6 +194,7 @@ public class EjerciciosActivity extends HeaderActivity {
             public void onEjercicioClick(Ejercicio ejercicio) {
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
+                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 intent.putExtra("usuario", usuarioActual);
                 intent.putExtra("seccion", seccionActual);
                 startActivity(intent);

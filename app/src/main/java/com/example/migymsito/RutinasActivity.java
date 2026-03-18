@@ -3,7 +3,6 @@ package com.example.migymsito;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -18,7 +17,6 @@ import androidx.core.graphics.Insets;
 
 import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Rutina;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.RutinaRepository;
 
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.ArrayList;
 public class RutinasActivity extends HeaderActivity {
 
     private GridView gvRutinas;
-    private Usuario usuarioActual;
     private RutinaRepository rutinaRepository;
     private RutinasAdapter adapter;
 
@@ -35,13 +32,11 @@ public class RutinasActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
-        } else {
-            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
-        }
+        // Ya no cargamos usuarioActual aquí, usamos usuarioLogueado del HeaderActivity
 
         gvRutinas = findViewById(R.id.gvGenerico);
+        
+        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
         
         // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
@@ -63,7 +58,7 @@ public class RutinasActivity extends HeaderActivity {
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
-        tituloGv.setText("Mis Rutinas");
+        if (tituloGv != null) tituloGv.setText("Mis Rutinas");
 
         rutinaRepository = new RutinaRepository(getApplication());
         
@@ -77,7 +72,7 @@ public class RutinasActivity extends HeaderActivity {
             public void onRutinaClick(Rutina rutina) {
                 Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
                 intent.putExtra("rutina", rutina);
-                intent.putExtra("usuario", usuarioActual);
+                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 
@@ -129,8 +124,8 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void cargarRutinasDesdeDB() {
-        if (usuarioActual != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioActual.IdUsuario, rutinas -> {
+        if (usuarioLogueado != null) {
+            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.id, rutinas -> {
                 adapter.setRutinas(rutinas);
             });
         }
@@ -163,10 +158,12 @@ public class RutinasActivity extends HeaderActivity {
             String nombre = etNombre.getText().toString().trim();
             if (!nombre.isEmpty()) {
                 if (rutinaExistente == null) {
-                    Rutina nueva = new Rutina();
+                    com.example.migymsito.data.Rutina nueva = new com.example.migymsito.data.Rutina();
                     nueva.NombreRutina = nombre;
-                    nueva.IdUsuarioRutina = usuarioActual.IdUsuario;
-                    rutinaRepository.insertarRutina(nueva);
+                    if (usuarioLogueado != null) {
+                        nueva.IdUsuarioRutina = usuarioLogueado.id;
+                        rutinaRepository.insertarRutina(nueva);
+                    }
                 } else {
                     rutinaExistente.NombreRutina = nombre;
                     rutinaRepository.actualizarRutina(rutinaExistente);

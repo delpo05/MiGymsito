@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-    android:id="@+id/MiPerfil"
-    android:title="@string/mi_perfil" />
+        android:id="@+id/Home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/MiPerfil"
+        android:title="@string/mi_perfil" />
+
     <item
         android:id="@+id/Historial"
         android:title="@string/historial" />
+
     <item
         android:id="@+id/MiProgreso"
         android:title="@string/mi_progreso" />
+
+    <!-- Grupo para separar las acciones de cuenta de las de navegación -->
+    <group android:id="@+id/menu_footer">
+        <item
+            android:id="@+id/CerrarSesion"
+            android:title="Cerrar sesión" />
+    </group>
 </menu>
