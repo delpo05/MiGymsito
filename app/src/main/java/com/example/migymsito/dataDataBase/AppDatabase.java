@@ -91,7 +91,7 @@ public abstract class AppDatabase extends RoomDatabase {
         SeccionXejercicioDao sxeDao = db.seccionXejercicioDao();
 
         if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
-            
+
             // Sección Pecho
             long idPecho = insertarSeccion(seccionDao, "Pecho");
             insertarEjercicio(ejercicioDao, sxeDao, "Press de banca", idPecho);

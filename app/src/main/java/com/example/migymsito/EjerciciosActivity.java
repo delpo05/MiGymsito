@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -460,6 +461,7 @@ public class EjerciciosActivity extends HeaderActivity {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
+        CheckBox cbPesoCorporal = dialog.findViewById(R.id.cbPesoCorporal);
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
@@ -469,6 +471,7 @@ public class EjerciciosActivity extends HeaderActivity {
         if (ejercicioExistente != null) {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
+            cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
             btnAceptar.setText("Guardar");
             if (ejercicioExistente.ImagenEjercicio != null) {
                 uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
@@ -493,11 +496,13 @@ public class EjerciciosActivity extends HeaderActivity {
                 return;
             }
 
+            boolean esPesoCorporal = cbPesoCorporal.isChecked();
+
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
-                nuevo.PesoCorporalEjercicio = false;
+                nuevo.PesoCorporalEjercicio = esPesoCorporal;
                 if (uriImagenSeleccionada != null) {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
@@ -510,7 +515,7 @@ public class EjerciciosActivity extends HeaderActivity {
                 editado.NombreEjercicio = nombre;
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = "Personalizado"; // Al editarlo, siempre queda como personalizado
-                editado.PesoCorporalEjercicio = ejercicioExistente.PesoCorporalEjercicio;
+                editado.PesoCorporalEjercicio = esPesoCorporal;
 
                 ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion);
             }

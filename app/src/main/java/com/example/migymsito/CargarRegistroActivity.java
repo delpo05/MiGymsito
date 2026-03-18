@@ -23,7 +23,7 @@ import java.util.List;
 
 public class CargarRegistroActivity extends HeaderActivity {
 
-    private TextView tvNombreEjercicio, tvSerieValue;
+    private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso;
     private EditText etRepeticiones, etPeso;
     private ImageButton btnRepUp, btnRepDown, btnPesoUp, btnPesoDown, btnEliminarUltimo;
     private Button btnCargar;
@@ -38,6 +38,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private int idUsuario;
     private int idSeccion;
     private String nombreEjercicio;
+    private boolean esPesoCorporal = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class CargarRegistroActivity extends HeaderActivity {
             idUsuario = usuario.IdUsuario;
             idEjercicio = ejercicio.IdEjercicio;
             nombreEjercicio = ejercicio.NombreEjercicio;
+            esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
         }
         
         if (seccion != null) {
@@ -82,6 +84,8 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void initViews() {
         tvNombreEjercicio = findViewById(R.id.tvNombreEjercicio);
         tvSerieValue = findViewById(R.id.tvSerieValue);
+        tvPesoLabel = findViewById(R.id.tvPesoLabel);
+        tvColumnaPeso = findViewById(R.id.tvColumnaPeso);
         etRepeticiones = findViewById(R.id.etRepeticiones);
         etPeso = findViewById(R.id.etPeso);
         btnRepUp = findViewById(R.id.btnRepUp);
@@ -93,6 +97,12 @@ public class CargarRegistroActivity extends HeaderActivity {
         rvHistorial = findViewById(R.id.rvHistorial);
 
         tvNombreEjercicio.setText(nombreEjercicio);
+
+        // Si es peso corporal, cambiamos los labels para que sea más intuitivo
+        if (esPesoCorporal) {
+            tvPesoLabel.setText("Lastre (kg)");
+            tvColumnaPeso.setText("Lastre");
+        }
     }
 
     private void setupListeners() {
@@ -105,7 +115,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void setupRecyclerView() {
-        adapter = new RegistroAdapter(listaHistorial);
+        adapter = new RegistroAdapter(listaHistorial, esPesoCorporal);
         rvHistorial.setLayoutManager(new LinearLayoutManager(this));
         rvHistorial.setAdapter(adapter);
     }
@@ -151,9 +161,15 @@ public class CargarRegistroActivity extends HeaderActivity {
         String repStr = etRepeticiones.getText().toString();
         String pesoStr = etPeso.getText().toString();
 
-        if (repStr.isEmpty() || pesoStr.isEmpty() || repStr.equals("0")) {
-            Toast.makeText(this, "Introduce datos válidos", Toast.LENGTH_SHORT).show();
+        // Si no es peso corporal, el peso 0 podría no ser deseado, pero en calistenia es lo normal.
+        // Validamos que al menos las repeticiones sean > 0.
+        if (repStr.isEmpty() || repStr.equals("0")) {
+            Toast.makeText(this, "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        if (pesoStr.isEmpty()) {
+            pesoStr = "0";
         }
 
         double peso = Double.parseDouble(pesoStr);
