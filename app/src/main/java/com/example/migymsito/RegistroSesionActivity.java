@@ -121,10 +121,11 @@ public class RegistroSesionActivity extends AppCompatActivity {
         nuevoHistorial.AlturaHistorial = Double.valueOf(etRegAltura.getText().toString());
         nuevoHistorial.FechaHistorial = System.currentTimeMillis();
 
-        usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, exito -> {
-            if (exito) {
-                Toast.makeText(RegistroSesionActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                finish(); // Volver al login
+        usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, idGenerado -> {
+            if (idGenerado != -1) {
+                Toast.makeText(RegistroSesionActivity.this, "Registro exitoso. Inicie sesión por primera vez.", Toast.LENGTH_LONG).show();
+                // Volvemos a la pantalla de Inicio de Sesión
+                finish();
             } else {
                 Toast.makeText(RegistroSesionActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
             }

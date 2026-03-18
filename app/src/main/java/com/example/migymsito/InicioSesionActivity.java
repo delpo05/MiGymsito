@@ -23,12 +23,25 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        usuarioRepository = new UsuarioRepository(getApplication());
+
+        // --- LÓGICA DE AUTO-LOGIN ---
+        int idSesion = usuarioRepository.obtenerIdSesion();
+        if (idSesion != -1) {
+            usuarioRepository.obtenerUsuarioPorId(idSesion, usuario -> {
+                if (usuario != null) {
+                    HeaderActivity.usuarioLogueado = usuario;
+                    irARutinas();
+                }
+            });
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.inicio_sesion_activity);
 
         etUsuario = findViewById(R.id.etUsuario);
         etPassword = findViewById(R.id.etPassword);
-        usuarioRepository = new UsuarioRepository(getApplication());
         
         configurarWindowInsets(R.id.main);
 
@@ -36,6 +49,12 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
             Intent intent = new Intent(InicioSesionActivity.this, DebugUsuariosRegistradosActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void irARutinas() {
+        Intent intent = new Intent(InicioSesionActivity.this, RutinasActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void configurarWindowInsets(int layoutId) {
@@ -68,11 +87,11 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     @Override
     public void onResult(Usuario result) {
         if (result != null) {
-            // Cambiado a VistaRutinasActivity
-            Intent intent = new Intent(InicioSesionActivity.this, RutinasActivity.class);
-            intent.putExtra("usuario",  result);
-            startActivity(intent);
-            finish();
+            // Guardamos el ID en SharedPreferences para la próxima vez
+            usuarioRepository.guardarIdSesion(result.IdUsuario);
+            
+            HeaderActivity.usuarioLogueado = result;
+            irARutinas();
         } else {
             Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
         }

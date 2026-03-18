@@ -44,22 +44,34 @@ public class CargarRegistroActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cargar_registro_activity);
 
-        // Recuperar datos del Intent de forma segura
-        Usuario usuario;
+        // 1. Intentamos obtener el usuario de la sesión global primero
+        if (usuarioLogueado != null) {
+            idUsuario = usuarioLogueado.IdUsuario;
+        }
+
+        // 2. Recuperar datos del Intent (Ejercicio y Sección)
         Ejercicio ejercicio;
         Seccion seccion;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            usuario = getIntent().getSerializableExtra("usuario", Usuario.class);
             ejercicio = getIntent().getSerializableExtra("ejercicio", Ejercicio.class);
             seccion = getIntent().getSerializableExtra("seccion", Seccion.class);
+            // Si el usuario viene en el intent, lo priorizamos (por compatibilidad)
+            Usuario uIntent = getIntent().getSerializableExtra("usuario", Usuario.class);
+            if (uIntent != null) {
+                usuarioLogueado = uIntent;
+                idUsuario = uIntent.IdUsuario;
+            }
         } else {
-            usuario = (Usuario) getIntent().getSerializableExtra("usuario");
             ejercicio = (Ejercicio) getIntent().getSerializableExtra("ejercicio");
             seccion = (Seccion) getIntent().getSerializableExtra("seccion");
+            Usuario uIntent = (Usuario) getIntent().getSerializableExtra("usuario");
+            if (uIntent != null) {
+                usuarioLogueado = uIntent;
+                idUsuario = uIntent.IdUsuario;
+            }
         }
 
-        if (usuario != null && ejercicio != null) {
-            idUsuario = usuario.IdUsuario;
+        if (ejercicio != null) {
             idEjercicio = ejercicio.IdEjercicio;
             nombreEjercicio = ejercicio.NombreEjercicio;
         }
@@ -68,13 +80,20 @@ public class CargarRegistroActivity extends HeaderActivity {
             idSeccion = seccion.IdSeccion;
         }
 
+        // Validación de seguridad
+        if (idUsuario == 0) {
+            Toast.makeText(this, "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
         registroRepository = new RegistroRepository(getApplication());
 
         initViews();
         setupListeners();
         setupRecyclerView();
 
-        if (idUsuario != 0 && idEjercicio != 0) {
+        if (idEjercicio != 0) {
             cargarHistorial();
         }
     }

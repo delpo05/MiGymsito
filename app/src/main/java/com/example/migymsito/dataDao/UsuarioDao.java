@@ -14,7 +14,6 @@ public interface UsuarioDao {
     @Insert
     long registrarUsuario(Usuario usuario);
 
-    // MÉTODO AÑADIDO PARA SOLUCIONAR EL ERROR EN EL REPOSITORIO
     @Update
     void actualizarUsuario(Usuario usuario);
 
@@ -26,6 +25,9 @@ public interface UsuarioDao {
 
     @Query("SELECT * FROM Usuario WHERE nombreUsuario = :nombre LIMIT 1")
     Usuario validarNombreUsuario(String nombre);
+
+    @Query("SELECT * FROM Usuario WHERE IdUsuario = :id LIMIT 1")
+    Usuario obtenerUsuarioPorId(int id);
 
     @Query("SELECT * FROM Usuario")
     List<Usuario> obtenerTodosLosUsuarios();

@@ -32,11 +32,7 @@ public class RutinasActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Ya no cargamos usuarioActual aquí, usamos usuarioLogueado del HeaderActivity
-
         gvRutinas = findViewById(R.id.gvGenerico);
-        
-        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
         
         // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
@@ -46,8 +42,9 @@ public class RutinasActivity extends HeaderActivity {
 
         TextView tvUsername = findViewById(R.id.toolbar_username);
 
-        if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.NombreUsuario);
+        // CORRECCIÓN: usuarioActual -> usuarioLogueado y campos en Mayúscula
+        if (tvUsername != null && usuarioLogueado != null) {
+            tvUsername.setText(usuarioLogueado.NombreUsuario);
         } else if (tvUsername != null) {
             tvUsername.setText("Invitado");
         }
@@ -72,7 +69,6 @@ public class RutinasActivity extends HeaderActivity {
             public void onRutinaClick(Rutina rutina) {
                 Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
                 intent.putExtra("rutina", rutina);
-                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 
@@ -124,8 +120,9 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void cargarRutinasDesdeDB() {
+        // CORRECCIÓN: id -> IdUsuario
         if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.id, rutinas -> {
+            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
                 adapter.setRutinas(rutinas);
             });
         }
@@ -160,8 +157,9 @@ public class RutinasActivity extends HeaderActivity {
                 if (rutinaExistente == null) {
                     com.example.migymsito.data.Rutina nueva = new com.example.migymsito.data.Rutina();
                     nueva.NombreRutina = nombre;
+                    // CORRECCIÓN: id -> IdUsuario
                     if (usuarioLogueado != null) {
-                        nueva.IdUsuarioRutina = usuarioLogueado.id;
+                        nueva.IdUsuarioRutina = usuarioLogueado.IdUsuario;
                         rutinaRepository.insertarRutina(nueva);
                     }
                 } else {

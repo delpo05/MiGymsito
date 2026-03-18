@@ -38,12 +38,8 @@ public class DatosPersonalesActivity extends HeaderActivity {
         vincularVistas();
         configurarDropdownGenero();
 
-        // ARREGLO: Configurar el DatePicker con múltiples triggers para asegurar que abra
         if (etFecha != null) {
-            // Se abre al hacer click
             etFecha.setOnClickListener(v -> mostrarDatePicker());
-            
-            // Se abre si por alguna razón recibe el foco (aunque esté en focusable false)
             etFecha.setOnFocusChangeListener((v, hasFocus) -> {
                 if (hasFocus) {
                     mostrarDatePicker();
@@ -112,21 +108,21 @@ public class DatosPersonalesActivity extends HeaderActivity {
     }
 
     private void cargarDatosUsuario() {
-        if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
-        if (etNombre != null) etNombre.setText(usuarioLogueado.nombreUsuario);
-        if (etCorreo != null) etCorreo.setText(usuarioLogueado.correoElectronicoUsuario);
-        if (etPassword != null) etPassword.setText(usuarioLogueado.contraseniaUsuario);
+        if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.NombreUsuario + " !");
+        if (etNombre != null) etNombre.setText(usuarioLogueado.NombreUsuario);
+        if (etCorreo != null) etCorreo.setText(usuarioLogueado.CorreoElectronicoUsuario);
+        if (etPassword != null) etPassword.setText(usuarioLogueado.ContraseniaUsuario);
         
         if (etGenero != null) {
-            etGenero.setText(usuarioLogueado.generoUsuario, false);
+            etGenero.setText(usuarioLogueado.GeneroUsuario, false);
         }
 
-        if (usuarioLogueado.fechaNacimiento != null && etFecha != null) {
+        if (usuarioLogueado.FechaNacimientoUsuario != null && etFecha != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            etFecha.setText(sdf.format(new Date(usuarioLogueado.fechaNacimiento)));
+            etFecha.setText(sdf.format(new Date(usuarioLogueado.FechaNacimientoUsuario)));
         }
 
-        usuarioRepository.obtenerUltimoHistorial(usuarioLogueado.id, result -> {
+        usuarioRepository.obtenerUltimoHistorial(usuarioLogueado.IdUsuario, result -> {
             if (result != null) {
                 if (etAltura != null) etAltura.setText(String.valueOf(result.AlturaHistorial));
                 if (etPeso != null) etPeso.setText(String.valueOf(result.PesoHistorial));
@@ -150,16 +146,16 @@ public class DatosPersonalesActivity extends HeaderActivity {
             return;
         }
 
-        usuarioLogueado.nombreUsuario = nuevoNombre;
-        usuarioLogueado.correoElectronicoUsuario = nuevoCorreo;
-        usuarioLogueado.contraseniaUsuario = nuevaPass;
-        usuarioLogueado.generoUsuario = nuevoGenero;
+        usuarioLogueado.NombreUsuario = nuevoNombre;
+        usuarioLogueado.CorreoElectronicoUsuario = nuevoCorreo;
+        usuarioLogueado.ContraseniaUsuario = nuevaPass;
+        usuarioLogueado.GeneroUsuario = nuevoGenero;
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             Date date = sdf.parse(fechaStr);
             if (date != null) {
-                usuarioLogueado.fechaNacimiento = date.getTime();
+                usuarioLogueado.FechaNacimientoUsuario = date.getTime();
             }
         } catch (ParseException e) {
             Log.e("DatosPersonales", "Error parseando fecha");
@@ -169,7 +165,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
         try {
             if (!pesoStr.isEmpty() && !alturaStr.isEmpty()) {
                 nuevoHistorial = new Historial();
-                nuevoHistorial.IdUsuario = usuarioLogueado.id;
+                nuevoHistorial.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
                 nuevoHistorial.PesoHistorial = Double.parseDouble(pesoStr);
                 nuevoHistorial.AlturaHistorial = Double.parseDouble(alturaStr);
                 nuevoHistorial.FechaHistorial = System.currentTimeMillis();
@@ -182,7 +178,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
             if (success) {
                 Toast.makeText(this, "Datos actualizados", Toast.LENGTH_SHORT).show();
                 actualizarNombreHeader();
-                if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
+                if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.NombreUsuario + " !");
             } else {
                 new AlertDialog.Builder(this)
                         .setTitle("Error")
