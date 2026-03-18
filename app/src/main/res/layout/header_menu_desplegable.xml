@@ -12,14 +12,6 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/logo_app_header" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:text="Mi Gymsito"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@color/blanco"
-        android:textStyle="bold" />
+    
 
 </LinearLayout>
