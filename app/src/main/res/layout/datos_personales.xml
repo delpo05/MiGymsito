@@ -76,7 +76,7 @@
                                 android:layout_marginStart="10dp" />
                         </LinearLayout>
 
-                        <!-- 1. Nombre (Línea entera) -->
+                        <!-- 1. Nombre -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
                                 android:textStyle="bold" />
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- 2. Correo (Línea entera) -->
+                        <!-- 2. Correo -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                                 android:textStyle="bold" />
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- 3. Contraseña (Línea entera) -->
+                        <!-- 3. Contraseña -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -133,7 +133,7 @@
                                 android:textStyle="bold" />
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- 4. Fecha y Género (Mitad y mitad) -->
+                        <!-- 4. Fecha y Género -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -153,7 +153,9 @@
                                     android:layout_height="wrap_content"
                                     android:hint="Nacimiento"
                                     android:textColor="@color/blanco"
-                                    android:textStyle="bold" />
+                                    android:textStyle="bold"
+                                    android:focusable="false"
+                                    android:clickable="true" />
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
@@ -164,12 +166,14 @@
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
                                 android:textColorHint="@color/gris_pista"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                                <com.google.android.material.textfield.TextInputEditText
+                                app:endIconTint="@color/blanco"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                                     android:id="@+id/etDatoGenero"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:hint="Género"
+                                    android:inputType="none"
                                     android:textColor="@color/blanco"
                                     android:textStyle="bold" />
                             </com.google.android.material.textfield.TextInputLayout>

@@ -1,8 +1,11 @@
 package com.example.migymsito;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,13 +18,15 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class DatosPersonalesActivity extends HeaderActivity {
 
     private TextView tvHolaNombre;
-    private EditText etNombre, etCorreo, etPassword, etFecha, etGenero, etAltura, etPeso;
+    private EditText etNombre, etCorreo, etPassword, etFecha, etAltura, etPeso;
+    private AutoCompleteTextView etGenero;
     private UsuarioRepository usuarioRepository;
 
     @Override
@@ -31,6 +36,20 @@ public class DatosPersonalesActivity extends HeaderActivity {
 
         usuarioRepository = new UsuarioRepository(getApplication());
         vincularVistas();
+        configurarDropdownGenero();
+
+        // ARREGLO: Configurar el DatePicker con múltiples triggers para asegurar que abra
+        if (etFecha != null) {
+            // Se abre al hacer click
+            etFecha.setOnClickListener(v -> mostrarDatePicker());
+            
+            // Se abre si por alguna razón recibe el foco (aunque esté en focusable false)
+            etFecha.setOnFocusChangeListener((v, hasFocus) -> {
+                if (hasFocus) {
+                    mostrarDatePicker();
+                }
+            });
+        }
 
         if (usuarioLogueado != null) {
             cargarDatosUsuario();
@@ -56,12 +75,51 @@ public class DatosPersonalesActivity extends HeaderActivity {
         etPeso = findViewById(R.id.etDatoPeso);
     }
 
+    private void configurarDropdownGenero() {
+        String[] generos = {"Masculino", "Femenino", "Otro"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, generos);
+        if (etGenero != null) {
+            etGenero.setAdapter(adapter);
+        }
+    }
+
+    private void mostrarDatePicker() {
+        final Calendar c = Calendar.getInstance();
+        
+        String fechaActual = etFecha.getText().toString();
+        if (!fechaActual.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                Date date = sdf.parse(fechaActual);
+                if (date != null) c.setTime(date);
+            } catch (ParseException e) {
+                Log.e("DatosPersonales", "Error parseando fecha");
+            }
+        }
+
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year1, monthOfYear, dayOfMonth) -> {
+                    String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
+                    etFecha.setText(fechaSeleccionada);
+                }, year, month, day);
+
+        datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
+        datePickerDialog.show();
+    }
+
     private void cargarDatosUsuario() {
         if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
         if (etNombre != null) etNombre.setText(usuarioLogueado.nombreUsuario);
         if (etCorreo != null) etCorreo.setText(usuarioLogueado.correoElectronicoUsuario);
         if (etPassword != null) etPassword.setText(usuarioLogueado.contraseniaUsuario);
-        if (etGenero != null) etGenero.setText(usuarioLogueado.generoUsuario);
+        
+        if (etGenero != null) {
+            etGenero.setText(usuarioLogueado.generoUsuario, false);
+        }
 
         if (usuarioLogueado.fechaNacimiento != null && etFecha != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -77,10 +135,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
     }
 
     public void EventoBotonActualizar(View view) {
-        if (usuarioLogueado == null) {
-            Toast.makeText(this, "Error: Sesión no válida", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (usuarioLogueado == null) return;
 
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevoCorreo = etCorreo.getText().toString().trim();
@@ -91,11 +146,10 @@ public class DatosPersonalesActivity extends HeaderActivity {
         String alturaStr = etAltura.getText().toString().trim();
 
         if (nuevoNombre.isEmpty() || nuevoCorreo.isEmpty() || nuevaPass.isEmpty()) {
-            Toast.makeText(this, "Nombre, Correo y Contraseña obligatorios", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Campos obligatorios incompletos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Actualizamos los datos del objeto local
         usuarioLogueado.nombreUsuario = nuevoNombre;
         usuarioLogueado.correoElectronicoUsuario = nuevoCorreo;
         usuarioLogueado.contraseniaUsuario = nuevaPass;
@@ -108,7 +162,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
                 usuarioLogueado.fechaNacimiento = date.getTime();
             }
         } catch (ParseException e) {
-            Log.e("DatosPersonales", "Error parseando fecha: " + fechaStr);
+            Log.e("DatosPersonales", "Error parseando fecha");
         }
 
         Historial nuevoHistorial = null;
@@ -121,22 +175,17 @@ public class DatosPersonalesActivity extends HeaderActivity {
                 nuevoHistorial.FechaHistorial = System.currentTimeMillis();
             }
         } catch (NumberFormatException e) {
-            Log.e("DatosPersonales", "Error en formato de peso/altura");
+            Log.e("DatosPersonales", "Error formato peso/altura");
         }
 
-        // LLAMADA AL REPOSITORIO
         usuarioRepository.actualizarPerfilUsuario(usuarioLogueado, nuevoHistorial, (success, errorMessage) -> {
             if (success) {
-                Toast.makeText(this, "Datos actualizados correctamente", Toast.LENGTH_SHORT).show();
-                
-                // REFRESCAR EL HEADER Y EL SALUDO
-                actualizarNombreHeader(); 
-                if (tvHolaNombre != null) {
-                    tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
-                }
+                Toast.makeText(this, "Datos actualizados", Toast.LENGTH_SHORT).show();
+                actualizarNombreHeader();
+                if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.nombreUsuario + " !");
             } else {
                 new AlertDialog.Builder(this)
-                        .setTitle("Error de Base de Datos")
+                        .setTitle("Error")
                         .setMessage(errorMessage)
                         .setPositiveButton("Cerrar", null)
                         .show();
