@@ -12,7 +12,7 @@ import java.io.Serializable;
         tableName = "Rutina",
         foreignKeys = @ForeignKey(
                 entity = Usuario.class,
-                parentColumns = "id",
+                parentColumns = "IdUsuario",
                 childColumns = "IdUsuarioRutina",
                 onDelete = ForeignKey.CASCADE
         ),

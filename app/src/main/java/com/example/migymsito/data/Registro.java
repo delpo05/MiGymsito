@@ -12,43 +12,43 @@ import java.io.Serializable;
         tableName = "Registro",
         foreignKeys = {
                 @ForeignKey(
-                        entity = Usuario.class,
-                        parentColumns = "id",
-                        childColumns = "IdUsuarioRegistro",
+                        entity = Entrenamiento.class,
+                        parentColumns = "IdEntrenamiento",
+                        childColumns = "IdEntrenamiento",
                         onDelete = ForeignKey.CASCADE
                 ),
                 @ForeignKey(
-                        entity = Ejercicio.class,
-                        parentColumns = "idEjercicio",
-                        childColumns = "IdEjercicioRegistro",
+                        entity = SeccionXejercicio.class,
+                        parentColumns = "IdSeccionXejercicio",
+                        childColumns = "IdSeccionXejercicio",
                         onDelete = ForeignKey.CASCADE
                 )
         },
         indices = {
-                @Index("IdUsuarioRegistro"),
-                @Index("IdEjercicioRegistro")
+                @Index("IdEntrenamiento"),
+                @Index("IdSeccionXejercicio")
         }
 )
 public class Registro implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
-    public int idRegistro;
+    public int IdRegistro;
 
     @NonNull
-    public int IdUsuarioRegistro; // Relación con Usuario
+    public int IdEntrenamiento;
 
     @NonNull
-    public int IdEjercicioRegistro; // Relación con Ejercicio
+    public int IdSeccionXejercicio;
 
     @NonNull
-    public Long FechaRegistro; // Guardado como Timestamp (milisegundos)
-
-    @NonNull
-    public Double PesoRegistro; // Double por si usas medios kilos (ej: 12.5)
+    public Double PesoRegistro;
 
     @NonNull
     public int NumSeriesRegistro;
 
     @NonNull
-    public int RepeticionesRegistro;
+    public int Repeticiones;
+
+    @NonNull
+    public Long FechaRegistro; 
 }

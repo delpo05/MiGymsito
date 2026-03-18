@@ -29,9 +29,9 @@ public class UsuariosAdapter extends RecyclerView.Adapter<UsuariosAdapter.Usuari
     @Override
     public void onBindViewHolder(@NonNull UsuarioViewHolder holder, int position) {
         Usuario usuario = listaUsuarios.get(position);
-        holder.tvNombre.setText(usuario.nombreUsuario);
-        holder.tvCorreo.setText(usuario.correoElectronicoUsuario);
-        holder.tvPassword.setText(usuario.contraseniaUsuario);
+        holder.tvNombre.setText(usuario.NombreUsuario);
+        holder.tvCorreo.setText(usuario.CorreoElectronicoUsuario);
+        holder.tvPassword.setText(usuario.ContraseniaUsuario);
     }
 
     @Override

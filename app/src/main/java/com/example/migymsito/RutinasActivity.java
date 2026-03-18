@@ -38,6 +38,20 @@ public class RutinasActivity extends HeaderActivity {
         
         // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
         
+        // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
+        View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
+        if (btnFinalizar != null) {
+            btnFinalizar.setVisibility(View.GONE);
+        }
+
+        TextView tvUsername = findViewById(R.id.toolbar_username);
+
+        if (tvUsername != null && usuarioActual != null) {
+            tvUsername.setText(usuarioActual.NombreUsuario);
+        } else if (tvUsername != null) {
+            tvUsername.setText("Invitado");
+        }
+
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
     }
