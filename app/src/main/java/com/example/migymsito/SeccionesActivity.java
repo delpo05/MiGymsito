@@ -42,7 +42,6 @@ public class SeccionesActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
-        // Ya no cargamos usuarioActual, usamos usuarioLogueado del HeaderActivity
         if (getIntent() != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
@@ -53,16 +52,15 @@ public class SeccionesActivity extends HeaderActivity {
 
         gvSecciones = findViewById(R.id.gvGenerico);
         
-        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
-        // Ocultar el botón en esta pantalla ya que solo debe aparecer en Ejercicios
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
             btnFinalizar.setVisibility(View.GONE);
         }
 
         TextView tvUsername = findViewById(R.id.toolbar_username);
-        if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.NombreUsuario);
+        // CORRECCIÓN: usuarioActual -> usuarioLogueado y campo en Mayúscula
+        if (tvUsername != null && usuarioLogueado != null) {
+            tvUsername.setText(usuarioLogueado.NombreUsuario);
         }
 
         configurarGridView();
@@ -84,7 +82,6 @@ public class SeccionesActivity extends HeaderActivity {
             public void onSeccionClick(Seccion seccion) {
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
-                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 
@@ -136,6 +133,7 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void cargarSeccionesDesdeDB() {
+        // CORRECCIÓN: IdRutina con Mayúscula
         if (rutinaActual != null) {
             seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
                 adapter.setSecciones(secciones);
@@ -165,7 +163,6 @@ public class SeccionesActivity extends HeaderActivity {
             mostrarPopUpCrearSeccion(null, false);
         });
 
-        // Participa en SeccionesActivity para abrir el popup de secciones previas
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesPrevias();
@@ -174,7 +171,6 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
-    // Participa en SeccionesActivity para mostrar todas las secciones previas en un popup blanco estético y profesional
     private void mostrarPopUpSeccionesPrevias() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -189,7 +185,6 @@ public class SeccionesActivity extends HeaderActivity {
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
-        // MODIFICACIÓN: La función obtenerTodasLasSecciones ahora utiliza el JOIN en SeccionDao para traer el nombre de la rutina
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
@@ -205,7 +200,6 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     // CAMBIO: Se usa el campo nombreRutina obtenido del JOIN SQL
                      tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
                      
                      GradientDrawable shape = new GradientDrawable();
@@ -216,7 +210,6 @@ public class SeccionesActivity extends HeaderActivity {
                      
                      convertView.setOnClickListener(v -> {
                          dialog.dismiss();
-                         // Abrir popup de creación/clonación con la info de la sección seleccionada
                          mostrarPopUpCrearSeccion(s, true);
                      });
                      return convertView;
@@ -260,11 +253,13 @@ public class SeccionesActivity extends HeaderActivity {
                 if (seccionBase == null) {
                     Seccion nueva = new Seccion();
                     nueva.NombreSeccion = nombre;
+                    // CORRECCIÓN: IdRutina con Mayúscula
                     nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
                     dialog.dismiss();
                     new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 } else if (esClonacion) {
+                    // CORRECCIÓN: IdRutina con Mayúscula
                     seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
                         cargarSeccionesDesdeDB();
                     });

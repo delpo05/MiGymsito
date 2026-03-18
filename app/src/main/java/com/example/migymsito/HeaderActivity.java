@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.google.android.material.navigation.NavigationView;
 
 public abstract class HeaderActivity extends AppCompatActivity {
@@ -21,14 +22,14 @@ public abstract class HeaderActivity extends AppCompatActivity {
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
     
-    // Variable estática para que todas las pantallas compartan la misma sesión
+    // Variable estática para la sesión global
     public static Usuario usuarioLogueado; 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Si el Intent trae un usuario (ej. desde el Login), actualizamos la sesión global
+        // 1. Intentamos recuperar del Intent si viene (Login manual)
         if (getIntent() != null && getIntent().hasExtra("usuario")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 usuarioLogueado = getIntent().getSerializableExtra("usuario", Usuario.class);
@@ -36,12 +37,25 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 usuarioLogueado = (Usuario) getIntent().getSerializableExtra("usuario");
             }
         }
+
+        // 2. Si no hay usuario en memoria (ej. se reinició la app), intentamos recuperar de SharedPreferences
+        if (usuarioLogueado == null) {
+            UsuarioRepository repo = new UsuarioRepository(getApplication());
+            int idSesion = repo.obtenerIdSesion();
+            if (idSesion != -1) {
+                repo.obtenerUsuarioPorId(idSesion, usuario -> {
+                    if (usuario != null) {
+                        usuarioLogueado = usuario;
+                        actualizarNombreHeader();
+                    }
+                });
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Cada vez que volvemos a una pantalla, refrescamos el nombre del header
         actualizarNombreHeader();
     }
 
@@ -57,7 +71,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
@@ -76,7 +89,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
     protected void actualizarNombreHeader() {
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioLogueado != null) {
-            tvUsername.setText(usuarioLogueado.nombreUsuario);
+            tvUsername.setText(usuarioLogueado.NombreUsuario);
         }
     }
 
@@ -87,7 +100,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
-                
                 if (itemId == R.id.Home) {
                     if (!(this instanceof RutinasActivity)) {
                         Intent intent = new Intent(this, RutinasActivity.class);
@@ -98,10 +110,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
                     intent.putExtra("usuario", usuarioLogueado); 
                     startActivity(intent);
-                } else if (itemId == R.id.Historial) {
-                    Toast.makeText(this, "Historial", Toast.LENGTH_SHORT).show();
-                } else if (itemId == R.id.MiProgreso) {
-                    Toast.makeText(this, "Mi Progreso", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.CerrarSesion) {
                     cerrarSesion();
                 }
@@ -115,10 +123,10 @@ public abstract class HeaderActivity extends AppCompatActivity {
     }
 
     private void cerrarSesion() {
-        // Limpiamos la sesión estática
         usuarioLogueado = null;
+        UsuarioRepository repository = new UsuarioRepository(getApplication());
+        repository.eliminarSesion();
         
-        // Redireccionamos al Login y borramos toda la pila de actividades
         Intent intent = new Intent(this, InicioSesionActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

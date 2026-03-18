@@ -1,6 +1,8 @@
 package com.example.migymsito.dataRepository;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -20,12 +22,13 @@ public class UsuarioRepository {
     private final ExecutorService executorService;
     private final Handler mainThreadHandler;
     private final Application application;
+    private static final String PREFS_NAME = "SesionUsuario";
+    private static final String KEY_USER_ID = "idUsuario";
 
     public interface RepositoryCallback<T> {
         void onResult(T result);
     }
 
-    // Callback especial para depuración
     public interface DebugCallback {
         void onResult(boolean success, String errorMessage);
     }
@@ -38,6 +41,32 @@ public class UsuarioRepository {
         mainThreadHandler = new Handler(Looper.getMainLooper());
     }
 
+    // --- MÉTODOS DE SESIÓN (SharedPreferences) ---
+
+    public void guardarIdSesion(int idUsuario) {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(KEY_USER_ID, idUsuario).apply();
+    }
+
+    public int obtenerIdSesion() {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(KEY_USER_ID, -1);
+    }
+
+    public void eliminarSesion() {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_USER_ID).apply();
+    }
+
+    // --- MÉTODOS DE BASE DE DATOS ---
+
+    public void obtenerUsuarioPorId(int id, RepositoryCallback<Usuario> callback) {
+        executorService.execute(() -> {
+            Usuario usuario = usuarioDao.obtenerUsuarioPorId(id);
+            mainThreadHandler.post(() -> callback.onResult(usuario));
+        });
+    }
+
     public void validarLogin(String correo, String password, RepositoryCallback<Usuario> callback) {
         executorService.execute(() -> {
             Usuario usuario = usuarioDao.login(correo, password);
@@ -45,38 +74,32 @@ public class UsuarioRepository {
         });
     }
 
-    public void registrarUsuarioConHistorial(Usuario usuario, Historial historial, RepositoryCallback<Boolean> callback) {
+    public void registrarUsuarioConHistorial(Usuario usuario, Historial historial, RepositoryCallback<Integer> callback) {
         executorService.execute(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
                 long idGenerado = usuarioDao.registrarUsuario(usuario);
                 historial.IdUsuarioHistorial = (int) idGenerado;
                 db.historialDao().insertarHistorial(historial);
-                mainThreadHandler.post(() -> callback.onResult(true));
+                mainThreadHandler.post(() -> callback.onResult((int) idGenerado));
             } catch (Exception e) {
                 Log.e("UsuarioRepository", "Error en registro: " + e.getMessage());
-                mainThreadHandler.post(() -> callback.onResult(false));
+                mainThreadHandler.post(() -> callback.onResult(-1));
             }
         });
     }
 
-    // MÉTODO ACTUALIZADO PARA MOSTRAR EL ERROR REAL
     public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, DebugCallback callback) {
         executorService.execute(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
-                
-                // Intentamos actualizar
                 usuarioDao.actualizarUsuario(usuario);
-                
                 if (nuevoHistorial != null) {
                     db.historialDao().insertarHistorial(nuevoHistorial);
                 }
-                
                 mainThreadHandler.post(() -> callback.onResult(true, null));
             } catch (Exception e) {
                 Log.e("UsuarioRepository", "ERROR REAL DE BASE DE DATOS: ", e);
-                // Enviamos el mensaje de error de la excepción (ej: UNIQUE constraint failed)
                 mainThreadHandler.post(() -> callback.onResult(false, e.getMessage()));
             }
         });
@@ -114,7 +137,6 @@ public class UsuarioRepository {
             }
         });
     }
-    //Code para debug
 
     public void borrarTodaLaBaseDeDatos(RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
