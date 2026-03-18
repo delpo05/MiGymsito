@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!--Esta seccion es para darle estilo a los items de la grilla de cargar registro
-el back de este layout se maneja en RegistroAdapter-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,7 +11,7 @@ el back de este layout se maneja en RegistroAdapter-->
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:textColor="#000000" />
+        android:textColor="@color/blanco" />
 
     <TextView
         android:id="@+id/tvRepeticionesItem"
@@ -22,7 +19,7 @@ el back de este layout se maneja en RegistroAdapter-->
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:textColor="#000000" />
+        android:textColor="@color/blanco" />
 
     <TextView
         android:id="@+id/tvPesoItem"
@@ -30,5 +27,5 @@ el back de este layout se maneja en RegistroAdapter-->
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:textColor="#000000" />
+        android:textColor="@color/blanco" />
 </LinearLayout>

@@ -1,234 +1,269 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/negro"
+    android:fitsSystemWindows="true"
     tools:context=".CargarRegistroActivity">
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/header" />
-
-    <TextView
-        android:id="@+id/tvNombreEjercicio"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Nombre del Ejercicio"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
-
     <LinearLayout
-        android:id="@+id/llInputs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicio">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <!-- Serie Columna -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+        <!-- HEADER UNIFICADO -->
+        <include layout="@layout/header" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Serie"
-                android:textColor="#000000"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvSerieValue"
+                android:id="@+id/tvNombreEjercicio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="1"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:text="Nombre del Ejercicio"
+                android:textColor="@color/blanco"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Repeticiones Columna -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+            <LinearLayout
+                android:id="@+id/llInputs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicio">
 
-            <TextView
+                <!-- Serie Columna -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Serie"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvSerieValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="1"
+                        android:textColor="@color/blanco"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Repeticiones Columna -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Repeticiones"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/btnRepUp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_arrow_up"
+                        app:tint="@color/blanco" />
+
+                    <EditText
+                        android:id="@+id/etRepeticiones"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:text="0"
+                        android:backgroundTint="@color/blanco"
+                        android:textColor="@color/blanco"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/btnRepDown"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_arrow_down"
+                        app:tint="@color/blanco" />
+                </LinearLayout>
+
+                <!-- Peso Columna -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Peso (kg)"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/btnPesoUp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_arrow_up"
+                        app:tint="@color/blanco" />
+
+                    <EditText
+                        android:id="@+id/etPeso"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        android:text="0"
+                        android:backgroundTint="@color/blanco"
+                        android:textColor="@color/blanco"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/btnPesoDown"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_arrow_down"
+                        app:tint="@color/blanco" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnCargar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Repeticiones"
-                android:textColor="#000000"
-                android:textStyle="bold" />
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#403C3C"
+                android:text="Cargar"
+                android:textAllCaps="false"
+                android:textColor="@color/blanco"
+                app:cornerRadius="25dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/llInputs" />
 
-            <ImageButton
-                android:id="@+id/btnRepUp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_up" />
-
-            <EditText
-                android:id="@+id/etRepeticiones"
-                android:layout_width="60dp"
+            <FrameLayout
+                android:id="@+id/flHistorialHeader"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:inputType="number"
-                android:text="0"
-                android:textColor="#000000"
-                android:textSize="18sp" />
+                android:layout_marginTop="24dp"
+                android:background="#1A1A1A"
+                app:layout_constraintTop_toBottomOf="@id/btnCargar">
 
-            <ImageButton
-                android:id="@+id/btnRepDown"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_down" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvHistorialHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="Historial"
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold" />
 
-        <!-- Peso Columna -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/btnEliminarUltimo"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@color/blanco" />
+            </FrameLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <TableLayout
+                android:id="@+id/tlHistorial"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Peso (kg)"
-                android:textColor="#000000"
-                android:textStyle="bold" />
+                android:stretchColumns="*"
+                app:layout_constraintTop_toBottomOf="@id/flHistorialHeader">
 
-            <ImageButton
-                android:id="@+id/btnPesoUp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_up" />
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#0F0F0F">
 
-            <EditText
-                android:id="@+id/etPeso"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:inputType="numberDecimal"
-                android:text="0"
-                android:textColor="#000000"
-                android:textSize="18sp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="Series"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
 
-            <ImageButton
-                android:id="@+id/btnPesoDown"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_down" />
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="Repeticiones"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        android:text="Peso"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+                </TableRow>
+            </TableLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHistorial"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tlHistorial" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnCargar"
+    <!-- MENU LATERAL -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#666666"
-        android:text="Cargar"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/llInputs" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/negro"
+        app:headerLayout="@layout/header_menu_desplegable"
+        app:menu="@menu/popup_header"
+        app:itemTextColor="@color/blanco"
+        app:itemIconTint="@color/blanco" />
 
-    <FrameLayout
-        android:id="@+id/flHistorialHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="#EEEEEE"
-        app:layout_constraintTop_toBottomOf="@id/btnCargar">
-
-        <TextView
-            android:id="@+id/tvHistorialHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="Historial"
-            android:textColor="#000000"
-            android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/btnEliminarUltimo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_delete"
-            android:contentDescription="Eliminar último registro" />
-    </FrameLayout>
-
-    <TableLayout
-        android:id="@+id/tlHistorial"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="*"
-        app:layout_constraintTop_toBottomOf="@id/flHistorialHeader">
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#F5F5F5">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="Series"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="Repeticiones"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="Peso"
-                android:textStyle="bold" />
-        </TableRow>
-    </TableLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvHistorial"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tlHistorial" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
