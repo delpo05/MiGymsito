@@ -27,20 +27,19 @@ public interface SeccionDao {
     @Query("SELECT * FROM Seccion WHERE IdRutinaSeccion = :idRutina")
     List<Seccion> obtenerSeccionesPorRutina(int idRutina);
 
-    /**
-     * MODIFICACIÓN: Ahora devuelve un Mapa que relaciona la Sección con su Rutina.
-     * Room se encarga de hacer el JOIN internamente y mapear ambos objetos.
-     */
     @Query("SELECT * FROM Seccion JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina")
     Map<Seccion, Rutina> obtenerTodasLasSeccionesConRutina();
 
-    // Obtiene todas las secciones que son preestablecidas por el sistema
     @Query("SELECT * FROM Seccion WHERE TipoSeccion = 'Preestablecido'")
     List<Seccion> obtenerSeccionesPreestablecidas();
 
-    // Obtiene todas las secciones que no son preestablecidas (personalizadas)
     @Query("SELECT * FROM Seccion WHERE TipoSeccion = 'Personalizado'")
     List<Seccion> obtenerSeccionesPersonalizadas();
+
+    @Query("SELECT Seccion.* FROM Seccion " +
+           "INNER JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina " +
+           "WHERE Rutina.IdUsuarioRutina = :idUsuario")
+    List<Seccion> obtenerSeccionesPorUsuario(int idUsuario);
 
     @Query("DELETE FROM Seccion")
     void borrarTodo();

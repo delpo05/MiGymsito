@@ -110,6 +110,10 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
                     intent.putExtra("usuario", usuarioLogueado); 
                     startActivity(intent);
+                } else if (itemId == R.id.MiProgreso) {
+                    Intent intent = new Intent(this, EstadisticasActivity.class);
+                    intent.putExtra("usuario", usuarioLogueado);
+                    startActivity(intent);
                 } else if (itemId == R.id.CerrarSesion) {
                     cerrarSesion();
                 }

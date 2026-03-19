@@ -36,6 +36,11 @@ public interface EjercicioDao {
     @Query("SELECT * FROM Ejercicio WHERE TipoEjercicio = 'Preestablecido'")
     List<Ejercicio> obtenerEjerciciosPreestablecidos();
 
+    @Query("SELECT nombreEjercicio FROM Ejercicio JOIN SeccionXejercicio ON Ejercicio.IdEjercicio = SeccionXejercicio.IdEjercicio WHERE SeccionXejercicio.IdSeccion = :idSeccion")
+    List<String> obtenerNombresEjerciciosPorSeccion(int idSeccion);
+
+
+
     @Query("DELETE FROM Ejercicio")
     void borrarTodo();
 }

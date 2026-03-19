@@ -30,28 +30,28 @@ public class SeccionRepository {
         executorService = Executors.newFixedThreadPool(4);
     }
 
+    public interface RepositoryCallback<T> {
+        void onResult(T result);
+    }
+
     public void insertarSeccion(Seccion seccion) {
         executorService.execute(() -> seccionDao.insertarSeccion(seccion));
     }
 
-    // Participa en SeccionesActivity para clonar una sección previa con sus ejercicios
+    // --- MÉTODOS DE CLONACIÓN ---
     public void clonarSeccion(Seccion seccionOriginal, int idNuevaRutina, RepositoryCallback<Void> callback) {
         clonarSeccionConNombre(seccionOriginal, idNuevaRutina, seccionOriginal.NombreSeccion, callback);
     }
 
-    // Nueva versión que permite especificar el nombre al clonar
     public void clonarSeccionConNombre(Seccion seccionOriginal, int idNuevaRutina, String nuevoNombre, RepositoryCallback<Void> callback) {
         executorService.execute(() -> {
-            // 1. Insertar la nueva sección con el nuevo nombre
             Seccion nuevaSeccion = new Seccion();
             nuevaSeccion.NombreSeccion = nuevoNombre;
             nuevaSeccion.IdRutinaSeccion = idNuevaRutina;
             long nuevaSeccionId = seccionDao.insertarSeccion(nuevaSeccion);
 
-            // 2. Obtener los ejercicios de la sección original
             List<SeccionXejercicio> ejercicios = seccionXejercicioDao.getEjerciciosBySeccion(seccionOriginal.IdSeccion);
 
-            // 3. Insertar los mismos ejercicios en la nueva sección
             for (SeccionXejercicio sxe : ejercicios) {
                 SeccionXejercicio nuevoSxe = new SeccionXejercicio();
                 nuevoSxe.IdSeccion = (int) nuevaSeccionId;
@@ -62,12 +62,12 @@ public class SeccionRepository {
         });
     }
 
-    public void actualizarSeccion(Seccion seccion) {
-        executorService.execute(() -> seccionDao.actualizarSeccion(seccion));
-    }
-
-    public void eliminarSeccion(Seccion seccion) {
-        executorService.execute(() -> seccionDao.eliminarSeccion(seccion));
+    // --- MÉTODOS DE OBTENCIÓN ---
+    public void obtenerSeccionesPorUsuario(int idUsuario, RepositoryCallback<List<Seccion>> callback) {
+        executorService.execute(() -> {
+            List<Seccion> lista = seccionDao.obtenerSeccionesPorUsuario(idUsuario);
+            notificar(callback, lista);
+        });
     }
 
     public void obtenerSeccionesDeRutina(int idRutina, RepositoryCallback<List<Seccion>> callback) {
@@ -77,21 +77,15 @@ public class SeccionRepository {
         });
     }
 
-    /**
-     * MODIFICADO: Ahora procesa el Mapa devuelto por el DAO para asignar el nombre de la rutina.
-     * Esto soluciona el problema de que aparezca "Desconocida" o "General".
-     */
     public void obtenerTodasLasSecciones(RepositoryCallback<List<Seccion>> callback) {
         executorService.execute(() -> {
             Map<Seccion, Rutina> mapa = seccionDao.obtenerTodasLasSeccionesConRutina();
             List<Seccion> listaCompleta = new ArrayList<>();
-            
             if (mapa != null) {
                 for (Map.Entry<Seccion, Rutina> entry : mapa.entrySet()) {
                     Seccion seccion = entry.getKey();
                     Rutina rutina = entry.getValue();
                     if (rutina != null) {
-                        // Asignamos el nombre de la rutina al campo @Ignore de la sección
                         seccion.nombreRutina = rutina.NombreRutina;
                     }
                     listaCompleta.add(seccion);
@@ -101,7 +95,6 @@ public class SeccionRepository {
         });
     }
 
-    // Obtiene las secciones que son preestablecidas (sistema)
     public void obtenerSeccionesPreestablecidas(RepositoryCallback<List<Seccion>> callback) {
         executorService.execute(() -> {
             List<Seccion> lista = seccionDao.obtenerSeccionesPreestablecidas();
@@ -109,7 +102,6 @@ public class SeccionRepository {
         });
     }
 
-    // Obtiene las secciones que son personalizadas (usuario)
     public void obtenerSeccionesPersonalizadas(RepositoryCallback<List<Seccion>> callback) {
         executorService.execute(() -> {
             List<Seccion> lista = seccionDao.obtenerSeccionesPersonalizadas();
@@ -117,14 +109,18 @@ public class SeccionRepository {
         });
     }
 
-    // Mensajero para volver al hilo principal de la UI
+    // --- MÉTODOS DE ACTUALIZACIÓN Y ELIMINACIÓN ---
+    public void actualizarSeccion(Seccion seccion) {
+        executorService.execute(() -> seccionDao.actualizarSeccion(seccion));
+    }
+
+    public void eliminarSeccion(Seccion seccion) {
+        executorService.execute(() -> seccionDao.eliminarSeccion(seccion));
+    }
+
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
         if (callback != null) {
             new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
         }
-    }
-
-    public interface RepositoryCallback<T> {
-        void onResult(T result);
     }
 }
