@@ -57,11 +57,7 @@ public class SeccionesActivity extends HeaderActivity {
             btnFinalizar.setVisibility(View.GONE);
         }
 
-        TextView tvUsername = findViewById(R.id.toolbar_username);
-        // CORRECCIÓN: usuarioActual -> usuarioLogueado y campo en Mayúscula
-        if (tvUsername != null && usuarioLogueado != null) {
-            tvUsername.setText(usuarioLogueado.NombreUsuario);
-        }
+        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
 
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
@@ -82,7 +78,7 @@ public class SeccionesActivity extends HeaderActivity {
             public void onSeccionClick(Seccion seccion) {
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
-                intent.putExtra("usuario", usuarioActual);
+                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 
@@ -172,7 +168,6 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
-    // Participa en SeccionesActivity para mostrar todas las secciones previas en un popup blanco estético y profesional
     private void mostrarPopUpSeccionesPrevias() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -185,13 +180,11 @@ public class SeccionesActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
 
-        // Al cancelar, vuelve al popup de "Añadir Sección"
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpAnadirSeccion();
         });
 
-        // MODIFICACIÓN: La función obtenerTodasLasSecciones ahora utiliza el JOIN en SeccionDao para traer el nombre de la rutina
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
@@ -207,7 +200,6 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     // CAMBIO: Se usa el campo nombreRutina obtenido del JOIN SQL
                      tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
                      
                      GradientDrawable shape = new GradientDrawable();
@@ -218,7 +210,6 @@ public class SeccionesActivity extends HeaderActivity {
                      
                      convertView.setOnClickListener(v -> {
                          dialog.dismiss();
-                         // Abrir popup de creación/clonación con la info de la sección seleccionada
                          mostrarPopUpCrearSeccion(s, true);
                      });
                      return convertView;
@@ -254,7 +245,6 @@ public class SeccionesActivity extends HeaderActivity {
             btnAceptar.setText("Guardar");
         }
 
-        // Si se cancela la creación o clonación, vuelve al popup correspondiente
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
             if (esClonacion) {
@@ -282,9 +272,9 @@ public class SeccionesActivity extends HeaderActivity {
                 } else {
                     seccionBase.NombreSeccion = nombre;
                     seccionRepository.actualizarSeccion(seccionBase);
+                    dialog.dismiss();
+                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 }
-                dialog.dismiss();
-                new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
             }
         });
         dialog.show();

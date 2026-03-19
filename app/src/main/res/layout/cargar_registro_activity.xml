@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- HEADER UNIFICADO -->
+        <!-- Header Unificado -->
         <include layout="@layout/header" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -122,6 +122,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tvPesoLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Peso (kg)"
@@ -233,6 +234,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tvColumnaPeso"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"

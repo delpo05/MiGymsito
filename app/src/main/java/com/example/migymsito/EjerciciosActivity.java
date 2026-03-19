@@ -2,15 +2,22 @@ package com.example.migymsito;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
+import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -20,7 +27,6 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,7 +35,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
@@ -44,7 +49,6 @@ import java.util.Locale;
 
 public class EjerciciosActivity extends HeaderActivity {
 
-    private Usuario usuarioActual;
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
@@ -88,21 +92,16 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
         );
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
-            seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
-        } else {
-            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
-            seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+        if (getIntent() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+            } else {
+                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+            }
         }
 
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
-        
-        TextView tvUsername = findViewById(R.id.toolbar_username);
-        if (tvUsername != null && usuarioActual != null) {
-            tvUsername.setText(usuarioActual.NombreUsuario);
-        }
 
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
@@ -167,7 +166,6 @@ public class EjerciciosActivity extends HeaderActivity {
             public void onEjercicioClick(Ejercicio ejercicio) {
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
-                intent.putExtra("usuario", usuarioActual);
                 intent.putExtra("seccion", seccionActual);
                 startActivity(intent);
             }
@@ -197,10 +195,9 @@ public class EjerciciosActivity extends HeaderActivity {
         View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> {
-                // MODIFICACIÓN: Ahora se elimina solo el vínculo con la sección actual usando la función del repositorio
                 ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
                 dialog.dismiss();
-                new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
+                new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 200);
             });
         }
 
@@ -220,7 +217,6 @@ public class EjerciciosActivity extends HeaderActivity {
         dialog.show();
     }
 
-    // Muestra el popup inicial para elegir entre ejercicio preestablecido o personalizado
     private void mostrarPopUpAnadirEjercicio() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_dos_opciones);
@@ -238,7 +234,6 @@ public class EjerciciosActivity extends HeaderActivity {
 
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
 
-        // Al hacer clic en Ejercicios Creados, abre el sub-popup para elegir entre Preestablecidos o Personalizados
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpEleccionTipoEjercicio();
@@ -252,10 +247,6 @@ public class EjerciciosActivity extends HeaderActivity {
         dialog.show();
     }
 
-    /**
-     * Muestra un sub-popup con dos opciones: Ejercicios Prestablecidos y Ejercicios Personalizados.
-     * Se abre tras seleccionar "Ejercicios Creados".
-     */
     private void mostrarPopUpEleccionTipoEjercicio() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_dos_opciones);
@@ -271,19 +262,16 @@ public class EjerciciosActivity extends HeaderActivity {
         tvOpcionIzq.setText("Ejercicios\nPrestablecidos");
         tvOpcionDer.setText("Ejercicios\nPersonalizados");
 
-        // Al hacer clic en cancelar, vuelve al popup anterior
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpAnadirEjercicio();
         });
 
-        // Muestra las secciones preestablecidas por el sistema
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesParaSeleccion("Preestablecido");
         });
 
-        // Muestra las secciones creadas por el usuario
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesParaSeleccion("Personalizado");
@@ -292,10 +280,6 @@ public class EjerciciosActivity extends HeaderActivity {
         dialog.show();
     }
 
-    /**
-     * Muestra un popup con una lista de secciones filtradas por tipo.
-     * @param tipo "Preestablecido" para las del sistema, "Personalizado" para las del usuario.
-     */
     private void mostrarPopUpSeccionesParaSeleccion(String tipo) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -313,18 +297,16 @@ public class EjerciciosActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
 
-        // Al hacer clic en cancelar, vuelve al popup anterior
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpEleccionTipoEjercicio();
         });
 
         SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
-            // FILTRADO: Si son secciones personalizadas, quitamos la sección en la que estamos parados
             List<Seccion> listaAMostrar = new ArrayList<>();
             for (Seccion s : secciones) {
                 if (seccionActual != null && s.IdSeccion == seccionActual.IdSeccion) {
-                    continue; // Saltar la sección actual
+                    continue;
                 }
                 listaAMostrar.add(s);
             }
@@ -369,10 +351,6 @@ public class EjerciciosActivity extends HeaderActivity {
         dialog.show();
     }
 
-    /**
-     * Muestra un popup con los ejercicios de una sección seleccionada para poder añadirlos a la sección actual.
-     * @param seccionSeleccionada La sección de la cual se mostrarán los ejercicios.
-     */
     private void mostrarPopUpEjerciciosDeSeccionSeleccionada(Seccion seccionSeleccionada) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -390,7 +368,6 @@ public class EjerciciosActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicios);
 
-        // Al hacer clic en cancelar, vuelve al popup anterior (Listado de secciones del mismo tipo)
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesParaSeleccion(seccionSeleccionada.TipoSeccion);
@@ -428,10 +405,9 @@ public class EjerciciosActivity extends HeaderActivity {
                     container.setBackground(shape);
 
                     convertView.setOnClickListener(v -> {
-                        // Al seleccionar un ejercicio, se registra la relación en SeccionXejercicio para la sección actual
                         ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
                         dialog.dismiss();
-                        new Handler().postDelayed(() -> cargarEjerciciosDesdeDB(), 300);
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> cargarEjerciciosDesdeDB(), 300);
                     });
                     return convertView;
                 }
@@ -470,7 +446,6 @@ public class EjerciciosActivity extends HeaderActivity {
 
         ivPreviewImagen.setOnClickListener(this::mostrarOpcionesImagen);
 
-        // Al hacer clic en cancelar, vuelve al popup anterior si se está creando uno nuevo
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
             if (ejercicioExistente == null) {
@@ -496,21 +471,27 @@ public class EjerciciosActivity extends HeaderActivity {
                     nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
                 }
 
-                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion);
+                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, (Boolean success) -> {
+                    if (success != null && success) {
+                        dialog.dismiss();
+                        new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
+                    }
+                });
             } else {
-                // MODIFICACIÓN: Usamos actualizarEjercicioIndependiente para no afectar a otras rutinas que usen este ejercicio
                 Ejercicio editado = new Ejercicio();
                 editado.IdEjercicio = ejercicioExistente.IdEjercicio; 
                 editado.NombreEjercicio = nombre;
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
-                editado.TipoEjercicio = "Personalizado"; // Al editarlo, siempre queda como personalizado
+                editado.TipoEjercicio = "Personalizado";
                 editado.PesoCorporalEjercicio = esPesoCorporal;
 
-                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion);
+                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, (Boolean success) -> {
+                    if (success != null && success) {
+                        dialog.dismiss();
+                        new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
+                    }
+                });
             }
-            
-            dialog.dismiss();
-            new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 300);
         });
 
         dialog.show();
