@@ -32,97 +32,85 @@ public class EjercicioRepository {
         mainThreadHandler = new Handler(Looper.getMainLooper());
     }
 
-    public interface RepositoryCallback<T> {
-        void onResult(T result);
+    public void insertarEjercicio(Ejercicio ejercicio) {
+        executorService.execute(() -> ejercicioDao.insertarEjercicio(ejercicio));
     }
 
-    public void insertarEjercicioConSeccion(Ejercicio ejercicio, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void insertarEjercicioConSeccion(Ejercicio ejercicio, int idSeccion) {
         executorService.execute(() -> {
-            try {
-                long idEjercicio = ejercicioDao.insertarEjercicio(ejercicio);
-                
-                SeccionXejercicio relacion = new SeccionXejercicio();
-                relacion.IdSeccion = idSeccion;
-                relacion.IdEjercicio = (int) idEjercicio;
-                
-                seccionXejercicioDao.insert(relacion);
-                
-                if (callback != null) {
-                    mainThreadHandler.post(() -> callback.onResult(true));
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "ERROR AL CREAR EJERCICIO: ", e);
-                if (callback != null) {
-                    mainThreadHandler.post(() -> callback.onResult(false));
-                }
-            }
-        });
-    }
+            long idEjercicio = ejercicioDao.insertarEjercicio(ejercicio);
 
-    public void insertarRelacionSeccionEjercicio(int idEjercicio, int idSeccion) {
-        executorService.execute(() -> {
-            try {
-                SeccionXejercicio relacion = new SeccionXejercicio();
-                relacion.IdSeccion = idSeccion;
-                relacion.IdEjercicio = idEjercicio;
-                seccionXejercicioDao.insert(relacion);
-            } catch (Exception e) {
-                Log.e(TAG, "Error al insertar relación: " + e.getMessage());
-            }
+            SeccionXejercicio relacion = new SeccionXejercicio();
+            relacion.IdSeccion = idSeccion;
+            relacion.IdEjercicio = (int) idEjercicio;
+
+            seccionXejercicioDao.insert(relacion);
         });
     }
 
     public void actualizarEjercicio(Ejercicio ejercicio) {
+        executorService.execute(() -> ejercicioDao.actualizarEjercicio(ejercicio));
+    }
+
+    // NUEVO: Modifica el ejercicio creando una copia para no afectar a otras secciones
+    public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion) {
         executorService.execute(() -> {
-            try {
-                ejercicioDao.actualizarEjercicio(ejercicio);
-            } catch (Exception e) {
-                Log.e(TAG, "Error al actualizar ejercicio: " + e.getMessage());
+            // 1. Crear una copia del ejercicio con los nuevos datos (Nombre/Imagen)
+            Ejercicio nuevoEj = new Ejercicio();
+            nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
+            nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
+            nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
+            nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
+
+            // 2. Insertarlo como un ejercicio nuevo
+            long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
+
+            // 3. Buscar la relación actual de esta sección
+            SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
+
+            if (relacion != null) {
+                // 4. Actualizar la relación para que apunte al nuevo ID
+                relacion.IdEjercicio = (int) nuevoIdEjercicio;
+                seccionXejercicioDao.update(relacion);
             }
         });
     }
 
+    public void eliminarEjercicio(Ejercicio ejercicio) {
+        executorService.execute(() -> ejercicioDao.eliminarEjercicio(ejercicio));
+    }
+
+    // NUEVO: Elimina solo el vínculo entre el ejercicio y la sección actual
     public void eliminarEjercicioDeSeccion(int idEjercicio, int idSeccion) {
         executorService.execute(() -> {
-            try {
-                SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, idEjercicio);
-                if (relacion != null) {
-                    seccionXejercicioDao.delete(relacion);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error al eliminar vínculo: " + e.getMessage());
+            SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, idEjercicio);
+            if (relacion != null) {
+                seccionXejercicioDao.delete(relacion);
             }
         });
     }
 
     public void obtenerEjerciciosPorSeccion(int idSeccion, RepositoryCallback<List<Ejercicio>> callback) {
         executorService.execute(() -> {
-            try {
-                List<SeccionXejercicio> relaciones = seccionXejercicioDao.getEjerciciosBySeccion(idSeccion);
-                List<Ejercicio> ejercicios = new ArrayList<>();
-                for (SeccionXejercicio rel : relaciones) {
-                    Ejercicio ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
-                    if (ej != null) {
-                        ejercicios.add(ej);
-                    }
+            List<SeccionXejercicio> relaciones = seccionXejercicioDao.getEjerciciosBySeccion(idSeccion);
+            List<Ejercicio> ejercicios = new ArrayList<>();
+            for (SeccionXejercicio rel : relaciones) {
+                Ejercicio ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
+                if (ej != null) {
+                    ejercicios.add(ej);
                 }
-                mainThreadHandler.post(() -> callback.onResult(ejercicios));
-            } catch (Exception e) {
-                Log.e(TAG, "Error al obtener ejercicios: " + e.getMessage());
-                mainThreadHandler.post(() -> callback.onResult(new ArrayList<>()));
             }
+            notificar(callback, ejercicios);
         });
     }
 
-    public void obtenerTodosLosEjercicios(RepositoryCallback<List<Ejercicio>> callback) {
-        executorService.execute(() -> {
-            try {
-                List<Ejercicio> ejercicios = ejercicioDao.obtenerTodosLosEjercicios();
-                mainThreadHandler.post(() -> callback.onResult(ejercicios));
-            } catch (Exception e) {
-                Log.e(TAG, "Error al obtener todos los ejercicios: " + e.getMessage());
-                mainThreadHandler.post(() -> callback.onResult(new ArrayList<>()));
-            }
-        });
+    private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
+        if (callback != null) {
+            new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
+        }
+    }
+
+    public interface RepositoryCallback<T> {
+        void onResult(T result);
     }
 }

@@ -2,19 +2,14 @@ package com.example.migymsito;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.view.LayoutInflater;
+import android.provider.MediaStore;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -25,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -33,8 +29,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionXejercicio;
+import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
-import com.example.migymsito.dataRepository.EntrenamientoRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,38 +42,23 @@ import java.util.Locale;
 
 public class EjerciciosActivity extends HeaderActivity {
 
+    private Usuario usuarioActual;
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private GridView gvEjercicios;
     private EjercicioRepository ejercicioRepository;
-    private EntrenamientoRepository entrenamientoRepository;
     private EjerciciosAdapter adapter;
-    private Button btnFinalizarEntrenamiento;
 
     private Uri uriImagenSeleccionada;
     private ImageView ivPreviewImagen;
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<Uri> cameraLauncher;
-    private Uri uriFotoCamara; 
+    private Uri uriFotoCamara;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
-
-        if (getIntent() != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
-            } else {
-                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
-            }
-        }
-
-        if (seccionActual == null) {
-            Toast.makeText(this, "Error: No se pudo cargar la sección", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
 
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
@@ -103,45 +85,74 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
         );
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            usuarioActual = getIntent().getSerializableExtra("usuario", Usuario.class);
+            seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+        } else {
+            usuarioActual = (Usuario) getIntent().getSerializableExtra("usuario");
+            seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+        }
+
         gvEjercicios = findViewById(R.id.gvGenerico);
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
-        btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
 
-        entrenamientoRepository = new EntrenamientoRepository(getApplication());
+        TextView tvUsername = findViewById(R.id.toolbar_username);
+        if (tvUsername != null && usuarioActual != null) {
+            tvUsername.setText(usuarioActual.NombreUsuario);
+        }
 
         configurarGridView();
-        configurarBotonFinalizar();
         configurarWindowInsets(R.id.layout_contenedor_grid);
     }
 
-    private void configurarBotonFinalizar() {
-        if (btnFinalizarEntrenamiento != null) {
-            btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
-            btnFinalizarEntrenamiento.setOnClickListener(v -> {
-                if (usuarioLogueado != null && seccionActual != null) {
-                    entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
-                            usuarioLogueado.IdUsuario,
-                            seccionActual.IdSeccion,
-                            success -> {
-                                if (success) {
-                                    Toast.makeText(this, "Entrenamiento de " + seccionActual.NombreSeccion + " finalizado.", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(this, "No hay entrenamiento activo en esta sección.", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                    );
-                }
-            });
+    private void abrirCamara() {
+        File photoFile = null;
+        try {
+            photoFile = crearArchivoImagen();
+        } catch (IOException ex) {
+            Toast.makeText(this, "Error al crear el archivo de imagen", Toast.LENGTH_SHORT).show();
         }
+
+        if (photoFile != null) {
+            uriFotoCamara = FileProvider.getUriForFile(this,
+                    "com.example.migymsito.fileprovider",
+                    photoFile);
+            cameraLauncher.launch(uriFotoCamara);
+        }
+    }
+
+    private File crearArchivoImagen() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
+    }
+
+    private void mostrarOpcionesImagen(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenu().add("Cámara");
+        popup.getMenu().add("Galería");
+
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getTitle().equals("Cámara")) {
+                abrirCamara();
+            } else if (item.getTitle().equals("Galería")) {
+                galleryLauncher.launch("image/*");
+            }
+            return true;
+        });
+        popup.show();
     }
 
     private void configurarGridView() {
         if (seccionActual != null) {
             tvTituloGrid.setText("Ejercicios de " + seccionActual.NombreSeccion);
+        } else {
+            tvTituloGrid.setText("Mis Ejercicios");
         }
 
         ejercicioRepository = new EjercicioRepository(getApplication());
-        
+
         adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
             @Override
             public void onAddClick() {
@@ -152,6 +163,7 @@ public class EjerciciosActivity extends HeaderActivity {
             public void onEjercicioClick(Ejercicio ejercicio) {
                 Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
                 intent.putExtra("ejercicio", ejercicio);
+                intent.putExtra("usuario", usuarioActual);
                 intent.putExtra("seccion", seccionActual);
                 startActivity(intent);
             }
@@ -166,12 +178,42 @@ public class EjerciciosActivity extends HeaderActivity {
         cargarEjerciciosDesdeDB();
     }
 
-    private void cargarEjerciciosDesdeDB() {
-        if (seccionActual != null) {
-            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> {
-                adapter.setEjercicios(ejercicios);
+    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
+        if (tvNombre != null) {
+            tvNombre.setText(ejercicio.NombreEjercicio);
+        }
+
+        View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
+        if (btnEliminar != null) {
+            btnEliminar.setOnClickListener(v -> {
+                // CAMBIO: Solo eliminamos la relación con esta sección
+                ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
+                dialog.dismiss();
+                new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 200);
             });
         }
+
+        View btnModificar = dialog.findViewById(R.id.btnModificarPopUp);
+        if (btnModificar != null) {
+            btnModificar.setOnClickListener(v -> {
+                dialog.dismiss();
+                mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
+            });
+        }
+
+        View btnCancelar = dialog.findViewById(R.id.btnCancelarPopUp);
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void mostrarPopUpAnadirEjercicio() {
@@ -191,73 +233,11 @@ public class EjerciciosActivity extends HeaderActivity {
 
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
 
-        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpEjerciciosPreestablecidos();
-        });
-
         dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpCrearEjercicioPersonalizado(null);
         });
 
-        dialog.show();
-    }
-
-    private void mostrarPopUpEjerciciosPreestablecidos() {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.pop_up_ejercicios_preestablecidos);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        GridView gvPopup = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
-        Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicios);
-
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
-
-        ejercicioRepository.obtenerTodosLosEjercicios(ejercicios -> {
-            gvPopup.setAdapter(new BaseAdapter() {
-                @Override public int getCount() { return ejercicios.size(); }
-                @Override public Object getItem(int i) { return ejercicios.get(i); }
-                @Override public long getItemId(int i) { return i; }
-                @Override public View getView(int position, View convertView, ViewGroup parent) {
-                    if (convertView == null) {
-                        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ejercicio_previo, parent, false);
-                    }
-                    Ejercicio e = ejercicios.get(position);
-                    TextView tvNombre = convertView.findViewById(R.id.tv_nombre_ejercicio_previo);
-                    TextView tvTipo = convertView.findViewById(R.id.tv_tipo_ejercicio_previo);
-                    ImageView ivImagen = convertView.findViewById(R.id.iv_ejercicio_previo);
-                    View container = convertView.findViewById(R.id.container_item_ejercicio_previo);
-
-                    tvNombre.setText(e.NombreEjercicio);
-                    tvTipo.setText("Tipo: " + e.TipoEjercicio);
-
-                    if (e.ImagenEjercicio != null && !e.ImagenEjercicio.isEmpty()) {
-                        ivImagen.setVisibility(View.VISIBLE);
-                        ivImagen.setImageURI(Uri.parse(e.ImagenEjercicio));
-                    } else {
-                        ivImagen.setVisibility(View.GONE);
-                    }
-
-                    GradientDrawable shape = new GradientDrawable();
-                    shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
-                    shape.setStroke(4, Color.BLACK);
-                    shape.setColor(Color.WHITE);
-                    container.setBackground(shape);
-
-                    convertView.setOnClickListener(v -> {
-                        ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
-                        dialog.dismiss();
-                        new Handler().postDelayed(EjerciciosActivity.this::cargarEjerciciosDesdeDB, 300);
-                    });
-                    return convertView;
-                }
-            });
-        });
         dialog.show();
     }
 
@@ -271,103 +251,67 @@ public class EjerciciosActivity extends HeaderActivity {
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
-        Button btnGuardar = dialog.findViewById(R.id.btnAceptarEjercicio);
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
 
+        uriImagenSeleccionada = null;
+
         if (ejercicioExistente != null) {
-            tvTitulo.setText("Editar Ejercicio");
+            tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
-            if (ejercicioExistente.ImagenEjercicio != null && !ejercicioExistente.ImagenEjercicio.isEmpty()) {
-                ivPreviewImagen.setImageURI(Uri.parse(ejercicioExistente.ImagenEjercicio));
+            btnAceptar.setText("Guardar");
+            if (ejercicioExistente.ImagenEjercicio != null) {
                 uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
+                ivPreviewImagen.setImageURI(uriImagenSeleccionada);
             }
         }
 
-        if (ivPreviewImagen != null) {
-            ivPreviewImagen.setOnClickListener(this::mostrarOpcionesImagen);
-        }
-        
+        ivPreviewImagen.setOnClickListener(v -> mostrarOpcionesImagen(v));
+
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
-        btnGuardar.setOnClickListener(v -> {
+        btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
-            if (!nombre.isEmpty()) {
-                btnGuardar.setEnabled(false); // Evitar múltiples clics
-                if (ejercicioExistente == null) {
-                    Ejercicio nuevo = new Ejercicio();
-                    nuevo.NombreEjercicio = nombre;
-                    nuevo.TipoEjercicio = "Personalizado";
-                    nuevo.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : "";
-                    
-                    // CORRECCIÓN IMPORTANTE: Se debe asignar un valor al campo @NonNull PesoCorporalEjercicio
-                    nuevo.PesoCorporalEjercicio = false; 
-                    
-                    ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
-                        if (success) {
-                            dialog.dismiss();
-                            cargarEjerciciosDesdeDB();
-                        } else {
-                            btnGuardar.setEnabled(true);
-                            Toast.makeText(this, "Error al crear el ejercicio", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    ejercicioExistente.NombreEjercicio = nombre;
-                    ejercicioExistente.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
-                    ejercicioRepository.actualizarEjercicio(ejercicioExistente);
-                    dialog.dismiss();
-                    new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 300);
-                }
+            if (nombre.isEmpty()) {
+                etNombre.setError("Campo obligatorio");
+                return;
             }
-        });
-        dialog.show();
-    }
 
-    private void abrirCamara() {
-        File photoFile = null;
-        try { photoFile = crearArchivoImagen(); } catch (IOException ex) {}
-        if (photoFile != null) {
-            uriFotoCamara = FileProvider.getUriForFile(this, "com.example.migymsito.fileprovider", photoFile);
-            cameraLauncher.launch(uriFotoCamara);
-        }
-    }
+            if (ejercicioExistente == null) {
+                Ejercicio nuevo = new Ejercicio();
+                nuevo.NombreEjercicio = nombre;
+                nuevo.TipoEjercicio = "Personalizado";
+                nuevo.PesoCorporalEjercicio = false;
+                if (uriImagenSeleccionada != null) {
+                    nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
+                }
 
-    private File crearArchivoImagen() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        return File.createTempFile("JPEG_" + timeStamp + "_", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES));
-    }
+                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion);
+            } else {
+                // CAMBIO: Creamos un objeto con los cambios y llamamos a la actualización independiente
+                Ejercicio editado = new Ejercicio();
+                editado.IdEjercicio = ejercicioExistente.IdEjercicio; // Para identificar la relación actual
+                editado.NombreEjercicio = nombre;
+                editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
+                editado.TipoEjercicio = ejercicioExistente.TipoEjercicio;
+                editado.PesoCorporalEjercicio = ejercicioExistente.PesoCorporalEjercicio;
 
-    private void mostrarOpcionesImagen(View view) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Cámara");
-        popup.getMenu().add("Galería");
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Cámara")) abrirCamara();
-            else if (item.getTitle().equals("Galería")) galleryLauncher.launch("image/*");
-            return true;
-        });
-        popup.show();
-    }
+                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion);
+            }
 
-    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
-        if (tvNombre != null) tvNombre.setText(ejercicio.NombreEjercicio);
-        dialog.findViewById(R.id.btnEliminarPopUp).setOnClickListener(v -> {
-            ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
             dialog.dismiss();
             new Handler().postDelayed(this::cargarEjerciciosDesdeDB, 300);
         });
-        dialog.findViewById(R.id.btnModificarPopUp).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
-        });
-        dialog.findViewById(R.id.btnCancelarPopUp).setOnClickListener(v -> dialog.dismiss());
+
         dialog.show();
+    }
+
+    private void cargarEjerciciosDesdeDB() {
+        if (seccionActual != null) {
+            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> {
+                adapter.setEjercicios(ejercicios);
+            });
+        }
     }
 
     private void configurarWindowInsets(int layoutId) {
