@@ -16,9 +16,11 @@ import java.util.List;
 public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.RegistroViewHolder> {
 
     private List<Registro> listaRegistros;
+    private boolean esPesoCorporal;
 
-    public RegistroAdapter(List<Registro> listaRegistros) {
+    public RegistroAdapter(List<Registro> listaRegistros, boolean esPesoCorporal) {
         this.listaRegistros = listaRegistros;
+        this.esPesoCorporal = esPesoCorporal;
     }
 
     @NonNull
@@ -33,7 +35,16 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
         Registro registro = listaRegistros.get(position);
         holder.tvSerie.setText(String.valueOf(registro.NumSeriesRegistro));
         holder.tvRepeticiones.setText(String.valueOf(registro.Repeticiones));
-        holder.tvPeso.setText(registro.PesoRegistro + " kg");
+        
+        if (esPesoCorporal) {
+            if (registro.PesoRegistro == 0) {
+                holder.tvPeso.setText("Peso Corp.");
+            } else {
+                holder.tvPeso.setText("PC + " + registro.PesoRegistro + " kg");
+            }
+        } else {
+            holder.tvPeso.setText(registro.PesoRegistro + " kg");
+        }
     }
 
     @Override

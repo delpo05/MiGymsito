@@ -1,9 +1,11 @@
 package com.example.migymsito.dataDataBase;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
@@ -22,6 +24,8 @@ import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.SeccionXejercicioDao;
 import com.example.migymsito.dataDao.UsuarioDao;
 
+import java.util.concurrent.Executors;
+
 @Database(entities = {
         Usuario.class,
         Rutina.class,
@@ -31,7 +35,7 @@ import com.example.migymsito.dataDao.UsuarioDao;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 8, exportSchema = false)
+}, version = 10, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -51,11 +55,87 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "migymsito_db")
+                            .addCallback(sRoomDatabaseCallback)
                             .fallbackToDestructiveMigration()
                             .build();
                 }
             }
         }
         return INSTANCE;
+    }
+
+    /**
+     * Callback para inicializar la base de datos con ejercicios y secciones preestablecidas.
+     * Se ejecuta cada vez que se abre la base de datos para asegurar que los datos existan.
+     */
+    private static final RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+        @Override
+        public void onOpen(@NonNull SupportSQLiteDatabase db) {
+            super.onOpen(db);
+            Executors.newSingleThreadExecutor().execute(() -> {
+                AppDatabase database = INSTANCE;
+                if (database != null) {
+                    inicializarDatosPreestablecidos(database);
+                }
+            });
+        }
+    };
+
+    /**
+     * Inserta las secciones y ejercicios preestablecidos si no existen en la base de datos.
+     * Utiliza los DAOs correspondientes para realizar las inserciones.
+     */
+    private static void inicializarDatosPreestablecidos(AppDatabase db) {
+        SeccionDao seccionDao = db.seccionDao();
+        EjercicioDao ejercicioDao = db.ejercicioDao();
+        SeccionXejercicioDao sxeDao = db.seccionXejercicioDao();
+
+        if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
+
+            // Sección Pecho
+            long idPecho = insertarSeccion(seccionDao, "Pecho");
+            insertarEjercicio(ejercicioDao, sxeDao, "Press de banca", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Apertura de pecho", idPecho);
+
+            // Sección Espalda
+            long idEspalda = insertarSeccion(seccionDao, "Espalda");
+            insertarEjercicio(ejercicioDao, sxeDao, "Dominada", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Remo con barra", idEspalda);
+
+            // Sección Bicep
+            long idBicep = insertarSeccion(seccionDao, "Bicep");
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl de bicep con barra", idBicep);
+
+            // Sección Tricep
+            long idTricep = insertarSeccion(seccionDao, "Tricep");
+            insertarEjercicio(ejercicioDao, sxeDao, "Extensión de tricep", idTricep);
+        }
+    }
+
+    /**
+     * Método auxiliar para insertar una sección preestablecida usando el DAO.
+     */
+    private static long insertarSeccion(SeccionDao dao, String nombre) {
+        Seccion s = new Seccion();
+        s.NombreSeccion = nombre;
+        s.TipoSeccion = "Preestablecido";
+        s.IdRutinaSeccion = null;
+        return dao.insertarSeccion(s);
+    }
+
+    /**
+     * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
+     */
+    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
+        Ejercicio e = new Ejercicio();
+        e.TipoEjercicio = "Preestablecido";
+        e.NombreEjercicio = nombre;
+        e.PesoCorporalEjercicio = false;
+        long idEjercicio = ejDao.insertarEjercicio(e);
+
+        SeccionXejercicio sxe = new SeccionXejercicio();
+        sxe.IdSeccion = (int) idSeccion;
+        sxe.IdEjercicio = (int) idEjercicio;
+        sxeDao.insert(sxe);
     }
 }

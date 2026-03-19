@@ -24,8 +24,8 @@ public class Seccion implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int IdSeccion;
 
-    @NonNull
-    public int IdRutinaSeccion;  // FK
+    // Se cambia a Integer para permitir nulos en secciones preestablecidas que no pertenecen a ninguna rutina de usuario
+    public Integer IdRutinaSeccion;  // FK
 
     @NonNull
     public String NombreSeccion;
@@ -33,4 +33,11 @@ public class Seccion implements Serializable {
     // Participa en SeccionesActivity para mostrar el nombre de la rutina en el popup de secciones previas
     @Ignore
     public String nombreRutina;
+
+    /**
+     * Define el origen de la sección.
+     * Puede ser "Preestablecido" o "Personalizado".
+     */
+    @NonNull
+    public String TipoSeccion = "Personalizado";
 }

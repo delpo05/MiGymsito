@@ -51,7 +51,7 @@ public class SeccionesActivity extends HeaderActivity {
         }
 
         gvSecciones = findViewById(R.id.gvGenerico);
-        
+
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
             btnFinalizar.setVisibility(View.GONE);
@@ -82,6 +82,7 @@ public class SeccionesActivity extends HeaderActivity {
             public void onSeccionClick(Seccion seccion) {
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
+                intent.putExtra("usuario", usuarioActual);
                 startActivity(intent);
             }
 
@@ -133,7 +134,6 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void cargarSeccionesDesdeDB() {
-        // CORRECCIÓN: IdRutina con Mayúscula
         if (rutinaActual != null) {
             seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
                 adapter.setSecciones(secciones);
@@ -163,6 +163,7 @@ public class SeccionesActivity extends HeaderActivity {
             mostrarPopUpCrearSeccion(null, false);
         });
 
+        // Participa en SeccionesActivity para abrir el popup de secciones previas
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesPrevias();
@@ -171,6 +172,7 @@ public class SeccionesActivity extends HeaderActivity {
         dialog.show();
     }
 
+    // Participa en SeccionesActivity para mostrar todas las secciones previas en un popup blanco estético y profesional
     private void mostrarPopUpSeccionesPrevias() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -183,8 +185,13 @@ public class SeccionesActivity extends HeaderActivity {
         GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Al cancelar, vuelve al popup de "Añadir Sección"
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpAnadirSeccion();
+        });
 
+        // MODIFICACIÓN: La función obtenerTodasLasSecciones ahora utiliza el JOIN en SeccionDao para traer el nombre de la rutina
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
              gvPopup.setAdapter(new BaseAdapter() {
                  @Override public int getCount() { return secciones.size(); }
@@ -200,6 +207,7 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
+                     // CAMBIO: Se usa el campo nombreRutina obtenido del JOIN SQL
                      tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
                      
                      GradientDrawable shape = new GradientDrawable();
@@ -210,6 +218,7 @@ public class SeccionesActivity extends HeaderActivity {
                      
                      convertView.setOnClickListener(v -> {
                          dialog.dismiss();
+                         // Abrir popup de creación/clonación con la info de la sección seleccionada
                          mostrarPopUpCrearSeccion(s, true);
                      });
                      return convertView;
@@ -245,7 +254,15 @@ public class SeccionesActivity extends HeaderActivity {
             btnAceptar.setText("Guardar");
         }
 
-        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        // Si se cancela la creación o clonación, vuelve al popup correspondiente
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (esClonacion) {
+                mostrarPopUpSeccionesPrevias();
+            } else if (seccionBase == null) {
+                mostrarPopUpAnadirSeccion();
+            }
+        });
 
         btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
@@ -253,13 +270,11 @@ public class SeccionesActivity extends HeaderActivity {
                 if (seccionBase == null) {
                     Seccion nueva = new Seccion();
                     nueva.NombreSeccion = nombre;
-                    // CORRECCIÓN: IdRutina con Mayúscula
                     nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
                     dialog.dismiss();
                     new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 } else if (esClonacion) {
-                    // CORRECCIÓN: IdRutina con Mayúscula
                     seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
                         cargarSeccionesDesdeDB();
                     });
@@ -267,9 +282,9 @@ public class SeccionesActivity extends HeaderActivity {
                 } else {
                     seccionBase.NombreSeccion = nombre;
                     seccionRepository.actualizarSeccion(seccionBase);
-                    dialog.dismiss();
-                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 }
+                dialog.dismiss();
+                new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
             }
         });
         dialog.show();

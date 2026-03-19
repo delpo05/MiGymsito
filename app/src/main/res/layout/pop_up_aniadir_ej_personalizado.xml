@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -79,6 +79,17 @@
             android:textSize="14sp"
             android:inputType="textPersonName" />
     </LinearLayout>
+
+    <!-- Nueva Sección: Peso Corporal -->
+    <CheckBox
+        android:id="@+id/cbPesoCorporal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="¿Es peso corporal? (Calistenia)"
+        android:textColor="@color/negro"
+        android:layout_marginBottom="24dp"
+        android:textSize="14sp"
+        android:buttonTint="@color/negro" />
 
     <!-- Botonera -->
     <LinearLayout
