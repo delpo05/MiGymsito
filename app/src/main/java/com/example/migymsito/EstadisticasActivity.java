@@ -46,17 +46,17 @@ public class EstadisticasActivity extends HeaderActivity {
                     nombresSecciones.add(s.NombreSeccion);
                 }
 
+                // Usamos el layout personalizado dropdown_item
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(
                         this,
-                        android.R.layout.simple_dropdown_item_1line,
+                        R.layout.dropdown_item,
                         nombresSecciones
                 );
                 autoCompleteSecciones.setAdapter(adapter);
 
-                // Listener para cargar ejercicios cuando se selecciona una sección
                 autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
                     Seccion seleccionada = listaSecciones.get(position);
-                    autoCompleteEjercicios.setText(""); // Limpiar dropdown de ejercicios
+                    autoCompleteEjercicios.setText(""); 
                     cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
                 });
             });
@@ -67,9 +67,10 @@ public class EstadisticasActivity extends HeaderActivity {
 
     public void cargarEjerciciosDeSeccion(int idSeccion) {
         ejerciciosRepository.obtenerNombresEjerciciosPorSeccion(idSeccion, nombresEjercicios -> {
+            // Usamos el layout personalizado dropdown_item
             ArrayAdapter<String> adapter = new ArrayAdapter<>(
                     this,
-                    android.R.layout.simple_dropdown_item_1line,
+                    R.layout.dropdown_item,
                     nombresEjercicios
             );
             autoCompleteEjercicios.setAdapter(adapter);
@@ -82,9 +83,10 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private void configurarDropdownConsulta() {
         String[] opcionesConsulta = {"Progreso de Cargas", "Volumen de Entrenamiento", "Frecuencia"};
+        // Usamos el layout personalizado dropdown_item
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_dropdown_item_1line,
+                R.layout.dropdown_item,
                 opcionesConsulta
         );
         autoCompleteConsulta.setAdapter(adapter);
