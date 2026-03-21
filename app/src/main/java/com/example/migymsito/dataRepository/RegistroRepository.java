@@ -100,6 +100,14 @@ public class RegistroRepository {
         });
     }
 
+    // Nuevo método para obtener progreso de cargas (máximo por día)
+    public void obtenerProgresoCargas(int idEjercicio, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerProgresoCargas(idEjercicio);
+            notificar(callback, lista);
+        });
+    }
+
     public void obtenerTodosLosRegistrosDelUsuario(int idUsuario, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerTodosLosRegistrosDelUsuario(idUsuario);

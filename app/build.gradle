@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace 'com.example.migymsito'
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.migymsito"
@@ -36,14 +34,13 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
 
-    def room_version = "2.6.1" // O la versión que prefieras
+    // MPAndroidChart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
+    // Room
+    def room_version = "2.6.1"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
-
-    implementation "androidx.room:room-runtime:2.6.1"
-    annotationProcessor "androidx.room:room-compiler:2.6.1"
-
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
