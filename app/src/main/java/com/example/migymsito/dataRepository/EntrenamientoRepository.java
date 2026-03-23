@@ -37,6 +37,13 @@ public class EntrenamientoRepository {
         });
     }
 
+    public void obtenerEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+        executorService.execute(() -> {
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            notificar(callback, e);
+        });
+    }
+
     public void finalizarEntrenamiento(int idEntrenamiento) {
         executorService.execute(() -> {
             Entrenamiento e = entrenamientoDao.getEntrenamientoById(idEntrenamiento);
