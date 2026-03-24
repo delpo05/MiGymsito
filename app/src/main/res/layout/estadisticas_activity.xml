@@ -110,9 +110,9 @@
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:padding="12dp"
-                        android:textSize="14sp"
                         android:popupBackground="#1A1A1A"
-                        android:textColor="@color/blanco" />
+                        android:textColor="@color/blanco"
+                        android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton

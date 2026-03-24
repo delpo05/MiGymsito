@@ -127,7 +127,7 @@ public class EjerciciosActivity extends HeaderActivity {
         });
 
         btnFinalizarEntrenamiento.setOnClickListener(v -> {
-            MediaPlayer mp = MediaPlayer.create(this, R.raw.ronaldo);
+            MediaPlayer mp = MediaPlayer.create(this, R.raw.sonido3);
             if (mp != null) {
                 mp.start();
                 mp.setOnCompletionListener(MediaPlayer::release); 
@@ -145,7 +145,7 @@ public class EjerciciosActivity extends HeaderActivity {
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                                 finish();
-                            }, 3000); 
+                            }, 500);
                         } else {
                             Toast.makeText(this, "Error al finalizar", Toast.LENGTH_SHORT).show();
                             btnFinalizarEntrenamiento.setEnabled(true);
