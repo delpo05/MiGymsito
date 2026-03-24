@@ -14,7 +14,7 @@ import java.util.List;
 public interface RutinaDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    void insertarRutina(Rutina rutina);
+    long insertarRutina(Rutina rutina);
 
     @Update
     void actualizarRutina(Rutina rutina);
