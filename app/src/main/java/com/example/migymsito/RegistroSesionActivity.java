@@ -9,6 +9,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -33,6 +34,9 @@ public class RegistroSesionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Habilitamos EdgeToEdge para consistencia con el Login
+        EdgeToEdge.enable(this);
         setContentView(R.layout.registro_sesion_activity);
 
         usuarioRepository = new UsuarioRepository(getApplication());
@@ -51,7 +55,8 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
         etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
 
-        configurarWindowInsets(R.id.registro);
+        // Configuramos los insets para el contenedor principal 'main_registro'
+        configurarWindowInsets(R.id.main_registro);
     }
 
     private void mostrarDatePicker() {
@@ -75,7 +80,8 @@ public class RegistroSesionActivity extends AppCompatActivity {
         if (layout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                // Mantenemos el padding lateral del XML y sumamos los systemBars
+                v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), systemBars.bottom);
                 return insets;
             });
         }
@@ -124,7 +130,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
         usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, idGenerado -> {
             if (idGenerado != -1) {
                 Toast.makeText(RegistroSesionActivity.this, "Registro exitoso. Inicie sesión por primera vez.", Toast.LENGTH_LONG).show();
-                // Volvemos a la pantalla de Inicio de Sesión
                 finish();
             } else {
                 Toast.makeText(RegistroSesionActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();

@@ -40,22 +40,19 @@ public class RegistroRepository {
      */
     public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, int series, int reps, RepositoryCallback<Registro> callback) {
         executorService.execute(() -> {
-            // 1. Obtener o crear Entrenamiento activo (sin FechaFin)
-            List<Entrenamiento> entrenamientos = entrenamientoDao.getEntrenamientosByUsuario(idUsuario);
-            Entrenamiento entrenamientoActivo = null;
-            for (Entrenamiento e : entrenamientos) {
-                if (e.FechaFin == null && e.IdSeccion == idSeccion) {
-                    entrenamientoActivo = e;
-                    break;
-                }
-            }
+            // 1. Obtener Entrenamiento activo específicamente para esta sección
+            Entrenamiento entrenamientoActivo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
 
             if (entrenamientoActivo == null) {
                 entrenamientoActivo = new Entrenamiento();
                 entrenamientoActivo.IdUsuario = idUsuario;
                 entrenamientoActivo.IdSeccion = idSeccion;
                 entrenamientoActivo.FechaInicio = System.currentTimeMillis();
-                entrenamientoActivo.NumeroEntrenamiento = entrenamientos.size() + 1;
+                
+                // Calcular el número correlativo de entrenamientos totales del usuario
+                List<Entrenamiento> todos = entrenamientoDao.getEntrenamientosByUsuario(idUsuario);
+                entrenamientoActivo.NumeroEntrenamiento = todos.size() + 1;
+                
                 long idEnt = entrenamientoDao.insert(entrenamientoActivo);
                 entrenamientoActivo.IdEntrenamiento = (int) idEnt;
             }
@@ -96,6 +93,36 @@ public class RegistroRepository {
     public void obtenerHistorialPorEjercicio(int idUsuario, int idEjercicio, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerHistorialPorEjercicioYUsuario(idUsuario, idEjercicio);
+            notificar(callback, lista);
+        });
+    }
+
+    /**
+     * Obtiene el historial del ejercicio pero filtrado por el entrenamiento activo.
+     * Esto permite que el contador de series se reinicie en cada nuevo entrenamiento.
+     */
+    public void obtenerRegistrosEntrenamientoActivo(int idUsuario, int idSeccion, int idEjercicio, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            if (activo != null) {
+                List<Registro> lista = registroDao.obtenerHistorialPorEjercicioYUsuario(idUsuario, idEjercicio);
+                // Filtrar solo los que pertenecen a este entrenamiento
+                java.util.List<Registro> filtrados = new java.util.ArrayList<>();
+                for (Registro r : lista) {
+                    if (r.IdEntrenamiento == activo.IdEntrenamiento) {
+                        filtrados.add(r);
+                    }
+                }
+                notificar(callback, filtrados);
+            } else {
+                notificar(callback, new java.util.ArrayList<>());
+            }
+        });
+    }
+
+    public void obtenerProgresoCargas(int idEjercicio, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerProgresoCargas(idEjercicio);
             notificar(callback, lista);
         });
     }

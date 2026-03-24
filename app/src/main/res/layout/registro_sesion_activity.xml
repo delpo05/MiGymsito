@@ -6,240 +6,230 @@
     android:background="@color/negro"
     android:fillViewport="true">
 
-    <TableLayout
-        android:id="@+id/registro"
+    <LinearLayout
+        android:id="@+id/main_registro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="24dp"
-        android:stretchColumns="0,1">
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingBottom="60dp">
+
+        <!-- Aumentamos el espacio superior para bajar todo el contenido -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:gravity="center"
             android:text="REGISTRO"
             android:textColor="@color/blanco"
-            android:textSize="32sp"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- Fila 1: Nombre de usuario -->
-        <TableRow
+        <!-- CARD PARA AGRUPAR EL FORMULARIO -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="32dp"
+            app:cardBackgroundColor="#111111"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="#1F1F1F"
+            app:strokeWidth="1dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:hint="Nombre"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegNombre"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-            
-        </TableRow>
-        
-        <!-- Fila 2: Correo de usuario -->
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Correo"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegCorreo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </TableRow>
-
-        <!-- Fila 3: Contraseña -->
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:hint="Contraseña"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista"
-                app:passwordToggleEnabled="true"
-                app:passwordToggleTint="@color/blanco">
+                android:orientation="vertical"
+                android:padding="28dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegContrasenia"
+                <!-- Nombre -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </TableRow>
+                    android:layout_marginBottom="20dp"
+                    android:hint="Nombre completo"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco"
+                    android:textColorHint="#999999">
 
-        <!-- Fila 4: Fecha de Nacimiento y Género -->
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRegNombre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:hint="Fecha nacimiento"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegFechaNac"
+                <!-- Correo -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginBottom="20dp"
+                    android:hint="Correo electrónico"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco"
+                    android:textColorHint="#999999">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Género"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista"
-                app:endIconTint="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRegCorreo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/etRegGenero"
+                <!-- Contraseña -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </TableRow>
+                    android:layout_marginBottom="20dp"
+                    android:hint="Contraseña"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco"
+                    android:textColorHint="#999999"
+                    app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="@color/blanco">
 
-        <!-- Fila 5: Peso y Altura -->
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRegContrasenia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:textColor="@color/blanco"
+                        android:textStyle="bold" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:hint="Peso (kg)"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegPeso"
+                <!-- Fecha y Género -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="20dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Altura (cm)"
-                app:hintTextColor="@color/gris_pista"
-                app:boxStrokeColor="@color/blanco"
-                android:textColorHint="@color/gris_pista">
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:hint="Nacimiento"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="#999999">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRegAltura"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRegFechaNac"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:textColor="@color/blanco"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Género"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="#999999"
+                        app:endIconTint="@color/blanco">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/etRegGenero"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="@color/blanco"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <!-- Peso y Altura -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:textColor="@color/blanco"
-                    android:textStyle="bold" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </TableRow>
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:hint="Peso (kg)"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="#999999">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRegPeso"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textColor="@color/blanco"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Altura (cm)"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="#999999">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etRegAltura"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textColor="@color/blanco"
+                            android:textStyle="bold" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Botón REGISTRAR -->
-        <TableRow
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegistrar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
-
-            <Button
-                android:id="@+id/btnRegistrar"
-                android:layout_width="250dp"
-                android:layout_height="60dp"
-                android:layout_span="2"
-                android:backgroundTint="@color/blanco"
-                android:onClick="EventoBotonRegistrar"
-                android:text="REGISTRAR"
-                android:textColor="@color/negro"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:cornerRadius="30dp" />
-        </TableRow>
+            android:layout_height="60dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginBottom="40dp"
+            android:onClick="EventoBotonRegistrar"
+            android:text="REGISTRAR"
+            android:textColor="@color/negro"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/blanco"
+            app:cornerRadius="30dp" />
 
         <!-- Botón VOLVER -->
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:onClick="EventoBotonVolver"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="@color/blanco" />
 
-            <ImageButton
-                android:id="@+id/btnVolver"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:background="@android:color/transparent"
-                android:contentDescription="Volver"
-                android:onClick="EventoBotonVolver"
-                android:src="@drawable/ic_back_arrow"
-                app:tint="@color/blanco" />
-        </TableRow>
-
-    </TableLayout>
+    </LinearLayout>
 </ScrollView>

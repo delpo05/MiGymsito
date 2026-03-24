@@ -8,6 +8,7 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity(
         tableName = "Seccion",
@@ -24,20 +25,30 @@ public class Seccion implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int IdSeccion;
 
-    // Se cambia a Integer para permitir nulos en secciones preestablecidas que no pertenecen a ninguna rutina de usuario
-    public Integer IdRutinaSeccion;  // FK
+    // Cambiado a Integer para permitir nulos en secciones preestablecidas (sin rutina inicial)
+    public Integer IdRutinaSeccion;  
 
     @NonNull
     public String NombreSeccion;
 
-    // Participa en SeccionesActivity para mostrar el nombre de la rutina en el popup de secciones previas
+    @NonNull
+    public String TipoSeccion = "Personalizado"; 
+
     @Ignore
     public String nombreRutina;
 
-    /**
-     * Define el origen de la sección.
-     * Puede ser "Preestablecido" o "Personalizado".
-     */
-    @NonNull
-    public String TipoSeccion = "Personalizado";
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Seccion seccion = (Seccion) o;
+        return IdSeccion == seccion.IdSeccion &&
+                Objects.equals(IdRutinaSeccion, seccion.IdRutinaSeccion) &&
+                NombreSeccion.equals(seccion.NombreSeccion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(IdSeccion, IdRutinaSeccion, NombreSeccion);
+    }
 }

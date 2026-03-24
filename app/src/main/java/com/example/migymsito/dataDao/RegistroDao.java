@@ -35,6 +35,18 @@ public interface RegistroDao {
            "ORDER BY Registro.FechaRegistro DESC")
     List<Registro> obtenerHistorialPorEjercicioYUsuario(int idUsuario, int idEjercicio);
 
+    // Query corregida: Obtenemos solo los campos necesarios para el progreso
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "AND r.PesoRegistro = (" +
+            "   SELECT MAX(r2.PesoRegistro) " +
+            "   FROM Registro r2 " +
+            "   WHERE (r2.FechaRegistro / 86400000) = (r.FechaRegistro / 86400000) " +
+            ") " +
+            "ORDER BY r.FechaRegistro ASC")
+    List<Registro> obtenerProgresoCargas(int idEjercicio);
+
     @Query("SELECT Registro.* FROM Registro " +
            "JOIN Entrenamiento ON Registro.IdEntrenamiento = Entrenamiento.IdEntrenamiento " +
            "WHERE Entrenamiento.IdUsuario = :idUsuario " +

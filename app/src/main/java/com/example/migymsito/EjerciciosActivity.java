@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,8 +36,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 
 import java.io.File;
@@ -54,7 +55,9 @@ public class EjerciciosActivity extends HeaderActivity {
     private GridView gvEjercicios;
     private EjercicioRepository ejercicioRepository;
     private SeccionRepository seccionRepository;
+    private EntrenamientoRepository entrenamientoRepository;
     private EjerciciosAdapter adapter;
+    private Button btnFinalizarEntrenamiento;
 
     private Uri uriImagenSeleccionada;
     private ImageView ivPreviewImagen;
@@ -67,6 +70,22 @@ public class EjerciciosActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
 
+        if (getIntent() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+            } else {
+                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
+            }
+        }
+
+        gvEjercicios = findViewById(R.id.gvGenerico);
+        tvTituloGrid = findViewById(R.id.tvTituloGrid);
+        btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
+
+        configurarGridView();
+        configurarBotonFinalizar();
+        configurarWindowInsets(R.id.layout_contenedor_grid);
+        
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -91,330 +110,50 @@ public class EjerciciosActivity extends HeaderActivity {
                     }
                 }
         );
+    }
 
-        if (getIntent() != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                seccionActual = getIntent().getSerializableExtra("seccion", Seccion.class);
+    private void configurarBotonFinalizar() {
+        if (btnFinalizarEntrenamiento == null || seccionActual == null || usuarioLogueado == null) {
+            if (btnFinalizarEntrenamiento != null) btnFinalizarEntrenamiento.setVisibility(View.GONE);
+            return;
+        }
+
+        entrenamientoRepository.obtenerEntrenamientoActivoPorSeccion(usuarioLogueado.IdUsuario, seccionActual.IdSeccion, entrenamiento -> {
+            if (entrenamiento != null) {
+                btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
+                btnFinalizarEntrenamiento.setEnabled(true);
             } else {
-                seccionActual = (Seccion) getIntent().getSerializableExtra("seccion");
-            }
-        }
-
-        gvEjercicios = findViewById(R.id.gvGenerico);
-        tvTituloGrid = findViewById(R.id.tvTituloGrid);
-
-        configurarGridView();
-        configurarWindowInsets(R.id.layout_contenedor_grid);
-    }
-
-    private void abrirCamara() {
-        File photoFile = null;
-        try {
-            photoFile = crearArchivoImagen();
-        } catch (IOException ex) {
-            Toast.makeText(this, "Error al crear el archivo de imagen", Toast.LENGTH_SHORT).show();
-        }
-
-        if (photoFile != null) {
-            uriFotoCamara = FileProvider.getUriForFile(this,
-                    "com.example.migymsito.fileprovider",
-                    photoFile);
-            cameraLauncher.launch(uriFotoCamara);
-        }
-    }
-
-    private File crearArchivoImagen() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFileName, ".jpg", storageDir);
-    }
-
-    private void mostrarOpcionesImagen(View view) {
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.getMenu().add("Cámara");
-        popup.getMenu().add("Galería");
-
-        popup.setOnMenuItemClickListener(item -> {
-            if ("Cámara".equals(item.getTitle())) {
-                abrirCamara();
-            } else if ("Galería".equals(item.getTitle())) {
-                galleryLauncher.launch("image/*");
-            }
-            return true;
-        });
-        popup.show();
-    }
-
-    private void configurarGridView() {
-        if (seccionActual != null) {
-            tvTituloGrid.setText("Ejercicios de " + seccionActual.NombreSeccion);
-        } else {
-            tvTituloGrid.setText("Mis Ejercicios");
-        }
-
-        ejercicioRepository = new EjercicioRepository(getApplication());
-        seccionRepository = new SeccionRepository(getApplication());
-
-        adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
-            @Override
-            public void onAddClick() {
-                mostrarPopUpAnadirEjercicio();
-            }
-
-            @Override
-            public void onEjercicioClick(Ejercicio ejercicio) {
-                Intent intent = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
-                intent.putExtra("ejercicio", ejercicio);
-                intent.putExtra("seccion", seccionActual);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onOptionsClick(View view, Ejercicio ejercicio) {
-                mostrarMenuOpciones(view, ejercicio);
+                btnFinalizarEntrenamiento.setVisibility(View.GONE);
             }
         });
 
-        gvEjercicios.setAdapter(adapter);
-        cargarEjerciciosDesdeDB();
-    }
-
-    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        TextView tvNombre = dialog.findViewById(R.id.tvNombrePopUp);
-        if (tvNombre != null) {
-            tvNombre.setText(ejercicio.NombreEjercicio);
-        }
-
-        View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
-        if (btnEliminar != null) {
-            btnEliminar.setOnClickListener(v -> {
-                ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
-                dialog.dismiss();
-                new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 200);
-            });
-        }
-
-        View btnModificar = dialog.findViewById(R.id.btnModificarPopUp);
-        if (btnModificar != null) {
-            btnModificar.setOnClickListener(v -> {
-                dialog.dismiss();
-                mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
-            });
-        }
-
-        View btnCancelar = dialog.findViewById(R.id.btnCancelarPopUp);
-        if (btnCancelar != null) {
-            btnCancelar.setOnClickListener(v -> dialog.dismiss());
-        }
-
-        dialog.show();
-    }
-
-    private void mostrarPopUpAnadirEjercicio() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_dos_opciones);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
-        TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
-        TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
-
-        tvTitulo.setText("Añadir Ejercicio");
-        tvOpcionIzq.setText("Ejercicios\nCreados");
-        tvOpcionDer.setText("Nuevo\nEjercicio");
-
-        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
-
-        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpEleccionTipoEjercicio();
-        });
-
-        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpCrearEjercicioPersonalizado(null);
-        });
-
-        dialog.show();
-    }
-
-    private void mostrarPopUpEleccionTipoEjercicio() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_dos_opciones);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
-        TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
-        TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
-
-        tvTitulo.setText("Tipo de Ejercicio");
-        tvOpcionIzq.setText("Ejercicios\nPrestablecidos");
-        tvOpcionDer.setText("Ejercicios\nPersonalizados");
-
-        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpAnadirEjercicio();
-        });
-
-        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion("Preestablecido");
-        });
-
-        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion("Personalizado");
-        });
-
-        dialog.show();
-    }
-
-    private void mostrarPopUpSeccionesParaSeleccion(String tipo) {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.pop_up_secciones_previas);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpPrevias);
-        if (tvTitulo != null) {
-            tvTitulo.setText(tipo.equals("Preestablecido") ? "Secciones Prestablecidas" : "Secciones Personalizadas");
-        }
-
-        GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
-        Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
-
-        btnCancelar.setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpEleccionTipoEjercicio();
-        });
-
-        SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
-            List<Seccion> listaAMostrar = new ArrayList<>();
-            for (Seccion s : secciones) {
-                if (seccionActual != null && s.IdSeccion == seccionActual.IdSeccion) {
-                    continue;
-                }
-                listaAMostrar.add(s);
+        btnFinalizarEntrenamiento.setOnClickListener(v -> {
+            // USAMOS MEDIAPLAYER PARA EL SIUUU
+            MediaPlayer mp = MediaPlayer.create(this, R.raw.ronaldo);
+            if (mp != null) {
+                mp.start();
+                mp.setOnCompletionListener(MediaPlayer::release); // Liberar memoria al terminar
             }
 
-            gvPopup.setAdapter(new BaseAdapter() {
-                @Override public int getCount() { return listaAMostrar.size(); }
-                @Override public Object getItem(int i) { return listaAMostrar.get(i); }
-                @Override public long getItemId(int i) { return i; }
-                @Override public View getView(int position, View convertView, ViewGroup parent) {
-                    if (convertView == null) {
-                        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
-                    }
-                    Seccion s = listaAMostrar.get(position);
-                    TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
-                    TextView tvDetalle = convertView.findViewById(R.id.tv_nombre_rutina_previa);
-                    View container = convertView.findViewById(R.id.container_item_previa);
+            btnFinalizarEntrenamiento.setEnabled(false);
 
-                    tvNombre.setText(s.NombreSeccion);
-                    tvDetalle.setText(s.TipoSeccion);
-
-                    GradientDrawable shape = new GradientDrawable();
-                    shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
-                    shape.setStroke(4, Color.BLACK);
-                    shape.setColor(Color.WHITE);
-                    container.setBackground(shape);
-
-                    convertView.setOnClickListener(v -> {
-                        dialog.dismiss();
-                        mostrarPopUpEjerciciosDeSeccionSeleccionada(s);
+            entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
+                    usuarioLogueado.IdUsuario, seccionActual.IdSeccion, success -> {
+                        if (success != null && success) {
+                            Toast.makeText(this, "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
+                            
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                Intent intent = new Intent(this, RutinasActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            }, 3000); // 3 segundos de SIUUU
+                        } else {
+                            Toast.makeText(this, "Error al finalizar", Toast.LENGTH_SHORT).show();
+                            btnFinalizarEntrenamiento.setEnabled(true);
+                        }
                     });
-                    return convertView;
-                }
-            });
-        };
-
-        if (tipo.equals("Preestablecido")) {
-            seccionRepository.obtenerSeccionesPreestablecidas(callback);
-        } else {
-            seccionRepository.obtenerSeccionesPersonalizadas(callback);
-        }
-
-        dialog.show();
-    }
-
-    private void mostrarPopUpEjerciciosDeSeccionSeleccionada(Seccion seccionSeleccionada) {
-        Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.pop_up_ejercicios_preestablecidos);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        }
-
-        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicios);
-        if (tvTitulo != null) {
-            tvTitulo.setText("Ejercicios de " + seccionSeleccionada.NombreSeccion);
-        }
-
-        GridView gvPopup = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
-        Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicios);
-
-        btnCancelar.setOnClickListener(v -> {
-            dialog.dismiss();
-            mostrarPopUpSeccionesParaSeleccion(seccionSeleccionada.TipoSeccion);
         });
-
-        ejercicioRepository.obtenerEjerciciosPorSeccion(seccionSeleccionada.IdSeccion, ejercicios -> {
-            gvPopup.setAdapter(new BaseAdapter() {
-                @Override public int getCount() { return ejercicios.size(); }
-                @Override public Object getItem(int i) { return ejercicios.get(i); }
-                @Override public long getItemId(int i) { return i; }
-                @Override public View getView(int position, View convertView, ViewGroup parent) {
-                    if (convertView == null) {
-                        convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ejercicio_previo, parent, false);
-                    }
-                    Ejercicio e = ejercicios.get(position);
-                    TextView tvNombre = convertView.findViewById(R.id.tv_nombre_ejercicio_previo);
-                    TextView tvTipo = convertView.findViewById(R.id.tv_tipo_ejercicio_previo);
-                    ImageView ivImagen = convertView.findViewById(R.id.iv_ejercicio_previo);
-                    View container = convertView.findViewById(R.id.container_item_ejercicio_previo);
-
-                    tvNombre.setText(e.NombreEjercicio);
-                    tvTipo.setText("Tipo: " + e.TipoEjercicio);
-
-                    if (e.ImagenEjercicio != null && !e.ImagenEjercicio.isEmpty()) {
-                        ivImagen.setVisibility(View.VISIBLE);
-                        ivImagen.setImageURI(Uri.parse(e.ImagenEjercicio));
-                    } else {
-                        ivImagen.setVisibility(View.GONE);
-                    }
-
-                    GradientDrawable shape = new GradientDrawable();
-                    shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
-                    shape.setStroke(4, Color.BLACK);
-                    shape.setColor(Color.WHITE);
-                    container.setBackground(shape);
-
-                    convertView.setOnClickListener(v -> {
-                        ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
-                        dialog.dismiss();
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> cargarEjerciciosDesdeDB(), 300);
-                    });
-                    return convertView;
-                }
-            });
-        });
-
-        dialog.show();
     }
 
     private void mostrarPopUpCrearEjercicioPersonalizado(Ejercicio ejercicioExistente) {
@@ -448,61 +187,192 @@ public class EjerciciosActivity extends HeaderActivity {
 
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
-            if (ejercicioExistente == null) {
-                mostrarPopUpAnadirEjercicio();
-            }
+            if (ejercicioExistente == null) mostrarPopUpAnadirEjercicio();
         });
 
         btnAceptar.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
             if (nombre.isEmpty()) {
-                etNombre.setError("Campo obligatorio");
+                etNombre.setError("Requerido");
                 return;
             }
-
-            boolean esPesoCorporal = cbPesoCorporal.isChecked();
 
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
-                nuevo.PesoCorporalEjercicio = esPesoCorporal;
-                if (uriImagenSeleccionada != null) {
-                    nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
-                }
+                nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                if (uriImagenSeleccionada != null) nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
 
-                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, (Boolean success) -> {
-                    if (success != null && success) {
-                        dialog.dismiss();
-                        new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
-                    }
+                ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
+                    dialog.dismiss();
+                    new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
                 });
             } else {
                 Ejercicio editado = new Ejercicio();
                 editado.IdEjercicio = ejercicioExistente.IdEjercicio; 
                 editado.NombreEjercicio = nombre;
+                // CORRECCIÓN AQUÍ: Usamos ImagenEjercicio en lugar de IdEjercicio
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = "Personalizado";
-                editado.PesoCorporalEjercicio = esPesoCorporal;
+                editado.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
 
-                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, (Boolean success) -> {
-                    if (success != null && success) {
-                        dialog.dismiss();
-                        new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
-                    }
+                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, success -> {
+                    dialog.dismiss();
+                    new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
                 });
             }
         });
-
         dialog.show();
+    }
+
+    // --- MÉTODOS DE APOYO (Se mantienen igual) ---
+    private void configurarGridView() {
+        if (seccionActual != null) tvTituloGrid.setText("Ejercicios de " + seccionActual.NombreSeccion);
+        ejercicioRepository = new EjercicioRepository(getApplication());
+        seccionRepository = new SeccionRepository(getApplication());
+        entrenamientoRepository = new EntrenamientoRepository(getApplication());
+        adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
+            @Override public void onAddClick() { mostrarPopUpAnadirEjercicio(); }
+            @Override public void onEjercicioClick(Ejercicio ej) {
+                Intent i = new Intent(EjerciciosActivity.this, CargarRegistroActivity.class);
+                i.putExtra("ejercicio", ej); i.putExtra("seccion", seccionActual);
+                startActivity(i);
+            }
+            @Override public void onOptionsClick(View v, Ejercicio ej) { mostrarMenuOpciones(v, ej); }
+        });
+        gvEjercicios.setAdapter(adapter);
+        cargarEjerciciosDesdeDB();
     }
 
     private void cargarEjerciciosDesdeDB() {
         if (seccionActual != null) {
-            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> {
-                adapter.setEjercicios(ejercicios);
-            });
+            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> adapter.setEjercicios(ejercicios));
         }
+    }
+
+    private void abrirCamara() {
+        File photoFile = null;
+        try { photoFile = crearArchivoImagen(); } catch (IOException ex) {}
+        if (photoFile != null) {
+            uriFotoCamara = FileProvider.getUriForFile(this, "com.example.migymsito.fileprovider", photoFile);
+            cameraLauncher.launch(uriFotoCamara);
+        }
+    }
+
+    private File crearArchivoImagen() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile("JPEG_" + timeStamp + "_", ".jpg", storageDir);
+    }
+
+    private void mostrarOpcionesImagen(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenu().add("Cámara"); popup.getMenu().add("Galería");
+        popup.setOnMenuItemClickListener(item -> {
+            if ("Cámara".equals(item.getTitle())) abrirCamara();
+            else galleryLauncher.launch("image/*");
+            return true;
+        });
+        popup.show();
+    }
+
+    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_modificar_eliminar);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        TextView tv = dialog.findViewById(R.id.tvNombrePopUp);
+        if (tv != null) tv.setText(ejercicio.NombreEjercicio);
+        dialog.findViewById(R.id.btnEliminarPopUp).setOnClickListener(v -> {
+            ejercicioRepository.eliminarEjercicioDeSeccion(ejercicio.IdEjercicio, seccionActual.IdSeccion);
+            dialog.dismiss();
+            new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 200);
+        });
+        dialog.findViewById(R.id.btnModificarPopUp).setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarPopUpCrearEjercicioPersonalizado(ejercicio);
+        });
+        dialog.findViewById(R.id.btnCancelarPopUp).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void mostrarPopUpAnadirEjercicio() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_dos_opciones);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
+        tvTitulo.setText("Añadir Ejercicio");
+        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpEleccionTipoEjercicio(); });
+        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpCrearEjercicioPersonalizado(null); });
+        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void mostrarPopUpEleccionTipoEjercicio() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_dos_opciones);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
+        tvTitulo.setText("Tipo de Ejercicio");
+        dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpSeccionesParaSeleccion("Preestablecido"); });
+        dialog.findViewById(R.id.btnOpcionDerecha).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpSeccionesParaSeleccion("Personalizado"); });
+        dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpAnadirEjercicio(); });
+        dialog.show();
+    }
+
+    private void mostrarPopUpSeccionesParaSeleccion(String tipo) {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.pop_up_secciones_previas);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
+        SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
+            List<Seccion> lista = new ArrayList<>();
+            for (Seccion s : secciones) if (seccionActual == null || s.IdSeccion != seccionActual.IdSeccion) lista.add(s);
+            gvPopup.setAdapter(new BaseAdapter() {
+                @Override public int getCount() { return lista.size(); }
+                @Override public Object getItem(int i) { return lista.get(i); }
+                @Override public long getItemId(int i) { return i; }
+                @Override public View getView(int pos, View v, ViewGroup p) {
+                    if (v == null) v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_seccion_previa, p, false);
+                    Seccion s = lista.get(pos);
+                    ((TextView)v.findViewById(R.id.tv_nombre_seccion_previa)).setText(s.NombreSeccion);
+                    v.setOnClickListener(view -> { dialog.dismiss(); mostrarPopUpEjerciciosDeSeccionSeleccionada(s); });
+                    return v;
+                }
+            });
+        };
+        if (tipo.equals("Preestablecido")) seccionRepository.obtenerSeccionesPreestablecidas(callback);
+        else seccionRepository.obtenerSeccionesPersonalizadas(callback);
+        dialog.findViewById(R.id.btnCancelarPrevias).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpEleccionTipoEjercicio(); });
+        dialog.show();
+    }
+
+    private void mostrarPopUpEjerciciosDeSeccionSeleccionada(Seccion seccionSel) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_ejercicios_preestablecidos);
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        GridView gv = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
+        ejercicioRepository.obtenerEjerciciosPorSeccion(seccionSel.IdSeccion, ejercicios -> {
+            gv.setAdapter(new BaseAdapter() {
+                @Override public int getCount() { return ejercicios.size(); }
+                @Override public Object getItem(int i) { return ejercicios.get(i); }
+                @Override public long getItemId(int i) { return i; }
+                @Override public View getView(int pos, View v, ViewGroup p) {
+                    if (v == null) v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_ejercicio_previo, p, false);
+                    Ejercicio e = ejercicios.get(pos);
+                    ((TextView)v.findViewById(R.id.tv_nombre_ejercicio_previo)).setText(e.NombreEjercicio);
+                    v.setOnClickListener(view -> {
+                        ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
+                        dialog.dismiss();
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> cargarEjerciciosDesdeDB(), 300);
+                    });
+                    return v;
+                }
+            });
+        });
+        dialog.findViewById(R.id.btnCancelarEjercicios).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpSeccionesParaSeleccion(seccionSel.TipoSeccion); });
+        dialog.show();
     }
 
     private void configurarWindowInsets(int layoutId) {
@@ -515,4 +385,6 @@ public class EjerciciosActivity extends HeaderActivity {
             });
         }
     }
+
+    @Override protected void onResume() { super.onResume(); configurarBotonFinalizar(); }
 }

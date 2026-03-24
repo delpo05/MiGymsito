@@ -82,25 +82,19 @@ public class EjercicioRepository {
         });
     }
 
-    // ACTUALIZADO: Ahora acepta un callback para avisar cuando termina
     public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             try {
-                // 1. Crear una copia del ejercicio con los nuevos datos (Nombre/Imagen)
                 Ejercicio nuevoEj = new Ejercicio();
                 nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
                 nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
                 nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
                 nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
 
-                // 2. Insertarlo como un ejercicio nuevo
                 long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
-
-                // 3. Buscar la relación actual de esta sección
                 SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
 
                 if (relacion != null) {
-                    // 4. Actualizar la relación para que apunte al nuevo ID
                     relacion.IdEjercicio = (int) nuevoIdEjercicio;
                     seccionXejercicioDao.update(relacion);
                 }
@@ -117,7 +111,6 @@ public class EjercicioRepository {
         });
     }
 
-    // NUEVO: Elimina solo el vínculo entre el ejercicio y la sección actual
     public void eliminarEjercicioDeSeccion(int idEjercicio, int idSeccion) {
         executorService.execute(() -> {
             SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, idEjercicio);
@@ -141,6 +134,29 @@ public class EjercicioRepository {
                 mainThreadHandler.post(() -> callback.onResult(ejercicios));
             } catch (Exception e) {
                 Log.e(TAG, "Error al obtener ejercicios: " + e.getMessage());
+                mainThreadHandler.post(() -> callback.onResult(new ArrayList<>()));
+            }
+        });
+    }
+
+    /**
+     * NUEVO: Obtiene solo los nombres de los ejercicios de una sección.
+     * Ideal para llenar dropdowns en Estadísticas.
+     */
+    public void obtenerNombresEjerciciosPorSeccion(int idSeccion, RepositoryCallback<List<String>> callback) {
+        executorService.execute(() -> {
+            try {
+                List<SeccionXejercicio> relaciones = seccionXejercicioDao.getEjerciciosBySeccion(idSeccion);
+                List<String> nombres = new ArrayList<>();
+                for (SeccionXejercicio rel : relaciones) {
+                    Ejercicio ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
+                    if (ej != null) {
+                        nombres.add(ej.NombreEjercicio);
+                    }
+                }
+                mainThreadHandler.post(() -> callback.onResult(nombres));
+            } catch (Exception e) {
+                Log.e(TAG, "Error al obtener nombres de ejercicios: " + e.getMessage());
                 mainThreadHandler.post(() -> callback.onResult(new ArrayList<>()));
             }
         });

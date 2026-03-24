@@ -45,31 +45,18 @@ public class CargarRegistroActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cargar_registro_activity);
 
-        // 1. Intentamos obtener el usuario de la sesión global primero
         if (usuarioLogueado != null) {
             idUsuario = usuarioLogueado.IdUsuario;
         }
 
-        // 2. Recuperar datos del Intent (Ejercicio y Sección)
         Ejercicio ejercicio;
         Seccion seccion;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ejercicio = getIntent().getSerializableExtra("ejercicio", Ejercicio.class);
             seccion = getIntent().getSerializableExtra("seccion", Seccion.class);
-            // Si el usuario viene en el intent, lo priorizamos (por compatibilidad)
-            Usuario uIntent = getIntent().getSerializableExtra("usuario", Usuario.class);
-            if (uIntent != null) {
-                usuarioLogueado = uIntent;
-                idUsuario = uIntent.IdUsuario;
-            }
         } else {
             ejercicio = (Ejercicio) getIntent().getSerializableExtra("ejercicio");
             seccion = (Seccion) getIntent().getSerializableExtra("seccion");
-            Usuario uIntent = (Usuario) getIntent().getSerializableExtra("usuario");
-            if (uIntent != null) {
-                usuarioLogueado = uIntent;
-                idUsuario = uIntent.IdUsuario;
-            }
         }
 
         if (ejercicio != null) {
@@ -82,7 +69,6 @@ public class CargarRegistroActivity extends HeaderActivity {
             idSeccion = seccion.IdSeccion;
         }
 
-        // Validación de seguridad
         if (idUsuario == 0) {
             Toast.makeText(this, "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
             finish();
@@ -96,7 +82,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         setupRecyclerView();
 
         if (idEjercicio != 0) {
-            cargarHistorial();
+            cargarSeriesDelDia();
         }
     }
 
@@ -117,7 +103,6 @@ public class CargarRegistroActivity extends HeaderActivity {
 
         tvNombreEjercicio.setText(nombreEjercicio);
 
-        // Si es peso corporal, cambiamos los labels para que sea más intuitivo
         if (esPesoCorporal) {
             tvPesoLabel.setText("Lastre (kg)");
             tvColumnaPeso.setText("Lastre");
@@ -153,8 +138,9 @@ public class CargarRegistroActivity extends HeaderActivity {
         } catch (Exception e) { et.setText("0"); }
     }
 
-    private void cargarHistorial() {
-        registroRepository.obtenerHistorialPorEjercicio(idUsuario, idEjercicio, registros -> {
+    private void cargarSeriesDelDia() {
+        // Usamos el nuevo método que filtra solo por el entrenamiento activo
+        registroRepository.obtenerRegistrosEntrenamientoActivo(idUsuario, idSeccion, idEjercicio, registros -> {
             listaHistorial.clear();
             listaHistorial.addAll(registros);
             adapter.notifyDataSetChanged();
@@ -180,8 +166,6 @@ public class CargarRegistroActivity extends HeaderActivity {
         String repStr = etRepeticiones.getText().toString();
         String pesoStr = etPeso.getText().toString();
 
-        // Si no es peso corporal, el peso 0 podría no ser deseado, pero en calistenia es lo normal.
-        // Validamos que al menos las repeticiones sean > 0.
         if (repStr.isEmpty() || repStr.equals("0")) {
             Toast.makeText(this, "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
@@ -204,6 +188,10 @@ public class CargarRegistroActivity extends HeaderActivity {
                 serieActual++;
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
+                
+                // Limpiar campos para la siguiente serie
+                etRepeticiones.setText("");
+                if (!esPesoCorporal) etPeso.setText("");
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }

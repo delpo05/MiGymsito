@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 10, exportSchema = false)
+}, version = 11, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
