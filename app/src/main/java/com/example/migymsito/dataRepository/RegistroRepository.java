@@ -127,6 +127,13 @@ public class RegistroRepository {
         });
     }
 
+    public void obtenerVolumenEntrenamiento(int idEjercicio, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerRegistrosParaVolumen(idEjercicio);
+            notificar(callback, lista);
+        });
+    }
+
     public void obtenerTodosLosRegistrosDelUsuario(int idUsuario, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerTodosLosRegistrosDelUsuario(idUsuario);

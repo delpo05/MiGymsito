@@ -23,9 +23,12 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class EstadisticasActivity extends HeaderActivity {
 
@@ -143,25 +146,64 @@ public class EstadisticasActivity extends HeaderActivity {
                     barChart.clear();
                     return;
                 }
-                mostrarGraficoBarras(registros);
+                mostrarGraficoBarras(registros, "Peso Máximo (kg)", false);
+            });
+        } else if (consulta.equals("Volumen de Entrenamiento")) {
+            registroRepository.obtenerVolumenEntrenamiento(ejercicioSeleccionado.IdEjercicio, registros -> {
+                if (registros == null || registros.isEmpty()) {
+                    Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
+                    barChart.clear();
+                    return;
+                }
+                mostrarGraficoBarras(registros, "Volumen Total (kg)", true);
             });
         } else {
             Toast.makeText(this, "Consulta no implementada aún", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void mostrarGraficoBarras(List<Registro> registros) {
+    private void mostrarGraficoBarras(List<Registro> registros, String etiqueta, boolean calcularVolumen) {
         List<BarEntry> entries = new ArrayList<>();
         final List<String> fechas = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
 
-        for (int i = 0; i < registros.size(); i++) {
-            Registro r = registros.get(i);
-            entries.add(new BarEntry(i, r.PesoRegistro.floatValue()));
-            fechas.add(sdf.format(new Date(r.FechaRegistro)));
+        // Usamos un Map para consolidar los datos por fecha
+        Map<String, Float> datosConsolidados = new LinkedHashMap<>();
+
+        for (Registro r : registros) {
+            String fechaStr = sdf.format(new Date(r.FechaRegistro));
+            float valorRegistro;
+            
+            if (calcularVolumen) {
+                // VOLUMEN = Peso * Repeticiones
+                // Ya no multiplicamos por NumSeriesRegistro porque cada fila es una serie individual.
+                valorRegistro = r.PesoRegistro.floatValue() * r.Repeticiones;
+            } else {
+                // CARGA MÁXIMA
+                valorRegistro = r.PesoRegistro.floatValue();
+            }
+
+            if (datosConsolidados.containsKey(fechaStr)) {
+                if (calcularVolumen) {
+                    // Sumamos el volumen de cada serie realizada en el día
+                    datosConsolidados.put(fechaStr, datosConsolidados.get(fechaStr) + valorRegistro);
+                } else {
+                    // Nos quedamos con el máximo peso del día
+                    datosConsolidados.put(fechaStr, Math.max(datosConsolidados.get(fechaStr), valorRegistro));
+                }
+            } else {
+                datosConsolidados.put(fechaStr, valorRegistro);
+            }
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Peso Máximo (kg)");
+        // Convertir el Map a las entradas del gráfico
+        int i = 0;
+        for (Map.Entry<String, Float> entry : datosConsolidados.entrySet()) {
+            entries.add(new BarEntry(i++, entry.getValue()));
+            fechas.add(entry.getKey());
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, etiqueta);
         dataSet.setColor(Color.parseColor("#BB86FC"));
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(10f);

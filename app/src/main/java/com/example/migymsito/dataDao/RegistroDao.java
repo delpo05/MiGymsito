@@ -42,10 +42,18 @@ public interface RegistroDao {
             "AND r.PesoRegistro = (" +
             "   SELECT MAX(r2.PesoRegistro) " +
             "   FROM Registro r2 " +
-            "   WHERE (r2.FechaRegistro / 86400000) = (r.FechaRegistro / 86400000) " +
+            "   JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
+            "   WHERE sxe2.IdEjercicio = :idEjercicio " +
+            "   AND (r2.FechaRegistro / 86400000) = (r.FechaRegistro / 86400000) " +
             ") " +
             "ORDER BY r.FechaRegistro ASC")
     List<Registro> obtenerProgresoCargas(int idEjercicio);
+
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "ORDER BY r.FechaRegistro ASC")
+    List<Registro> obtenerRegistrosParaVolumen(int idEjercicio);
 
     @Query("SELECT Registro.* FROM Registro " +
            "JOIN Entrenamiento ON Registro.IdEntrenamiento = Entrenamiento.IdEntrenamiento " +
