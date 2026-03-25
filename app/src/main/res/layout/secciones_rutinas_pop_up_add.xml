@@ -49,6 +49,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/btnImportarRutina"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Importar Rutina"
+            android:textAllCaps="false"
+            android:backgroundTint="#545B61"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:gravity="center">
 
         <Button

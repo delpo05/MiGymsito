@@ -51,6 +51,7 @@
                 android:textStyle="bold" />
 
             <ImageView
+                android:id="@+id/ivIconoIzquierda"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_circle_white"
@@ -85,6 +86,7 @@
                 android:textStyle="bold" />
 
             <ImageView
+                android:id="@+id/ivIconoDerecha"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/bg_circle_white"
