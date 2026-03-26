@@ -9,11 +9,9 @@ import android.widget.Toast;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
-import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
-import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -34,21 +32,16 @@ import java.util.Map;
 
 public class EstadisticasActivity extends HeaderActivity {
 
-    private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
+    private AutoCompleteTextView autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private MaterialButton btnConsultarProgreso;
     private BarChart barChart;
     
-    private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
     private EjercicioRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
     
-    private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
     private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
-    
-    private Rutina rutinaSeleccionada;
-    private Seccion seccionSeleccionada;
     private Ejercicio ejercicioSeleccionado;
 
     @Override
@@ -57,19 +50,17 @@ public class EstadisticasActivity extends HeaderActivity {
         setContentView(R.layout.estadisticas_activity);
 
         // Inicializar vistas
-        autoCompleteRutinas = findViewById(R.id.autoCompleteRutinas);
         autoCompleteSecciones = findViewById(R.id.autoCompleteSecciones);
         autoCompleteEjercicios = findViewById(R.id.autoCompleteEjercicios);
         autoCompleteConsulta = findViewById(R.id.autoCompleteConsulta);
         btnConsultarProgreso = findViewById(R.id.btnConsultarProgreso);
         barChart = findViewById(R.id.barChart);
 
-        rutinaRepository = new RutinaRepository(getApplication());
         seccionRepository = new SeccionRepository(getApplication());
         ejerciciosRepository = new EjercicioRepository(getApplication());
         registroRepository = new RegistroRepository(getApplication());
 
-        cargarRutinasDelUsuario();
+        cargarSeccionesDelUsuario();
         configurarDropdownConsulta();
         configurarGrafico();
 
@@ -95,70 +86,63 @@ public class EstadisticasActivity extends HeaderActivity {
         barChart.setNoDataTextColor(Color.GRAY);
     }
 
-    private void cargarRutinasDelUsuario() {
+    private void cargarSeccionesDelUsuario() {
         if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
-                this.listaRutinas = rutinas;
-                List<String> nombresRutinas = new ArrayList<>();
-                for (Rutina r : rutinas) {
-                    nombresRutinas.add(r.NombreRutina);
+            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, secciones -> {
+                this.listaSecciones = secciones;
+                List<String> nombresSecciones = new ArrayList<>();
+                nombresSecciones.add("Todas las secciones"); 
+                
+                for (Seccion s : secciones) {
+                    nombresSecciones.add(s.NombreSeccion);
                 }
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresRutinas);
-                autoCompleteRutinas.setAdapter(adapter);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresSecciones);
+                autoCompleteSecciones.setAdapter(adapter);
 
-                autoCompleteRutinas.setOnItemClickListener((parent, view, position, id) -> {
-                    rutinaSeleccionada = listaRutinas.get(position);
-                    
-                    // Resetear los de abajo
-                    autoCompleteSecciones.setText("");
-                    autoCompleteEjercicios.setText("");
-                    seccionSeleccionada = null;
+                autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
+                    autoCompleteEjercicios.setText(""); 
                     ejercicioSeleccionado = null;
                     
-                    cargarSeccionesDeRutina(rutinaSeleccionada.IdRutina);
+                    if (position == 0) {
+                        // "Todas las secciones" -> Solo ejercicios con registros
+                        cargarEjerciciosEnUso();
+                    } else {
+                        // Sección específica
+                        Seccion seleccionada = listaSecciones.get(position - 1);
+                        cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
+                    }
                 });
             });
         }
     }
 
-    private void cargarSeccionesDeRutina(int idRutina) {
-        seccionRepository.obtenerSeccionesDeRutina(idRutina, secciones -> {
-            this.listaSecciones = secciones;
-            List<String> nombresSecciones = new ArrayList<>();
-            for (Seccion s : secciones) {
-                nombresSecciones.add(s.NombreSeccion);
-            }
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresSecciones);
-            autoCompleteSecciones.setAdapter(adapter);
-
-            autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
-                seccionSeleccionada = listaSecciones.get(position);
-                
-                // Resetear ejercicios
-                autoCompleteEjercicios.setText("");
-                ejercicioSeleccionado = null;
-                
-                cargarEjerciciosDeSeccion(seccionSeleccionada.IdSeccion);
-            });
+    private void cargarEjerciciosDeSeccion(int idSeccion) {
+        ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
+            actualizarDropdownEjercicios(ejercicios);
         });
     }
 
-    private void cargarEjerciciosDeSeccion(int idSeccion) {
-        ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
-            this.listaEjerciciosActuales = ejercicios;
-            List<String> nombres = new ArrayList<>();
-            for (Ejercicio e : ejercicios) {
-                nombres.add(e.NombreEjercicio);
-            }
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
-            autoCompleteEjercicios.setAdapter(adapter);
-
-            autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
-                ejercicioSeleccionado = listaEjerciciosActuales.get(position);
+    private void cargarEjerciciosEnUso() {
+        if (usuarioLogueado != null) {
+            ejerciciosRepository.obtenerEjerciciosEnUso(usuarioLogueado.IdUsuario, ejercicios -> {
+                actualizarDropdownEjercicios(ejercicios);
             });
+        }
+    }
+
+    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+        this.listaEjerciciosActuales = ejercicios;
+        List<String> nombres = new ArrayList<>();
+        for (Ejercicio e : ejercicios) {
+            nombres.add(e.NombreEjercicio);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
+        autoCompleteEjercicios.setAdapter(adapter);
+
+        autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
+            ejercicioSeleccionado = listaEjerciciosActuales.get(position);
         });
     }
 
