@@ -3,6 +3,7 @@ package com.example.migymsito;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -143,6 +144,13 @@ public class DatosPersonalesActivity extends HeaderActivity {
 
         if (nuevoNombre.isEmpty() || nuevoCorreo.isEmpty() || nuevaPass.isEmpty()) {
             Toast.makeText(this, "Campos obligatorios incompletos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validación de correo
+        if (!Patterns.EMAIL_ADDRESS.matcher(nuevoCorreo).matches()) {
+            etCorreo.setError("Correo inválido");
+            Toast.makeText(this, "Por favor, introduce un correo electrónico válido", Toast.LENGTH_SHORT).show();
             return;
         }
 

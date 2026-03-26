@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp"> <!-- Reducido de 24dp para estirar a los costados -->
 
                 <!-- Saludo -->
                 <TextView
@@ -141,8 +141,8 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginEnd="6dp"
+                                android:layout_weight="0.9"
+                                android:layout_marginEnd="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
                                 android:textColorHint="@color/gris_pista"
@@ -161,8 +161,8 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="6dp"
+                                android:layout_weight="1.1"
+                                android:layout_marginStart="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
                                 android:textColorHint="@color/gris_pista"

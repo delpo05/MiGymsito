@@ -152,10 +152,18 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void actualizarSerieActual(List<Registro> registros) {
         if (!registros.isEmpty()) {
             int maxSerie = 0;
+            // El primer registro de la lista es el más reciente
+            Registro ultimoRegistro = registros.get(0);
+
             for (Registro r : registros) {
                 if (r.NumSeriesRegistro > maxSerie) maxSerie = r.NumSeriesRegistro;
             }
             serieActual = maxSerie + 1;
+
+            // Pre-llenar campos con la última serie realizada en este entrenamiento
+            etRepeticiones.setText(String.valueOf(ultimoRegistro.Repeticiones));
+            etPeso.setText(String.valueOf(ultimoRegistro.PesoRegistro));
+            
         } else {
             serieActual = 1;
         }
@@ -189,9 +197,7 @@ public class CargarRegistroActivity extends HeaderActivity {
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
                 
-                // Limpiar campos para la siguiente serie
-                etRepeticiones.setText("");
-                if (!esPesoCorporal) etPeso.setText("");
+                // Ya no limpiamos los campos para que queden predeterminados para la siguiente serie
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }
