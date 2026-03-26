@@ -139,6 +139,18 @@ public class EjercicioRepository {
         });
     }
 
+    public void obtenerEjerciciosEnUso(int idUsuario, RepositoryCallback<List<Ejercicio>> callback) {
+        executorService.execute(() -> {
+            try {
+                List<Ejercicio> ejercicios = ejercicioDao.obtenerEjerciciosEnUsoPorUsuario(idUsuario);
+                mainThreadHandler.post(() -> callback.onResult(ejercicios));
+            } catch (Exception e) {
+                Log.e(TAG, "Error al obtener ejercicios en uso: " + e.getMessage());
+                mainThreadHandler.post(() -> callback.onResult(new ArrayList<>()));
+            }
+        });
+    }
+
     /**
      * NUEVO: Obtiene solo los nombres de los ejercicios de una sección.
      * Ideal para llenar dropdowns en Estadísticas.

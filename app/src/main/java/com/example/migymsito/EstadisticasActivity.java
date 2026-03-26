@@ -91,6 +91,8 @@ public class EstadisticasActivity extends HeaderActivity {
             seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, secciones -> {
                 this.listaSecciones = secciones;
                 List<String> nombresSecciones = new ArrayList<>();
+                nombresSecciones.add("Todas las secciones"); 
+                
                 for (Seccion s : secciones) {
                     nombresSecciones.add(s.NombreSeccion);
                 }
@@ -99,10 +101,17 @@ public class EstadisticasActivity extends HeaderActivity {
                 autoCompleteSecciones.setAdapter(adapter);
 
                 autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
-                    Seccion seleccionada = listaSecciones.get(position);
                     autoCompleteEjercicios.setText(""); 
                     ejercicioSeleccionado = null;
-                    cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
+                    
+                    if (position == 0) {
+                        // "Todas las secciones" -> Solo ejercicios con registros
+                        cargarEjerciciosEnUso();
+                    } else {
+                        // Sección específica
+                        Seccion seleccionada = listaSecciones.get(position - 1);
+                        cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
+                    }
                 });
             });
         }
@@ -110,23 +119,35 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private void cargarEjerciciosDeSeccion(int idSeccion) {
         ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
-            this.listaEjerciciosActuales = ejercicios;
-            List<String> nombres = new ArrayList<>();
-            for (Ejercicio e : ejercicios) {
-                nombres.add(e.NombreEjercicio);
-            }
+            actualizarDropdownEjercicios(ejercicios);
+        });
+    }
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
-            autoCompleteEjercicios.setAdapter(adapter);
-
-            autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
-                ejercicioSeleccionado = listaEjerciciosActuales.get(position);
+    private void cargarEjerciciosEnUso() {
+        if (usuarioLogueado != null) {
+            ejerciciosRepository.obtenerEjerciciosEnUso(usuarioLogueado.IdUsuario, ejercicios -> {
+                actualizarDropdownEjercicios(ejercicios);
             });
+        }
+    }
+
+    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+        this.listaEjerciciosActuales = ejercicios;
+        List<String> nombres = new ArrayList<>();
+        for (Ejercicio e : ejercicios) {
+            nombres.add(e.NombreEjercicio);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
+        autoCompleteEjercicios.setAdapter(adapter);
+
+        autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
+            ejercicioSeleccionado = listaEjerciciosActuales.get(position);
         });
     }
 
     private void configurarDropdownConsulta() {
-        String[] opcionesConsulta = {"Progreso de Cargas", "Volumen de Entrenamiento", "Frecuencia"};
+        String[] opcionesConsulta = {"Peso Máximo", "Volumen de Entrenamiento", "Frecuencia"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, opcionesConsulta);
         autoCompleteConsulta.setAdapter(adapter);
     }
@@ -139,7 +160,7 @@ public class EstadisticasActivity extends HeaderActivity {
             return;
         }
 
-        if (consulta.equals("Progreso de Cargas")) {
+        if (consulta.equals("Peso Máximo")) {
             registroRepository.obtenerProgresoCargas(ejercicioSeleccionado.IdEjercicio, registros -> {
                 if (registros == null || registros.isEmpty()) {
                     Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
@@ -176,7 +197,6 @@ public class EstadisticasActivity extends HeaderActivity {
             
             if (calcularVolumen) {
                 // VOLUMEN = Peso * Repeticiones
-                // Ya no multiplicamos por NumSeriesRegistro porque cada fila es una serie individual.
                 valorRegistro = r.PesoRegistro.floatValue() * r.Repeticiones;
             } else {
                 // CARGA MÁXIMA
@@ -185,10 +205,8 @@ public class EstadisticasActivity extends HeaderActivity {
 
             if (datosConsolidados.containsKey(fechaStr)) {
                 if (calcularVolumen) {
-                    // Sumamos el volumen de cada serie realizada en el día
                     datosConsolidados.put(fechaStr, datosConsolidados.get(fechaStr) + valorRegistro);
                 } else {
-                    // Nos quedamos con el máximo peso del día
                     datosConsolidados.put(fechaStr, Math.max(datosConsolidados.get(fechaStr), valorRegistro));
                 }
             } else {
