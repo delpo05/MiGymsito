@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"> <!-- Reducido de 24dp para estirar a los costados -->
+                android:padding="16dp">
 
                 <!-- Saludo -->
                 <TextView
@@ -33,10 +33,10 @@
                     android:layout_height="wrap_content"
                     android:text="Hola, nombre"
                     android:textColor="@color/blanco"
-                    android:textSize="30sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="2dp" />
 
                 <!-- Título de la Página -->
                 <TextView
@@ -44,8 +44,8 @@
                     android:layout_height="wrap_content"
                     android:text="Configuración de Perfil"
                     android:textColor="@color/gris_pista"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="24dp"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.1" />
 
@@ -53,7 +53,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
+                    android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="#0F0F0F"
                     app:cardCornerRadius="15dp"
                     app:strokeColor="#383636"
@@ -91,7 +91,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -109,7 +109,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -127,7 +127,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -152,7 +152,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="0.9"
+                                android:layout_weight="0.8"
                                 android:layout_marginEnd="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
@@ -172,7 +172,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1.1"
+                                android:layout_weight="1.2"
                                 android:layout_marginStart="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
@@ -197,7 +197,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginBottom="24dp"
                     app:cardBackgroundColor="#0F0F0F"
                     app:cardCornerRadius="16dp"
                     app:strokeColor="#383636"
