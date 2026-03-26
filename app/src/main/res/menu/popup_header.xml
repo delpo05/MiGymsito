@@ -9,8 +9,8 @@
         android:title="@string/mi_perfil" />
 
     <item
-        android:id="@+id/Historial"
-        android:title="@string/historial" />
+        android:id="@+id/Exportar"
+        android:title="Exportar" />
 
     <item
         android:id="@+id/MiProgreso"
