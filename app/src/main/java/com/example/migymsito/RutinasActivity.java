@@ -121,7 +121,6 @@ public class RutinasActivity extends HeaderActivity {
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
         tvTitulo.setText("Nueva Rutina");
 
-        // Configurar Opción Izquierda: Crear
         TextView tvCrear = dialog.findViewById(R.id.tvTextoIzquierda);
         tvCrear.setText("Crear");
         ImageView ivCrear = dialog.findViewById(R.id.ivIconoIzquierda);
@@ -132,7 +131,6 @@ public class RutinasActivity extends HeaderActivity {
             mostrarPopUpRutina(null);
         });
 
-        // Configurar Opción Derecha: Importar
         TextView tvImportar = dialog.findViewById(R.id.tvTextoDerecha);
         tvImportar.setText("Importar");
         ImageView ivImportar = dialog.findViewById(R.id.ivIconoDerecha);
@@ -180,6 +178,7 @@ public class RutinasActivity extends HeaderActivity {
 
         View btnExportar = dialog.findViewById(R.id.btnExportarPopUp);
         if (btnExportar != null) {
+            btnExportar.setVisibility(View.VISIBLE);
             btnExportar.setOnClickListener(v -> {
                 exportarRutinaAArchivo(rutina);
                 dialog.dismiss();
@@ -274,7 +273,6 @@ public class RutinasActivity extends HeaderActivity {
         Button btnAceptar = dialog.findViewById(R.id.btnConfirmarGenerico);
         Button btnImportar = dialog.findViewById(R.id.btnImportarRutina);
 
-        // Ocultar el botón importar viejo ya que ahora está en el primer pop-up
         if (btnImportar != null) btnImportar.setVisibility(View.GONE);
 
         if (rutinaExistente == null) {
