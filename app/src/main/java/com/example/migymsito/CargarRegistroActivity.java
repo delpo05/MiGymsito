@@ -17,6 +17,7 @@ import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.RegistroRepository;
+import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private List<Registro> listaHistorial = new ArrayList<>();
 
     private RegistroRepository registroRepository;
+    private UsuarioRepository usuarioRepository;
 
     private int serieActual = 1;
     private int idEjercicio;
@@ -39,6 +41,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private int idSeccion;
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
+    private Double ultimoPesoUsuario = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,11 @@ public class CargarRegistroActivity extends HeaderActivity {
         }
 
         registroRepository = new RegistroRepository(getApplication());
+        usuarioRepository = new UsuarioRepository(getApplication());
+
+        if (esPesoCorporal) {
+            cargarUltimoPesoUsuario();
+        }
 
         initViews();
         setupListeners();
@@ -84,6 +92,14 @@ public class CargarRegistroActivity extends HeaderActivity {
         if (idEjercicio != 0) {
             cargarSeriesDelDia();
         }
+    }
+
+    private void cargarUltimoPesoUsuario() {
+        usuarioRepository.obtenerUltimoHistorial(idUsuario, historial -> {
+            if (historial != null) {
+                ultimoPesoUsuario = historial.PesoHistorial;
+            }
+        });
     }
 
     private void initViews() {
@@ -139,7 +155,6 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void cargarSeriesDelDia() {
-        // Usamos el nuevo método que filtra solo por el entrenamiento activo
         registroRepository.obtenerRegistrosEntrenamientoActivo(idUsuario, idSeccion, idEjercicio, registros -> {
             listaHistorial.clear();
             listaHistorial.addAll(registros);
@@ -179,7 +194,10 @@ public class CargarRegistroActivity extends HeaderActivity {
         int reps = Integer.parseInt(repStr);
 
         btnCargar.setEnabled(false);
-        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, nuevo -> {
+        
+        Double pesoCorporalAGuardar = esPesoCorporal ? ultimoPesoUsuario : null;
+
+        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, pesoCorporalAGuardar, nuevo -> {
             if (nuevo != null) {
                 listaHistorial.add(0, nuevo);
                 adapter.notifyItemInserted(0);
@@ -189,7 +207,6 @@ public class CargarRegistroActivity extends HeaderActivity {
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
                 
-                // Limpiar campos para la siguiente serie
                 etRepeticiones.setText("");
                 if (!esPesoCorporal) etPeso.setText("");
             } else {
