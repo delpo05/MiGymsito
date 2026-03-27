@@ -3,8 +3,8 @@ package com.example.migymsito;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,7 +15,6 @@ import com.example.migymsito.adapter.RegistroAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.RegistroRepository;
 
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ import java.util.List;
 public class CargarRegistroActivity extends HeaderActivity {
 
     private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso;
-    private EditText etRepeticiones, etPeso;
-    private ImageButton btnRepUp, btnRepDown, btnPesoUp, btnPesoDown, btnEliminarUltimo;
+    private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
+    private ImageButton btnEliminarUltimo;
     private Button btnCargar;
     private RecyclerView rvHistorial;
     private RegistroAdapter adapter;
@@ -78,6 +77,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         registroRepository = new RegistroRepository(getApplication());
 
         initViews();
+        setupPickers();
         setupListeners();
         setupRecyclerView();
 
@@ -91,12 +91,11 @@ public class CargarRegistroActivity extends HeaderActivity {
         tvSerieValue = findViewById(R.id.tvSerieValue);
         tvPesoLabel = findViewById(R.id.tvPesoLabel);
         tvColumnaPeso = findViewById(R.id.tvColumnaPeso);
-        etRepeticiones = findViewById(R.id.etRepeticiones);
-        etPeso = findViewById(R.id.etPeso);
-        btnRepUp = findViewById(R.id.btnRepUp);
-        btnRepDown = findViewById(R.id.btnRepDown);
-        btnPesoUp = findViewById(R.id.btnPesoUp);
-        btnPesoDown = findViewById(R.id.btnPesoDown);
+        
+        npRepeticiones = findViewById(R.id.npRepeticiones);
+        npPesoEntero = findViewById(R.id.npPesoEntero);
+        npPesoDecimal = findViewById(R.id.npPesoDecimal);
+        
         btnCargar = findViewById(R.id.btnCargar);
         btnEliminarUltimo = findViewById(R.id.btnEliminarUltimo);
         rvHistorial = findViewById(R.id.rvHistorial);
@@ -109,11 +108,35 @@ public class CargarRegistroActivity extends HeaderActivity {
         }
     }
 
+    private void setupPickers() {
+        // Habilitar edición por teclado
+        npRepeticiones.setDescendantFocusability(NumberPicker.FOCUS_AFTER_DESCENDANTS);
+        npPesoEntero.setDescendantFocusability(NumberPicker.FOCUS_AFTER_DESCENDANTS);
+        
+        // El decimal mejor dejarlo solo scroll porque tiene valores fijos (.00, .25, etc)
+        npPesoDecimal.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
+        // Repeticiones
+        npRepeticiones.setMinValue(0);
+        npRepeticiones.setMaxValue(100);
+        npRepeticiones.setValue(10);
+        npRepeticiones.setWrapSelectorWheel(true);
+
+        // Peso Entero
+        npPesoEntero.setMinValue(0);
+        npPesoEntero.setMaxValue(500);
+        npPesoEntero.setValue(0);
+        npPesoEntero.setWrapSelectorWheel(true);
+
+        // Peso Decimal
+        String[] valoresDecimales = {"00", "25", "50", "75"};
+        npPesoDecimal.setMinValue(0);
+        npPesoDecimal.setMaxValue(valoresDecimales.length - 1);
+        npPesoDecimal.setDisplayedValues(valoresDecimales);
+        npPesoDecimal.setWrapSelectorWheel(true);
+    }
+
     private void setupListeners() {
-        btnRepUp.setOnClickListener(v -> modificarValor(etRepeticiones, 1));
-        btnRepDown.setOnClickListener(v -> modificarValor(etRepeticiones, -1));
-        btnPesoUp.setOnClickListener(v -> modificarValor(etPeso, 1));
-        btnPesoDown.setOnClickListener(v ->  modificarValor(etPeso, -1));
         btnCargar.setOnClickListener(v -> guardarRegistro());
         btnEliminarUltimo.setOnClickListener(v -> eliminarUltimoRegistro());
     }
@@ -124,22 +147,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         rvHistorial.setAdapter(adapter);
     }
 
-    private void modificarValor(EditText et, double delta) {
-        try {
-            String text = et.getText().toString();
-            double val = text.isEmpty() ? 0 : Double.parseDouble(text);
-            val += delta;
-            if (val < 0) val = 0;
-            if (et.getId() == R.id.etRepeticiones) {
-                et.setText(String.valueOf((int) val));
-            } else {
-                et.setText(String.valueOf(val));
-            }
-        } catch (Exception e) { et.setText("0"); }
-    }
-
     private void cargarSeriesDelDia() {
-        // Usamos el nuevo método que filtra solo por el entrenamiento activo
         registroRepository.obtenerRegistrosEntrenamientoActivo(idUsuario, idSeccion, idEjercicio, registros -> {
             listaHistorial.clear();
             listaHistorial.addAll(registros);
@@ -163,20 +171,20 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void guardarRegistro() {
-        String repStr = etRepeticiones.getText().toString();
-        String pesoStr = etPeso.getText().toString();
+        // Forzar la validación de lo que el usuario haya escrito manualmente
+        npRepeticiones.clearFocus();
+        npPesoEntero.clearFocus();
 
-        if (repStr.isEmpty() || repStr.equals("0")) {
+        int reps = npRepeticiones.getValue();
+        int entero = npPesoEntero.getValue();
+        String[] valoresDecimales = npPesoDecimal.getDisplayedValues();
+        double decimal = Double.parseDouble("0." + valoresDecimales[npPesoDecimal.getValue()]);
+        double peso = entero + decimal;
+
+        if (reps <= 0) {
             Toast.makeText(this, "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        if (pesoStr.isEmpty()) {
-            pesoStr = "0";
-        }
-
-        double peso = Double.parseDouble(pesoStr);
-        int reps = Integer.parseInt(repStr);
 
         btnCargar.setEnabled(false);
         registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, nuevo -> {
@@ -188,10 +196,6 @@ public class CargarRegistroActivity extends HeaderActivity {
                 serieActual++;
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
-                
-                // Limpiar campos para la siguiente serie
-                etRepeticiones.setText("");
-                if (!esPesoCorporal) etPeso.setText("");
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }
