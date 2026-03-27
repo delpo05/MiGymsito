@@ -307,6 +307,11 @@ public class RutinasActivity extends HeaderActivity {
         dialog.show();
     }
 
+    @Override
+    protected void onImportFinished() {
+        cargarRutinasDesdeDB();
+    }
+
     private void leerArchivoImportacion(Uri uri) {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
