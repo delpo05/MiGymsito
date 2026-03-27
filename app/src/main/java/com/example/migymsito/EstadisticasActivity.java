@@ -25,7 +25,6 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,12 +36,12 @@ public class EstadisticasActivity extends HeaderActivity {
     private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private MaterialButton btnConsultarProgreso;
     private BarChart barChart;
-    
+
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
     private EjercicioRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
-    
+
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
     private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
@@ -75,11 +74,11 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private void configurarGrafico() {
         if (barChart == null) return;
-        
+
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setTextColor(Color.WHITE);
-        
+
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextColor(Color.WHITE);
@@ -97,6 +96,7 @@ public class EstadisticasActivity extends HeaderActivity {
             rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
                 this.listaRutinas = rutinas;
                 List<String> nombresRutinas = new ArrayList<>();
+                nombresRutinas.add("Todas las rutinas");
                 for (Rutina r : rutinas) {
                     nombresRutinas.add(r.NombreRutina);
                 }
@@ -108,12 +108,24 @@ public class EstadisticasActivity extends HeaderActivity {
                     autoCompleteSecciones.setText("");
                     autoCompleteEjercicios.setText("");
                     ejercicioSeleccionado = null;
-                    
-                    // Al elegir una rutina, cargamos sus secciones
-                    Rutina seleccionada = listaRutinas.get(position);
-                    cargarSeccionesDeRutina(seleccionada.IdRutina);
+
+                    if (position == 0) {
+                        // Todas las rutinas
+                        cargarTodasLasSeccionesDelUsuario();
+                    } else {
+                        // Rutina específica (position - 1 porque agregamos "Todas")
+                        Rutina seleccionada = listaRutinas.get(position - 1);
+                        cargarSeccionesDeRutina(seleccionada.IdRutina);
+                    }
                 });
             });
+        }
+    }
+
+    private void cargarTodasLasSeccionesDelUsuario() {
+        if (usuarioLogueado != null) {
+            // El método correcto es obtenerSeccionesPorUsuario
+            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, this::actualizarDropdownSecciones);
         }
     }
 
@@ -124,8 +136,8 @@ public class EstadisticasActivity extends HeaderActivity {
     private void actualizarDropdownSecciones(List<Seccion> secciones) {
         this.listaSecciones = secciones;
         List<String> nombresSecciones = new ArrayList<>();
-        nombresSecciones.add("Todas las secciones"); 
-        
+        nombresSecciones.add("Todas las secciones");
+
         for (Seccion s : secciones) {
             nombresSecciones.add(s.NombreSeccion);
         }
@@ -134,11 +146,11 @@ public class EstadisticasActivity extends HeaderActivity {
         autoCompleteSecciones.setAdapter(adapter);
 
         autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
-            autoCompleteEjercicios.setText(""); 
+            autoCompleteEjercicios.setText("");
             ejercicioSeleccionado = null;
-            
+
             if (position == 0) {
-                // Sigue funcionando globalmente: trae todos los ejercicios con registros
+                // Todas las secciones de la rutina elegida (o de todas las rutinas)
                 cargarEjerciciosEnUso();
             } else {
                 Seccion seleccionada = listaSecciones.get(position - 1);
@@ -218,18 +230,15 @@ public class EstadisticasActivity extends HeaderActivity {
         final List<String> fechas = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
 
-        // Usamos un Map para consolidar los datos por fecha
         Map<String, Float> datosConsolidados = new LinkedHashMap<>();
 
         for (Registro r : registros) {
             String fechaStr = sdf.format(new Date(r.FechaRegistro));
             float valorRegistro;
-            
+
             if (calcularVolumen) {
-                // VOLUMEN = Peso * Repeticiones
                 valorRegistro = r.PesoRegistro.floatValue() * r.Repeticiones;
             } else {
-                // CARGA MÁXIMA
                 valorRegistro = r.PesoRegistro.floatValue();
             }
 
@@ -244,7 +253,6 @@ public class EstadisticasActivity extends HeaderActivity {
             }
         }
 
-        // Convertir el Map a las entradas del gráfico
         int i = 0;
         for (Map.Entry<String, Float> entry : datosConsolidados.entrySet()) {
             entries.add(new BarEntry(i++, entry.getValue()));
@@ -252,14 +260,13 @@ public class EstadisticasActivity extends HeaderActivity {
         }
 
         BarDataSet dataSet = new BarDataSet(entries, etiqueta);
-        dataSet.setColor(Color.parseColor("#BB86FC"));
+        dataSet.setColor(Color.WHITE);
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(10f);
 
         BarData barData = new BarData(dataSet);
         barChart.setData(barData);
 
-        // Formatear el eje X para mostrar fechas
         barChart.getXAxis().setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -273,5 +280,10 @@ public class EstadisticasActivity extends HeaderActivity {
 
         barChart.animateY(1000);
         barChart.invalidate();
+    }
+
+    @Override
+    protected void onImportFinished() {
+        cargarRutinasDelUsuario();
     }
 }
