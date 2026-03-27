@@ -81,6 +81,11 @@ public class EjerciciosActivity extends HeaderActivity {
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
         btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
 
+        // Volvemos a 2 columnas para ejercicios
+        if (gvEjercicios != null) {
+            gvEjercicios.setNumColumns(2);
+        }
+
         configurarGridView();
         configurarBotonFinalizar();
         configurarWindowInsets(R.id.layout_contenedor_grid);

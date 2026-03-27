@@ -19,9 +19,7 @@ public class SeccionesAdapter extends BaseAdapter {
 
     private List<Seccion> secciones;
     private OnSeccionClickListener listener;
-    // Participa en SeccionesActivity para ocultar el botón de añadir cuando se usa en el popup de secciones previas
     private boolean mostrarBotonAdd = true;
-    // Participa en SeccionesActivity para adaptar el diseño al popup blanco (colores oscuros)
     private boolean isModoPopup = false;
 
     public interface OnSeccionClickListener {
@@ -35,12 +33,10 @@ public class SeccionesAdapter extends BaseAdapter {
         this.listener = listener;
     }
 
-    // Participa en SeccionesActivity para configurar si se muestra el botón de añadir (útil para el popup)
     public void setMostrarBotonAdd(boolean mostrar) {
         this.mostrarBotonAdd = mostrar;
     }
 
-    // Participa en SeccionesActivity para cambiar a colores oscuros en popup blanco
     public void setModoPopup(boolean modoPopup) {
         this.isModoPopup = modoPopup;
     }
@@ -84,18 +80,21 @@ public class SeccionesAdapter extends BaseAdapter {
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
         View ivImagen = convertView.findViewById(R.id.iv_item_imagen);
 
-        // Participa en SeccionesActivity: Ocultar la imagen y centrar el texto para Secciones
         if (ivImagen != null) ivImagen.setVisibility(View.GONE);
 
+        // --- RESETEAR DISEÑO PARA SECCIONES (Centrado perfecto) ---
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
+        params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        // Quitar márgenes que podrían venir de EjerciciosAdapter
+        params.setMargins(0, 0, 0, 0); 
         txtNombre.setLayoutParams(params);
+        txtNombre.setTextSize(16f);
+        txtNombre.setShadowLayer(0, 0, 0, 0);
 
-        // Participa en SeccionesActivity: Ajustar diseño según si es popup blanco o pantalla negra
         if (isModoPopup) {
             txtNombre.setTextColor(Color.BLACK);
             tvOpciones.setTextColor(Color.BLACK);
-            
             GradientDrawable shape = new GradientDrawable();
             shape.setShape(GradientDrawable.RECTANGLE);
             shape.setCornerRadius(12 * parent.getContext().getResources().getDisplayMetrics().density);
@@ -112,32 +111,21 @@ public class SeccionesAdapter extends BaseAdapter {
             btnAdd.setVisibility(View.VISIBLE);
             txtNombre.setVisibility(View.GONE);
             tvOpciones.setVisibility(View.GONE);
-
-            convertView.setOnClickListener(v -> {
-                if (listener != null) listener.onAddClick();
-            });
+            convertView.setOnClickListener(v -> { if (listener != null) listener.onAddClick(); });
         } else {
             Seccion seccion = secciones.get(position);
             btnAdd.setVisibility(View.GONE);
             txtNombre.setVisibility(View.VISIBLE);
-            
-            // Participa en SeccionesActivity: Ocultar opciones si no se muestra el botón add (es el popup)
             tvOpciones.setVisibility(mostrarBotonAdd ? View.VISIBLE : View.GONE);
 
-            // Participa en SeccionesActivity: Mostrar nombre de sección y rutina si está disponible (para el popup)
             if (seccion.nombreRutina != null && !seccion.nombreRutina.isEmpty()) {
                 txtNombre.setText(seccion.NombreSeccion + "\n(" + seccion.nombreRutina + ")");
             } else {
                 txtNombre.setText(seccion.NombreSeccion);
             }
 
-            tvOpciones.setOnClickListener(v -> {
-                if (listener != null) listener.onOptionsClick(v, seccion);
-            });
-
-            convertView.setOnClickListener(v -> {
-                if (listener != null) listener.onSeccionClick(seccion);
-            });
+            tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, seccion); });
+            convertView.setOnClickListener(v -> { if (listener != null) listener.onSeccionClick(seccion); });
         }
 
         return convertView;

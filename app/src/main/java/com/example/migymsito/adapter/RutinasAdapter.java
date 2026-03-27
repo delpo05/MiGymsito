@@ -66,10 +66,14 @@ public class RutinasAdapter extends BaseAdapter {
 
         if (ivImagen != null) ivImagen.setVisibility(View.GONE);
 
-        // Asegurar que el nombre esté centrado para Rutinas
+        // --- RESETEAR DISEÑO PARA RUTINAS (Centrado perfecto) ---
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
+        params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        params.setMargins(0, 0, 0, 0); // Quitar márgenes de Ejercicios
         txtNombre.setLayoutParams(params);
+        txtNombre.setTextSize(16f);
+        txtNombre.setShadowLayer(0, 0, 0, 0);
 
         if (container != null) {
             container.setBackgroundResource(R.drawable.card_border_white);
@@ -79,25 +83,16 @@ public class RutinasAdapter extends BaseAdapter {
             btnAdd.setVisibility(View.VISIBLE);
             txtNombre.setVisibility(View.GONE);
             tvOpciones.setVisibility(View.GONE);
-
-            convertView.setOnClickListener(v -> {
-                if (listener != null) listener.onAddClick();
-            });
+            convertView.setOnClickListener(v -> { if (listener != null) listener.onAddClick(); });
         } else {
             Rutina rutina = rutinas.get(position);
             btnAdd.setVisibility(View.GONE);
             txtNombre.setVisibility(View.VISIBLE);
             tvOpciones.setVisibility(View.VISIBLE);
-
             txtNombre.setText(rutina.NombreRutina);
 
-            tvOpciones.setOnClickListener(v -> {
-                if (listener != null) listener.onOptionsClick(v, rutina);
-            });
-
-            convertView.setOnClickListener(v -> {
-                if (listener != null) listener.onRutinaClick(rutina);
-            });
+            tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, rutina); });
+            convertView.setOnClickListener(v -> { if (listener != null) listener.onRutinaClick(rutina); });
         }
 
         return convertView;
