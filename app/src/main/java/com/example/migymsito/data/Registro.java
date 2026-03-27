@@ -50,5 +50,7 @@ public class Registro implements Serializable {
     public int Repeticiones;
 
     @NonNull
-    public Long FechaRegistro; 
+    public Long FechaRegistro;
+
+    public Double PesoCorporalMomento;
 }
