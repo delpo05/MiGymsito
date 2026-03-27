@@ -1,10 +1,23 @@
 <resources>
     <style name="Theme.MiGymsito" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/black</item>
-        <item name="colorSecondary">@color/black</item>
+        <!-- Color principal para botones y elementos destacados (No usar negro aquí) -->
+        <item name="colorPrimary">@color/blanco</item>
+        <item name="colorOnPrimary">@color/negro</item>
+        <item name="colorSecondary">@color/gris_pista</item>
         <item name="android:statusBarColor">@color/black</item>
-        <!-- Color de texto por defecto para componentes como NumberPicker -->
+
+        <!-- Esto controla el color del cursor y de los Checkbox/RadioButtons activos -->
+        <item name="colorControlActivated">@color/blanco</item>
+        
+        <!-- Esto controla el color de los elementos en estado normal (no enfocados) -->
+        <item name="colorControlNormal">@color/gris_pista</item>
+        
+        <!-- Color del efecto "ripple" (al tocar un botón) -->
+        <item name="colorControlHighlight">#40FFFFFF</item>
+
+        <!-- Color de texto por defecto -->
         <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="android:textColorSecondary">@color/gris_pista</item>
     </style>
 
     <style name="PickerStyle">
