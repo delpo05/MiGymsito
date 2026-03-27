@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
@@ -82,6 +83,45 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     public void EventoRegistrarse(View view) {
         Intent intent = new Intent(this, RegistroSesionActivity.class);
         startActivity(intent);
+    }
+
+    public void EventoLoginTest(View view) {
+        String testEmail = "test@gmail.com";
+        String testPass = "test123";
+
+        // Intentar login directamente primero
+        usuarioRepository.validarLogin(testEmail, testPass, usuario -> {
+            if (usuario != null) {
+                // Si existe, logueamos
+                onResult(usuario);
+            } else {
+                // Si no existe, lo creamos
+                crearUsuarioTest(testEmail, testPass);
+            }
+        });
+    }
+
+    private void crearUsuarioTest(String email, String pass) {
+        Usuario testUser = new Usuario();
+        testUser.CorreoElectronicoUsuario = email;
+        testUser.ContraseniaUsuario = pass;
+        testUser.NombreUsuario = "test_";
+        testUser.FechaNacimientoUsuario = System.currentTimeMillis(); // Default
+        testUser.GeneroUsuario = "Otro"; // Default
+
+        Historial testHistorial = new Historial();
+        testHistorial.PesoHistorial = 70.0;
+        testHistorial.AlturaHistorial = 170.0;
+        testHistorial.FechaHistorial = System.currentTimeMillis();
+
+        usuarioRepository.registrarUsuarioConHistorial(testUser, testHistorial, idGenerado -> {
+            if (idGenerado != -1) {
+                testUser.IdUsuario = idGenerado;
+                onResult(testUser);
+            } else {
+                Toast.makeText(this, "Error al crear usuario de prueba", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
