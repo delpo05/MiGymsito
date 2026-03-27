@@ -9,9 +9,11 @@ import android.widget.Toast;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
+import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -23,7 +25,6 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,14 +33,16 @@ import java.util.Map;
 
 public class EstadisticasActivity extends HeaderActivity {
 
-    private AutoCompleteTextView autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
+    private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private MaterialButton btnConsultarProgreso;
     private BarChart barChart;
-    
+
+    private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
     private EjercicioRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
-    
+
+    private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
     private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
     private Ejercicio ejercicioSeleccionado;
@@ -50,17 +53,19 @@ public class EstadisticasActivity extends HeaderActivity {
         setContentView(R.layout.estadisticas_activity);
 
         // Inicializar vistas
+        autoCompleteRutinas = findViewById(R.id.autoCompleteRutinas);
         autoCompleteSecciones = findViewById(R.id.autoCompleteSecciones);
         autoCompleteEjercicios = findViewById(R.id.autoCompleteEjercicios);
         autoCompleteConsulta = findViewById(R.id.autoCompleteConsulta);
         btnConsultarProgreso = findViewById(R.id.btnConsultarProgreso);
         barChart = findViewById(R.id.barChart);
 
+        rutinaRepository = new RutinaRepository(getApplication());
         seccionRepository = new SeccionRepository(getApplication());
         ejerciciosRepository = new EjercicioRepository(getApplication());
         registroRepository = new RegistroRepository(getApplication());
 
-        cargarSeccionesDelUsuario();
+        cargarRutinasDelUsuario();
         configurarDropdownConsulta();
         configurarGrafico();
 
@@ -69,11 +74,11 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private void configurarGrafico() {
         if (barChart == null) return;
-        
+
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setTextColor(Color.WHITE);
-        
+
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextColor(Color.WHITE);
@@ -86,47 +91,105 @@ public class EstadisticasActivity extends HeaderActivity {
         barChart.setNoDataTextColor(Color.GRAY);
     }
 
-    private void cargarSeccionesDelUsuario() {
+    private void cargarRutinasDelUsuario() {
         if (usuarioLogueado != null) {
-            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, secciones -> {
-                this.listaSecciones = secciones;
-                List<String> nombresSecciones = new ArrayList<>();
-                for (Seccion s : secciones) {
-                    nombresSecciones.add(s.NombreSeccion);
+            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
+                this.listaRutinas = rutinas;
+                List<String> nombresRutinas = new ArrayList<>();
+                nombresRutinas.add("Todas las rutinas");
+                for (Rutina r : rutinas) {
+                    nombresRutinas.add(r.NombreRutina);
                 }
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresSecciones);
-                autoCompleteSecciones.setAdapter(adapter);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresRutinas);
+                autoCompleteRutinas.setAdapter(adapter);
 
-                autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
-                    Seccion seleccionada = listaSecciones.get(position);
-                    autoCompleteEjercicios.setText(""); 
+                autoCompleteRutinas.setOnItemClickListener((parent, view, position, id) -> {
+                    autoCompleteSecciones.setText("");
+                    autoCompleteEjercicios.setText("");
                     ejercicioSeleccionado = null;
-                    cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
+
+                    if (position == 0) {
+                        // Todas las rutinas
+                        cargarTodasLasSeccionesDelUsuario();
+                    } else {
+                        // Rutina específica (position - 1 porque agregamos "Todas")
+                        Rutina seleccionada = listaRutinas.get(position - 1);
+                        cargarSeccionesDeRutina(seleccionada.IdRutina);
+                    }
                 });
             });
         }
     }
 
+    private void cargarTodasLasSeccionesDelUsuario() {
+        if (usuarioLogueado != null) {
+            // El método correcto es obtenerSeccionesPorUsuario
+            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, this::actualizarDropdownSecciones);
+        }
+    }
+
+    private void cargarSeccionesDeRutina(int idRutina) {
+        seccionRepository.obtenerSeccionesDeRutina(idRutina, this::actualizarDropdownSecciones);
+    }
+
+    private void actualizarDropdownSecciones(List<Seccion> secciones) {
+        this.listaSecciones = secciones;
+        List<String> nombresSecciones = new ArrayList<>();
+        nombresSecciones.add("Todas las secciones");
+
+        for (Seccion s : secciones) {
+            nombresSecciones.add(s.NombreSeccion);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresSecciones);
+        autoCompleteSecciones.setAdapter(adapter);
+
+        autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
+            autoCompleteEjercicios.setText("");
+            ejercicioSeleccionado = null;
+
+            if (position == 0) {
+                // Todas las secciones de la rutina elegida (o de todas las rutinas)
+                cargarEjerciciosEnUso();
+            } else {
+                Seccion seleccionada = listaSecciones.get(position - 1);
+                cargarEjerciciosDeSeccion(seleccionada.IdSeccion);
+            }
+        });
+    }
+
     private void cargarEjerciciosDeSeccion(int idSeccion) {
         ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
-            this.listaEjerciciosActuales = ejercicios;
-            List<String> nombres = new ArrayList<>();
-            for (Ejercicio e : ejercicios) {
-                nombres.add(e.NombreEjercicio);
-            }
+            actualizarDropdownEjercicios(ejercicios);
+        });
+    }
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
-            autoCompleteEjercicios.setAdapter(adapter);
-
-            autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
-                ejercicioSeleccionado = listaEjerciciosActuales.get(position);
+    private void cargarEjerciciosEnUso() {
+        if (usuarioLogueado != null) {
+            ejerciciosRepository.obtenerEjerciciosEnUso(usuarioLogueado.IdUsuario, ejercicios -> {
+                actualizarDropdownEjercicios(ejercicios);
             });
+        }
+    }
+
+    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+        this.listaEjerciciosActuales = ejercicios;
+        List<String> nombres = new ArrayList<>();
+        for (Ejercicio e : ejercicios) {
+            nombres.add(e.NombreEjercicio);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
+        autoCompleteEjercicios.setAdapter(adapter);
+
+        autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
+            ejercicioSeleccionado = listaEjerciciosActuales.get(position);
         });
     }
 
     private void configurarDropdownConsulta() {
-        String[] opcionesConsulta = {"Progreso de Cargas", "Volumen de Entrenamiento", "Frecuencia"};
+        String[] opcionesConsulta = {"Peso Máximo", "Volumen de Entrenamiento", "Frecuencia"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, opcionesConsulta);
         autoCompleteConsulta.setAdapter(adapter);
     }
@@ -139,7 +202,7 @@ public class EstadisticasActivity extends HeaderActivity {
             return;
         }
 
-        if (consulta.equals("Progreso de Cargas")) {
+        if (consulta.equals("Peso Máximo")) {
             registroRepository.obtenerProgresoCargas(ejercicioSeleccionado.IdEjercicio, registros -> {
                 if (registros == null || registros.isEmpty()) {
                     Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
@@ -167,28 +230,22 @@ public class EstadisticasActivity extends HeaderActivity {
         final List<String> fechas = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
 
-        // Usamos un Map para consolidar los datos por fecha
         Map<String, Float> datosConsolidados = new LinkedHashMap<>();
 
         for (Registro r : registros) {
             String fechaStr = sdf.format(new Date(r.FechaRegistro));
             float valorRegistro;
-            
+
             if (calcularVolumen) {
-                // VOLUMEN = Peso * Repeticiones
-                // Ya no multiplicamos por NumSeriesRegistro porque cada fila es una serie individual.
                 valorRegistro = r.PesoRegistro.floatValue() * r.Repeticiones;
             } else {
-                // CARGA MÁXIMA
                 valorRegistro = r.PesoRegistro.floatValue();
             }
 
             if (datosConsolidados.containsKey(fechaStr)) {
                 if (calcularVolumen) {
-                    // Sumamos el volumen de cada serie realizada en el día
                     datosConsolidados.put(fechaStr, datosConsolidados.get(fechaStr) + valorRegistro);
                 } else {
-                    // Nos quedamos con el máximo peso del día
                     datosConsolidados.put(fechaStr, Math.max(datosConsolidados.get(fechaStr), valorRegistro));
                 }
             } else {
@@ -196,7 +253,6 @@ public class EstadisticasActivity extends HeaderActivity {
             }
         }
 
-        // Convertir el Map a las entradas del gráfico
         int i = 0;
         for (Map.Entry<String, Float> entry : datosConsolidados.entrySet()) {
             entries.add(new BarEntry(i++, entry.getValue()));
@@ -204,14 +260,13 @@ public class EstadisticasActivity extends HeaderActivity {
         }
 
         BarDataSet dataSet = new BarDataSet(entries, etiqueta);
-        dataSet.setColor(Color.parseColor("#BB86FC"));
+        dataSet.setColor(Color.WHITE);
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(10f);
 
         BarData barData = new BarData(dataSet);
         barChart.setData(barData);
 
-        // Formatear el eje X para mostrar fechas
         barChart.getXAxis().setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -225,5 +280,10 @@ public class EstadisticasActivity extends HeaderActivity {
 
         barChart.animateY(1000);
         barChart.invalidate();
+    }
+
+    @Override
+    protected void onImportFinished() {
+        cargarRutinasDelUsuario();
     }
 }

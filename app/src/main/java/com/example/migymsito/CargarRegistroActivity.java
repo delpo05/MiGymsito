@@ -170,10 +170,29 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void actualizarSerieActual(List<Registro> registros) {
         if (!registros.isEmpty()) {
             int maxSerie = 0;
+            // El primer registro de la lista es el más reciente
+            Registro ultimoRegistro = registros.get(0);
+
             for (Registro r : registros) {
                 if (r.NumSeriesRegistro > maxSerie) maxSerie = r.NumSeriesRegistro;
             }
             serieActual = maxSerie + 1;
+
+            // Pre-llenar campos con la última serie realizada en este entrenamiento
+            npRepeticiones.setValue(ultimoRegistro.Repeticiones);
+            
+            double peso = ultimoRegistro.PesoRegistro;
+            int entero = (int) peso;
+            double decimal = peso - entero;
+            
+            npPesoEntero.setValue(entero);
+            
+            // Mapear decimal a índice del NumberPicker (00, 25, 50, 75)
+            if (decimal < 0.125) npPesoDecimal.setValue(0);
+            else if (decimal < 0.375) npPesoDecimal.setValue(1);
+            else if (decimal < 0.625) npPesoDecimal.setValue(2);
+            else npPesoDecimal.setValue(3);
+            
         } else {
             serieActual = 1;
         }
@@ -206,6 +225,7 @@ public class CargarRegistroActivity extends HeaderActivity {
                 serieActual++;
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
+
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }

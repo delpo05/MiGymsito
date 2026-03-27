@@ -40,6 +40,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+
+                android:gravity="top|center_horizontal"
+                android:orientation="horizontal"
+
                 android:padding="8dp"
                 app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicio">
 
@@ -49,6 +53,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+
                     android:text="Serie"
                     android:textColor="@color/blanco"
                     android:textStyle="bold"
@@ -56,6 +61,7 @@
                     app:layout_constraintHorizontal_weight="0.8"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
 
                 <TextView
                     android:id="@+id/labelReps"
@@ -70,6 +76,7 @@
                     app:layout_constraintStart_toEndOf="@+id/labelSerie"
                     app:layout_constraintTop_toTopOf="parent" />
 
+
                 <TextView
                     android:id="@+id/tvPesoLabel"
                     android:layout_width="0dp"
@@ -82,6 +89,7 @@
                     app:layout_constraintHorizontal_weight="1.2"
                     app:layout_constraintStart_toEndOf="@+id/labelReps"
                     app:layout_constraintTop_toTopOf="parent" />
+
 
                 <!-- Selectores y Valores (Centrados verticalmente entre sí) -->
                 <TextView
@@ -135,7 +143,9 @@
                         android:id="@+id/npPesoDecimal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+
                         android:theme="@style/PickerStyle" />
+
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>

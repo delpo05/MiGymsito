@@ -3,6 +3,7 @@ package com.example.migymsito;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -101,6 +102,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
                 (view, year1, monthOfYear, dayOfMonth) -> {
                     String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
                     etFecha.setText(fechaSeleccionada);
+                    etFecha.setError(null); // Limpiar error al seleccionar fecha
                 }, year, month, day);
 
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
@@ -133,6 +135,8 @@ public class DatosPersonalesActivity extends HeaderActivity {
     public void EventoBotonActualizar(View view) {
         if (usuarioLogueado == null) return;
 
+        boolean isValid = true;
+
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevoCorreo = etCorreo.getText().toString().trim();
         String nuevaPass = etPassword.getText().toString().trim();
@@ -141,8 +145,89 @@ public class DatosPersonalesActivity extends HeaderActivity {
         String pesoStr = etPeso.getText().toString().trim();
         String alturaStr = etAltura.getText().toString().trim();
 
-        if (nuevoNombre.isEmpty() || nuevoCorreo.isEmpty() || nuevaPass.isEmpty()) {
-            Toast.makeText(this, "Campos obligatorios incompletos", Toast.LENGTH_SHORT).show();
+        // Limpiar errores previos
+        etNombre.setError(null);
+        etCorreo.setError(null);
+        etPassword.setError(null);
+        etFecha.setError(null);
+        etGenero.setError(null);
+        etPeso.setError(null);
+        etAltura.setError(null);
+
+        // Validación Nombre
+        if (nuevoNombre.isEmpty()) {
+            etNombre.setError("El nombre es obligatorio");
+            isValid = false;
+        }
+
+        // Validación Correo
+        if (nuevoCorreo.isEmpty()) {
+            etCorreo.setError("El correo es obligatorio");
+            isValid = false;
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(nuevoCorreo).matches()) {
+            etCorreo.setError("Correo inválido");
+            isValid = false;
+        }
+
+        // Validación Contraseña
+        if (nuevaPass.isEmpty()) {
+            etPassword.setError("La contraseña es obligatoria");
+            isValid = false;
+        } else if (nuevaPass.length() < 6) {
+            etPassword.setError("Mínimo 6 caracteres");
+            isValid = false;
+        }
+
+        // Validación Fecha
+        if (fechaStr.isEmpty()) {
+            etFecha.setError("La fecha es obligatoria");
+            isValid = false;
+        }
+
+        // Validación Género
+        if (nuevoGenero.isEmpty()) {
+            etGenero.setError("El género es obligatorio");
+            isValid = false;
+        }
+
+        // Validación Peso
+        double peso = 0;
+        if (pesoStr.isEmpty()) {
+            etPeso.setError("El peso es obligatorio");
+            isValid = false;
+        } else {
+            try {
+                peso = Double.parseDouble(pesoStr);
+                if (peso <= 0) {
+                    etPeso.setError("Debe ser mayor a 0");
+                    isValid = false;
+                }
+            } catch (NumberFormatException e) {
+                etPeso.setError("Formato inválido");
+                isValid = false;
+            }
+        }
+
+        // Validación Altura
+        double altura = 0;
+        if (alturaStr.isEmpty()) {
+            etAltura.setError("La altura es obligatoria");
+            isValid = false;
+        } else {
+            try {
+                altura = Double.parseDouble(alturaStr);
+                if (altura <= 0) {
+                    etAltura.setError("Debe ser mayor a 0");
+                    isValid = false;
+                }
+            } catch (NumberFormatException e) {
+                etAltura.setError("Formato inválido");
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            Toast.makeText(this, "Por favor, corrige los errores señalados", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -159,24 +244,19 @@ public class DatosPersonalesActivity extends HeaderActivity {
             }
         } catch (ParseException e) {
             Log.e("DatosPersonales", "Error parseando fecha");
+            etFecha.setError("Formato de fecha inválido");
+            return;
         }
 
-        Historial nuevoHistorial = null;
-        try {
-            if (!pesoStr.isEmpty() && !alturaStr.isEmpty()) {
-                nuevoHistorial = new Historial();
-                nuevoHistorial.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
-                nuevoHistorial.PesoHistorial = Double.parseDouble(pesoStr);
-                nuevoHistorial.AlturaHistorial = Double.parseDouble(alturaStr);
-                nuevoHistorial.FechaHistorial = System.currentTimeMillis();
-            }
-        } catch (NumberFormatException e) {
-            Log.e("DatosPersonales", "Error formato peso/altura");
-        }
+        Historial nuevoHistorial = new Historial();
+        nuevoHistorial.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
+        nuevoHistorial.PesoHistorial = peso;
+        nuevoHistorial.AlturaHistorial = altura;
+        nuevoHistorial.FechaHistorial = System.currentTimeMillis();
 
         usuarioRepository.actualizarPerfilUsuario(usuarioLogueado, nuevoHistorial, (success, errorMessage) -> {
             if (success) {
-                Toast.makeText(this, "Datos actualizados", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "¡Datos actualizados!", Toast.LENGTH_SHORT).show();
                 actualizarNombreHeader();
                 if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.NombreUsuario + " !");
             } else {

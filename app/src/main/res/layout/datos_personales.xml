@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
                 <!-- Saludo -->
                 <TextView
@@ -33,16 +33,27 @@
                     android:layout_height="wrap_content"
                     android:text="Hola, nombre"
                     android:textColor="@color/blanco"
-                    android:textSize="30sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="2dp" />
+
+                <!-- Título de la Página -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Configuración de Perfil"
+                    android:textColor="@color/gris_pista"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.1" />
 
                 <!-- CARD DATOS PERSONALES -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
+                    android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="#0F0F0F"
                     app:cardCornerRadius="15dp"
                     app:strokeColor="#383636"
@@ -69,7 +80,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Datos personales"
+                                android:text="Datos de cuenta"
                                 android:textColor="@color/blanco"
                                 android:textStyle="bold"
                                 android:textSize="16sp"
@@ -80,7 +91,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -89,7 +100,7 @@
                                 android:id="@+id/etDatoNombre"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Nombre"
+                                android:hint="Nombre completo"
                                 android:textColor="@color/blanco"
                                 android:textStyle="bold" />
                         </com.google.android.material.textfield.TextInputLayout>
@@ -98,7 +109,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -116,7 +127,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="10dp"
                             app:boxStrokeColor="@color/blanco"
                             app:hintTextColor="@color/blanco"
                             android:textColorHint="@color/gris_pista"
@@ -141,8 +152,8 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginEnd="6dp"
+                                android:layout_weight="0.8"
+                                android:layout_marginEnd="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
                                 android:textColorHint="@color/gris_pista"
@@ -161,8 +172,8 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="6dp"
+                                android:layout_weight="1.2"
+                                android:layout_marginStart="4dp"
                                 app:boxStrokeColor="@color/blanco"
                                 app:hintTextColor="@color/blanco"
                                 android:textColorHint="@color/gris_pista"
@@ -186,7 +197,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginBottom="24dp"
                     app:cardBackgroundColor="#0F0F0F"
                     app:cardCornerRadius="16dp"
                     app:strokeColor="#383636"
@@ -212,7 +223,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Datos físicos"
+                                android:text="Físico actual"
                                 android:textColor="@color/blanco"
                                 android:textStyle="bold"
                                 android:textSize="16sp"
@@ -236,7 +247,7 @@
                                     android:id="@+id/etDatoAltura"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:hint="Altura"
+                                    android:hint="Altura (cm)"
                                     android:textColor="@color/blanco"
                                     android:textStyle="bold"
                                     android:inputType="numberDecimal" />
@@ -255,7 +266,7 @@
                                     android:id="@+id/etDatoPeso"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:hint="Peso"
+                                    android:hint="Peso (kg)"
                                     android:textColor="@color/blanco"
                                     android:textStyle="bold"
                                     android:inputType="numberDecimal" />
