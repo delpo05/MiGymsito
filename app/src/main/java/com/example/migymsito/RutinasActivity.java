@@ -29,6 +29,7 @@ import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataDataBase.AppDatabase;
+import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,7 @@ public class RutinasActivity extends HeaderActivity {
 
     private GridView gvRutinas;
     private RutinaRepository rutinaRepository;
+    private UsuarioRepository usuarioRepository;
     private RutinasAdapter adapter;
 
     private final ActivityResultLauncher<String> filePickerLauncher = registerForActivityResult(
@@ -62,6 +64,15 @@ public class RutinasActivity extends HeaderActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secciones_rutinas_activity);
+
+        usuarioRepository = new UsuarioRepository(getApplication());
+        rutinaRepository = new RutinaRepository(getApplication());
+
+        // Comprobar si ya hay una rutina seleccionada
+        int idRutinaGuardada = usuarioRepository.obtenerIdRutina();
+        if (idRutinaGuardada != -1 && getIntent().getBooleanExtra("cambiarRutina", false) == false) {
+            saltarASecciones(idRutinaGuardada);
+        }
 
         gvRutinas = findViewById(R.id.gvGenerico);
         
@@ -82,12 +93,25 @@ public class RutinasActivity extends HeaderActivity {
         configurarWindowInsets(R.id.layout_contenedor_grid);
     }
 
+    private void saltarASecciones(int idRutina) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+            Rutina rutina = db.rutinaDao().obtenerRutinaPorId(idRutina);
+            if (rutina != null) {
+                runOnUiThread(() -> {
+                    Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
+                    intent.putExtra("rutina", rutina);
+                    startActivity(intent);
+                    finish();
+                });
+            }
+        });
+    }
+
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
         if (tituloGv != null) tituloGv.setText("Mis Rutinas");
 
-        rutinaRepository = new RutinaRepository(getApplication());
-        
         adapter = new RutinasAdapter(new ArrayList<>(), new RutinasAdapter.OnRutinaClickListener() {
             @Override
             public void onAddClick() {
@@ -96,9 +120,13 @@ public class RutinasActivity extends HeaderActivity {
 
             @Override
             public void onRutinaClick(Rutina rutina) {
+                // Guardar la elección
+                usuarioRepository.guardarIdRutina(rutina.IdRutina);
+                
                 Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
                 intent.putExtra("rutina", rutina);
                 startActivity(intent);
+                finish();
             }
 
             @Override
@@ -135,8 +163,8 @@ public class RutinasActivity extends HeaderActivity {
         tvImportar.setText("Importar");
         ImageView ivImportar = dialog.findViewById(R.id.ivIconoDerecha);
         ivImportar.setImageResource(R.drawable.ic_import);
-        View btnImportar = dialog.findViewById(R.id.btnOpcionDerecha);
-        btnImportar.setOnClickListener(v -> {
+        View btnOpcionDerecha = dialog.findViewById(R.id.btnOpcionDerecha);
+        btnOpcionDerecha.setOnClickListener(v -> {
             dialog.dismiss();
             filePickerLauncher.launch("application/json");
         });
@@ -162,6 +190,9 @@ public class RutinasActivity extends HeaderActivity {
         View btnEliminar = dialog.findViewById(R.id.btnEliminarPopUp);
         if (btnEliminar != null) {
             btnEliminar.setOnClickListener(v -> {
+                if (usuarioRepository.obtenerIdRutina() == rutina.IdRutina) {
+                    usuarioRepository.eliminarRutinaSeleccionada();
+                }
                 rutinaRepository.eliminarRutina(rutina);
                 dialog.dismiss();
                 new Handler().postDelayed(this::cargarRutinasDesdeDB, 200);

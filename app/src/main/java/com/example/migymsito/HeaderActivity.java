@@ -47,8 +47,8 @@ public class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-    public static Usuario usuarioLogueado; // Cambiado a static para acceso global
-    private UsuarioRepository userRepo;
+    public static Usuario usuarioLogueado; 
+    protected UsuarioRepository userRepo;
 
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -90,9 +90,6 @@ public class HeaderActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Hook para que las actividades hijas sepan cuando el usuario terminó de cargar
-     */
     protected void onUsuarioCargado() {}
 
     @Override
@@ -143,11 +140,13 @@ public class HeaderActivity extends AppCompatActivity {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.Home) {
-                    if (!(this instanceof RutinasActivity)) {
-                        Intent intent = new Intent(this, RutinasActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intent);
-                    }
+                    // Acción de "Cambiar Rutina": Borrar preferencia y volver
+                    userRepo.eliminarRutinaSeleccionada();
+                    Intent intent = new Intent(this, RutinasActivity.class);
+                    intent.putExtra("cambiarRutina", true);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
                 } else if (itemId == R.id.MiPerfil) {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
                     startActivity(intent);
@@ -431,8 +430,7 @@ public class HeaderActivity extends AppCompatActivity {
 
     private void cerrarSesion() {
         usuarioLogueado = null;
-        UsuarioRepository repository = new UsuarioRepository(getApplication());
-        repository.eliminarSesion();
+        userRepo.eliminarSesion();
 
         Intent intent = new Intent(this, InicioSesionActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

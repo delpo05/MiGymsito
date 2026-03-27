@@ -24,6 +24,7 @@ public class UsuarioRepository {
     private final Application application;
     private static final String PREFS_NAME = "SesionUsuario";
     private static final String KEY_USER_ID = "idUsuario";
+    private static final String KEY_RUTINA_ID = "idRutinaSeleccionada";
 
     public interface RepositoryCallback<T> {
         void onResult(T result);
@@ -55,7 +56,24 @@ public class UsuarioRepository {
 
     public void eliminarSesion() {
         SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().remove(KEY_USER_ID).apply();
+        prefs.edit().remove(KEY_USER_ID).remove(KEY_RUTINA_ID).apply();
+    }
+
+    // --- MÉTODOS DE RUTINA SELECCIONADA ---
+
+    public void guardarIdRutina(int idRutina) {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(KEY_RUTINA_ID, idRutina).apply();
+    }
+
+    public int obtenerIdRutina() {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(KEY_RUTINA_ID, -1);
+    }
+
+    public void eliminarRutinaSeleccionada() {
+        SharedPreferences prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_RUTINA_ID).apply();
     }
 
     // --- MÉTODOS DE BASE DE DATOS ---
