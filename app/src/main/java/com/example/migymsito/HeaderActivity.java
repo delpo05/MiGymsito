@@ -1,34 +1,71 @@
 package com.example.migymsito;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.Entrenamiento;
+import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.Rutina;
+import com.example.migymsito.data.Seccion;
+import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.google.android.material.navigation.NavigationView;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public abstract class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-    
+
     // Variable estática para la sesión global
-    public static Usuario usuarioLogueado; 
+    public static Usuario usuarioLogueado;
+
+    private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    importarDatosDesdeCsv(uri);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // 1. Intentamos recuperar del Intent si viene (Login manual)
         if (getIntent() != null && getIntent().hasExtra("usuario")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -51,6 +88,19 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 });
             }
         }
+
+        // Manejo moderno del botón atrás
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false);
+                    HeaderActivity.super.onBackPressed();
+                }
+            }
+        });
     }
 
     @Override
@@ -108,16 +158,20 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     }
                 } else if (itemId == R.id.MiPerfil) {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                    intent.putExtra("usuario", usuarioLogueado); 
+                    intent.putExtra("usuario", usuarioLogueado);
                     startActivity(intent);
                 } else if (itemId == R.id.MiProgreso) {
                     Intent intent = new Intent(this, EstadisticasActivity.class);
                     intent.putExtra("usuario", usuarioLogueado);
                     startActivity(intent);
+                } else if (itemId == R.id.Exportar) {
+                    mostrarPopUpExportar();
+                } else if (itemId == R.id.Importar) {
+                    importLauncher.launch("*/*");
                 } else if (itemId == R.id.CerrarSesion) {
                     cerrarSesion();
                 }
-                
+
                 if (drawerLayout != null) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                 }
@@ -126,25 +180,293 @@ public abstract class HeaderActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarPopUpExportar() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_exportar_registros);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        CheckBox cbRegistros = dialog.findViewById(R.id.cbConfirmarExportar);
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarExportar);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarExportar);
+
+        btnAceptar.setOnClickListener(v -> {
+            boolean incluirRegistros = cbRegistros.isChecked();
+            exportarDatosCsv(incluirRegistros);
+            dialog.dismiss();
+        });
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void exportarDatosCsv(boolean incluirRegistros) {
+        if (usuarioLogueado == null) {
+            Toast.makeText(this, "Inicia sesión para exportar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+                StringBuilder csv = new StringBuilder();
+                String sep = ";";
+
+                // Encabezados
+                if (incluirRegistros) {
+                    csv.append("Rutina").append(sep).append("Seccion").append(sep).append("Ejercicio").append(sep)
+                            .append("Tipo").append(sep).append("Fecha").append(sep).append("Peso").append(sep)
+                            .append("Serie").append(sep).append("Reps").append(sep).append("Peso Corporal")
+                            .append(sep).append("Peso del Usuario en ese momento\n");
+                } else {
+                    csv.append("Rutina").append(sep).append("Seccion").append(sep).append("Ejercicio").append(sep)
+                            .append("Tipo").append(sep).append("Peso Corporal\n");
+                }
+
+                List<Rutina> rutinas = db.rutinaDao().obtenerRutinasPorUsuario(usuarioLogueado.IdUsuario);
+
+                if (rutinas == null || rutinas.isEmpty()) {
+                    runOnUiThread(() -> Toast.makeText(this, "No hay datos para exportar", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                for (Rutina r : rutinas) {
+                    List<Seccion> secciones = db.seccionDao().obtenerSeccionesPorRutina(r.IdRutina);
+                    for (Seccion s : secciones) {
+                        List<Ejercicio> ejercicios = db.ejercicioDao().obtenerEjerciciosPorSeccion(s.IdSeccion);
+                        for (Ejercicio ej : ejercicios) {
+                            String base = r.NombreRutina + sep + s.NombreSeccion + sep + ej.NombreEjercicio + sep + ej.TipoEjercicio;
+
+                            if (incluirRegistros) {
+                                List<Registro> registros = db.registroDao().obtenerHistorialPorEjercicioYUsuario(usuarioLogueado.IdUsuario, ej.IdEjercicio);
+                                if (registros.isEmpty()) {
+                                    csv.append(base).append(sep).append("Sin registros").append(sep).append("-").append(sep).append("-").append(sep).append("-\n");
+                                } else {
+                                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                    for (Registro reg : registros) {
+                                        csv.append(base).append(sep)
+                                                .append(sdf.format(new Date(reg.FechaRegistro))).append(sep)
+                                                .append(String.valueOf(reg.PesoRegistro).replace(".", ",")).append(sep)
+                                                .append(reg.NumSeriesRegistro).append(sep)
+                                                .append(reg.Repeticiones).append(sep)
+                                                .append(ej.PesoCorporalEjercicio ? "Si" : "No").append(sep);
+
+                                        if (ej.PesoCorporalEjercicio && reg.PesoCorporalMomento != null) {
+                                            csv.append(String.valueOf(reg.PesoCorporalMomento).replace(".", ","));
+                                        } else {
+                                            csv.append("-");
+                                        }
+                                        csv.append("\n");
+                                    }
+                                }
+                            } else {
+                                csv.append(base).append(sep).append(ej.PesoCorporalEjercicio ? "Si" : "No").append("\n");
+                            }
+                        }
+                    }
+                }
+
+                generarYCompartirArchivo(csv.toString(), incluirRegistros);
+
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error al exportar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
+    private void generarYCompartirArchivo(String contenido, boolean esCompleto) {
+        try {
+            File path = new File(getCacheDir(), "rutinas");
+            if (!path.exists()) path.mkdirs();
+            File file = new File(path, esCompleto ? "MiGymsito_Completo.csv" : "MiGymsito_Estructura.csv");
+
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(contenido.getBytes());
+            out.close();
+
+            Uri uri = FileProvider.getUriForFile(this, "com.example.migymsito.fileprovider", file);
+
+            runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/csv");
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(intent, "Compartir Progreso"));
+            });
+        } catch (Exception e) {
+            runOnUiThread(() -> Toast.makeText(this, "Error al crear archivo", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void importarDatosDesdeCsv(Uri uri) {
+        if (usuarioLogueado == null) return;
+
+        new Thread(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+                InputStream is = getContentResolver().openInputStream(uri);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+                String linea = reader.readLine(); // Saltar encabezado
+                String sep = ";";
+
+                while ((linea = reader.readLine()) != null) {
+                    String[] datos = linea.split(sep);
+                    if (datos.length < 4) continue;
+
+                    String nombreRutina = datos[0];
+                    String nombreSeccion = datos[1];
+                    String nombreEjercicio = datos[2];
+                    String tipoEjercicio = datos[3];
+
+                    // 1. Asegurar Rutina
+                    Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
+
+                    // 2. Asegurar Sección
+                    Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
+
+                    // 3. Asegurar Ejercicio
+                    Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
+
+                    // 4. Asegurar Relación
+                    SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
+
+                    // 5. Si hay registros, procesarlos
+                    if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
+                        try {
+                            String fechaStr = datos[4];
+                            double peso = Double.parseDouble(datos[5].replace(",", "."));
+                            int serie = Integer.parseInt(datos[6]);
+                            int reps = Integer.parseInt(datos[7]);
+                            Double pesoUsuario = null;
+                            if (datos.length > 9 && !datos[9].equals("-")) {
+                                pesoUsuario = Double.parseDouble(datos[9].replace(",", "."));
+                            }
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                            long fechaLong = sdf.parse(fechaStr).getTime();
+
+                            // Asegurar Entrenamiento (Agrupamos por día y sección)
+                            Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
+
+                            Registro reg = new Registro();
+                            reg.IdEntrenamiento = ent.IdEntrenamiento;
+                            reg.IdSeccionXejercicio = sxe.IdSeccionXejercicio;
+                            reg.FechaRegistro = fechaLong;
+                            reg.PesoRegistro = peso;
+                            reg.NumSeriesRegistro = serie;
+                            reg.Repeticiones = reps;
+                            reg.PesoCorporalMomento = pesoUsuario;
+
+                            db.registroDao().insertarRegistro(reg);
+
+                        } catch (Exception e) {
+                            // Error en una linea de registro individual, continuar
+                        }
+                    }
+                }
+                reader.close();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Importación completada", Toast.LENGTH_SHORT).show();
+                    onImportFinished();
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error al importar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
+    /**
+     * Método para que las actividades hijas refresquen su contenido tras una importación.
+     */
+    protected void onImportFinished() {
+        // Implementado por las hijas
+    }
+
+    private Rutina buscarOInsertarRutina(AppDatabase db, String nombre) {
+        List<Rutina> existentes = db.rutinaDao().obtenerRutinasPorUsuario(usuarioLogueado.IdUsuario);
+        for (Rutina r : existentes) {
+            if (r.NombreRutina.equalsIgnoreCase(nombre)) return r;
+        }
+        Rutina nueva = new Rutina();
+        nueva.NombreRutina = nombre;
+        nueva.IdUsuarioRutina = usuarioLogueado.IdUsuario;
+        nueva.IdRutina = (int) db.rutinaDao().insertarRutina(nueva);
+        return nueva;
+    }
+
+    private Seccion buscarOInsertarSeccion(AppDatabase db, String nombre, int idRutina) {
+        List<Seccion> existentes = db.seccionDao().obtenerSeccionesPorRutina(idRutina);
+        for (Seccion s : existentes) {
+            if (s.NombreSeccion.equalsIgnoreCase(nombre)) return s;
+        }
+        Seccion nueva = new Seccion();
+        nueva.NombreSeccion = nombre;
+        nueva.IdRutinaSeccion = idRutina;
+        nueva.TipoSeccion = "Personalizado";
+        nueva.IdSeccion = (int) db.seccionDao().insertarSeccion(nueva);
+        return nueva;
+    }
+
+    private Ejercicio buscarOInsertarEjercicio(AppDatabase db, String nombre, String tipo) {
+        List<Ejercicio> existentes = db.ejercicioDao().obtenerTodosLosEjercicios();
+        for (Ejercicio e : existentes) {
+            if (e.NombreEjercicio.equalsIgnoreCase(nombre)) return e;
+        }
+        Ejercicio nuevo = new Ejercicio();
+        nuevo.NombreEjercicio = nombre;
+        nuevo.TipoEjercicio = tipo;
+        nuevo.PesoCorporalEjercicio = false; // Valor por defecto, se podría inferir
+        nuevo.IdEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevo);
+        return nuevo;
+    }
+
+    private SeccionXejercicio buscarOInsertarRelacion(AppDatabase db, int idSeccion, int idEjercicio) {
+        SeccionXejercicio sxe = db.seccionXejercicioDao().getRelacion(idSeccion, idEjercicio);
+        if (sxe != null) return sxe;
+
+        SeccionXejercicio nuevo = new SeccionXejercicio();
+        nuevo.IdSeccion = idSeccion;
+        nuevo.IdEjercicio = idEjercicio;
+        nuevo.IdSeccionXejercicio = (int) db.seccionXejercicioDao().insert(nuevo);
+        return nuevo;
+    }
+
+    private Entrenamiento asegurarEntrenamiento(AppDatabase db, int idSeccion, long fecha) {
+        // Buscamos si hay un entrenamiento en esa fecha aproximada para esa sección
+        List<Entrenamiento> existentes = db.entrenamientoDao().getEntrenamientosByUsuario(usuarioLogueado.IdUsuario);
+        for (Entrenamiento e : existentes) {
+            if (e.IdSeccion == idSeccion && Math.abs(e.FechaInicio - fecha) < 3600000) { // Misma hora
+                return e;
+            }
+        }
+        Entrenamiento nuevo = new Entrenamiento();
+        nuevo.IdUsuario = usuarioLogueado.IdUsuario;
+        nuevo.IdSeccion = idSeccion;
+        nuevo.FechaInicio = fecha;
+        nuevo.NumeroEntrenamiento = existentes.size() + 1;
+        nuevo.IdEntrenamiento = (int) db.entrenamientoDao().insert(nuevo);
+        return nuevo;
+    }
+
     private void cerrarSesion() {
         usuarioLogueado = null;
         UsuarioRepository repository = new UsuarioRepository(getApplication());
         repository.eliminarSesion();
-        
+
         Intent intent = new Intent(this, InicioSesionActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
-        
+
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        super.onBackPressed();
     }
 }

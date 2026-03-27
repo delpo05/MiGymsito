@@ -137,6 +137,11 @@ public class SeccionesActivity extends HeaderActivity {
         }
     }
 
+    @Override
+    protected void onImportFinished() {
+        cargarSeccionesDesdeDB();
+    }
+
     private void mostrarPopUpAnadirSeccion() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_dos_opciones);

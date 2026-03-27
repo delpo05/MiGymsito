@@ -34,137 +34,121 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <LinearLayout
+            <!-- Nueva estructura de inputs con ConstraintLayout para alineación perfecta -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/llInputs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+
                 android:gravity="top|center_horizontal"
                 android:orientation="horizontal"
+
                 android:padding="8dp"
                 app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicio">
 
-                <!-- Serie Columna -->
-                <LinearLayout
+                <!-- Títulos (Todos alineados arriba) -->
+                <TextView
+                    android:id="@+id/labelSerie"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Serie"
-                        android:textColor="@color/blanco"
-                        android:textStyle="bold" />
+                    android:text="Serie"
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/labelReps"
+                    app:layout_constraintHorizontal_weight="0.8"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Espacio exacto igual a la altura de los ImageButton (40dp) -->
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="40dp" />
 
-                    <TextView
-                        android:id="@+id/tvSerieValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:gravity="center"
-                        android:text="1"
-                        android:textColor="@color/blanco"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Repeticiones Columna -->
-                <LinearLayout
+                <TextView
+                    android:id="@+id/labelReps"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:text="Repeticiones"
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@+id/tvPesoLabel"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@+id/labelSerie"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Repeticiones"
-                        android:textColor="@color/blanco"
-                        android:textStyle="bold" />
 
-                    <ImageButton
-                        android:id="@+id/btnRepUp"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_arrow_up"
-                        app:tint="@color/blanco" />
-
-                    <EditText
-                        android:id="@+id/etRepeticiones"
-                        android:layout_width="60dp"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:gravity="center"
-                        android:inputType="number"
-                        android:text="0"
-                        android:backgroundTint="@color/blanco"
-                        android:textColor="@color/blanco"
-                        android:textSize="18sp" />
-
-                    <ImageButton
-                        android:id="@+id/btnRepDown"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_arrow_down"
-                        app:tint="@color/blanco" />
-                </LinearLayout>
-
-                <!-- Peso Columna -->
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tvPesoLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:text="Peso (kg)"
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="1.2"
+                    app:layout_constraintStart_toEndOf="@+id/labelReps"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/tvPesoLabel"
+
+                <!-- Selectores y Valores (Centrados verticalmente entre sí) -->
+                <TextView
+                    android:id="@+id/tvSerieValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textColor="@color/blanco"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/npRepeticiones"
+                    app:layout_constraintEnd_toEndOf="@+id/labelSerie"
+                    app:layout_constraintStart_toStartOf="@+id/labelSerie"
+                    app:layout_constraintTop_toTopOf="@+id/npRepeticiones" />
+
+                <NumberPicker
+                    android:id="@+id/npRepeticiones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:theme="@style/PickerStyle"
+                    app:layout_constraintEnd_toEndOf="@+id/labelReps"
+                    app:layout_constraintStart_toStartOf="@+id/labelReps"
+                    app:layout_constraintTop_toBottomOf="@+id/labelReps" />
+
+                <LinearLayout
+                    android:id="@+id/containerPeso"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="@+id/npRepeticiones"
+                    app:layout_constraintEnd_toEndOf="@+id/tvPesoLabel"
+                    app:layout_constraintStart_toStartOf="@+id/tvPesoLabel"
+                    app:layout_constraintTop_toTopOf="@+id/npRepeticiones">
+
+                    <NumberPicker
+                        android:id="@+id/npPesoEntero"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Peso (kg)"
-                        android:textColor="@color/blanco"
-                        android:textStyle="bold" />
+                        android:theme="@style/PickerStyle" />
 
-                    <ImageButton
-                        android:id="@+id/btnPesoUp"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_arrow_up"
-                        app:tint="@color/blanco" />
-
-                    <EditText
-                        android:id="@+id/etPeso"
-                        android:layout_width="80dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:gravity="center"
-                        android:inputType="numberDecimal"
-                        android:text="0"
-                        android:backgroundTint="@color/blanco"
+                        android:layout_gravity="center"
+                        android:text=","
                         android:textColor="@color/blanco"
-                        android:textSize="18sp" />
+                        android:textSize="24sp" />
 
-                    <ImageButton
-                        android:id="@+id/btnPesoDown"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_arrow_down"
-                        app:tint="@color/blanco" />
+                    <NumberPicker
+                        android:id="@+id/npPesoDecimal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:theme="@style/PickerStyle" />
+
                 </LinearLayout>
-            </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
                 android:id="@+id/btnCargar"

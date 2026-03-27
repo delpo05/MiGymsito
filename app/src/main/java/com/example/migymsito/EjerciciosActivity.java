@@ -252,6 +252,11 @@ public class EjerciciosActivity extends HeaderActivity {
         }
     }
 
+    @Override
+    protected void onImportFinished() {
+        cargarEjerciciosDesdeDB();
+    }
+
     private void abrirCamara() {
         File photoFile = null;
         try { photoFile = crearArchivoImagen(); } catch (IOException ex) {}
@@ -365,7 +370,7 @@ public class EjerciciosActivity extends HeaderActivity {
             for (Seccion s : secciones) if (seccionActual == null || s.IdSeccion != seccionActual.IdSeccion) lista.add(s);
             gvPopup.setAdapter(new BaseAdapter() {
                 @Override public int getCount() { return lista.size(); }
-                @Override public Object getItem(int i) { return lista.get(i); }
+                @Override public Object getItem(int i) { return i < lista.size() ? lista.get(i) : null; }
                 @Override public long getItemId(int i) { return i; }
                 @Override public View getView(int pos, View v, ViewGroup p) {
                     if (v == null) v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_seccion_previa, p, false);
