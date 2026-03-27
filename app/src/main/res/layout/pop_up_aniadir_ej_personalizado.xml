@@ -80,6 +80,62 @@
             android:inputType="textPersonName" />
     </LinearLayout>
 
+    <!-- Nueva Sección: Tiempo de Descanso -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Descanso"
+            android:textColor="@color/negro"
+            android:textStyle="bold"
+            android:layout_marginEnd="16dp" />
+
+        <EditText
+            android:id="@+id/etMinutosDescanso"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:hint="02"
+            android:textColorHint="@color/gris_pista"
+            android:background="@null"
+            android:textColor="@color/negro"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="m"
+            android:textColor="@color/negro"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/etSegundosDescanso"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:hint="00"
+            android:textColorHint="@color/gris_pista"
+            android:background="@null"
+            android:textColor="@color/negro"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="s"
+            android:textColor="@color/negro" />
+    </LinearLayout>
+
     <!-- Nueva Sección: Peso Corporal -->
     <CheckBox
         android:id="@+id/cbPesoCorporal"

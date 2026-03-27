@@ -168,6 +168,8 @@ public class EjerciciosActivity extends HeaderActivity {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
+        EditText etMinutos = dialog.findViewById(R.id.etMinutosDescanso);
+        EditText etSegundos = dialog.findViewById(R.id.etSegundosDescanso);
         CheckBox cbPesoCorporal = dialog.findViewById(R.id.cbPesoCorporal);
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
@@ -179,11 +181,19 @@ public class EjerciciosActivity extends HeaderActivity {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
             cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
+            
+            int totalSegundos = ejercicioExistente.TiempoDeDescanso;
+            etMinutos.setText(String.format(Locale.getDefault(), "%02d", totalSegundos / 60));
+            etSegundos.setText(String.format(Locale.getDefault(), "%02d", totalSegundos % 60));
+
             btnAceptar.setText("Guardar");
             if (ejercicioExistente.ImagenEjercicio != null) {
                 uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
                 ivPreviewImagen.setImageURI(uriImagenSeleccionada);
             }
+        } else {
+            etMinutos.setText("02");
+            etSegundos.setText("00");
         }
 
         ivPreviewImagen.setOnClickListener(this::mostrarOpcionesImagen);
@@ -200,11 +210,23 @@ public class EjerciciosActivity extends HeaderActivity {
                 return;
             }
 
+            int mins = 0, segs = 0;
+            try {
+                String m = etMinutos.getText().toString();
+                String s = etSegundos.getText().toString();
+                mins = m.isEmpty() ? 0 : Integer.parseInt(m);
+                segs = s.isEmpty() ? 0 : Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                // Mantener ceros si hay error
+            }
+            int tiempoDescanso = (mins * 60) + segs;
+
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
                 nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                nuevo.TiempoDeDescanso = tiempoDescanso;
                 if (uriImagenSeleccionada != null) nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
 
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
@@ -218,6 +240,7 @@ public class EjerciciosActivity extends HeaderActivity {
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = "Personalizado";
                 editado.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                editado.TiempoDeDescanso = tiempoDescanso;
 
                 ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, success -> {
                     dialog.dismiss();

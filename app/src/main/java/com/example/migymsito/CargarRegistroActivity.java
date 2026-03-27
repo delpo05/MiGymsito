@@ -1,8 +1,14 @@
 package com.example.migymsito;
 
+import android.app.Dialog;
+import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -20,6 +26,7 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CargarRegistroActivity extends HeaderActivity {
 
@@ -40,6 +47,13 @@ public class CargarRegistroActivity extends HeaderActivity {
     private int idSeccion;
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
+
+    // Cronómetro
+    private TextView tvCronometro;
+    private ImageButton btnEditarCronometro;
+    private CountDownTimer countDownTimer;
+    private int tiempoDescansoSegundos = 120; // Default 2 min
+    private boolean timerCorriendo = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +100,7 @@ public class CargarRegistroActivity extends HeaderActivity {
             idEjercicio = ejercicio.IdEjercicio;
             nombreEjercicio = ejercicio.NombreEjercicio;
             esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
+            tiempoDescansoSegundos = ejercicio.TiempoDeDescanso;
         }
         
         if (seccion != null) {
@@ -116,7 +131,11 @@ public class CargarRegistroActivity extends HeaderActivity {
         btnEliminarUltimo = findViewById(R.id.btnEliminarUltimo);
         rvHistorial = findViewById(R.id.rvHistorial);
 
+        tvCronometro = findViewById(R.id.tvCronometro);
+        btnEditarCronometro = findViewById(R.id.btnEditarCronometro);
+
         tvNombreEjercicio.setText(nombreEjercicio);
+        actualizarTextoCronometro(tiempoDescansoSegundos);
 
         if (esPesoCorporal) {
             tvPesoLabel.setText("Lastre (kg)");
@@ -149,6 +168,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void setupListeners() {
         btnCargar.setOnClickListener(v -> guardarRegistro());
         btnEliminarUltimo.setOnClickListener(v -> eliminarUltimoRegistro());
+        btnEditarCronometro.setOnClickListener(v -> mostrarPopUpEditarTiempo());
     }
 
     private void setupRecyclerView() {
@@ -170,7 +190,6 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void actualizarSerieActual(List<Registro> registros) {
         if (!registros.isEmpty()) {
             int maxSerie = 0;
-            // El primer registro de la lista es el más reciente
             Registro ultimoRegistro = registros.get(0);
 
             for (Registro r : registros) {
@@ -178,7 +197,6 @@ public class CargarRegistroActivity extends HeaderActivity {
             }
             serieActual = maxSerie + 1;
 
-            // Pre-llenar campos con la última serie realizada en este entrenamiento
             npRepeticiones.setValue(ultimoRegistro.Repeticiones);
             
             double peso = ultimoRegistro.PesoRegistro;
@@ -187,7 +205,6 @@ public class CargarRegistroActivity extends HeaderActivity {
             
             npPesoEntero.setValue(entero);
             
-            // Mapear decimal a índice del NumberPicker (00, 25, 50, 75)
             if (decimal < 0.125) npPesoDecimal.setValue(0);
             else if (decimal < 0.375) npPesoDecimal.setValue(1);
             else if (decimal < 0.625) npPesoDecimal.setValue(2);
@@ -215,7 +232,6 @@ public class CargarRegistroActivity extends HeaderActivity {
         }
 
         btnCargar.setEnabled(false);
-        // Corregido: Agregado el parámetro nulo para pesoCorporalMomento que pide el repositorio
         registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, null, nuevo -> {
             if (nuevo != null) {
                 listaHistorial.add(0, nuevo);
@@ -226,11 +242,98 @@ public class CargarRegistroActivity extends HeaderActivity {
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
 
+                // Iniciar cronómetro de descanso
+                iniciarCronometro();
+
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }
             btnCargar.setEnabled(true);
         });
+    }
+
+    private void iniciarCronometro() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+
+        countDownTimer = new CountDownTimer(tiempoDescansoSegundos * 1000L, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timerCorriendo = true;
+                actualizarTextoCronometro((int) (millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish() {
+                timerCorriendo = false;
+                actualizarTextoCronometro(tiempoDescansoSegundos);
+                alertarFinDescanso();
+            }
+        }.start();
+    }
+
+    private void actualizarTextoCronometro(int segundosTotales) {
+        int minutes = segundosTotales / 60;
+        int seconds = segundosTotales % 60;
+        tvCronometro.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+    }
+
+    private void alertarFinDescanso() {
+        Toast.makeText(this, "¡Tiempo de descanso finalizado!", Toast.LENGTH_LONG).show();
+        MediaPlayer mp = MediaPlayer.create(this, R.raw.sonido3);
+        if (mp != null) {
+            mp.start();
+            mp.setOnCompletionListener(MediaPlayer::release);
+        }
+    }
+
+    private void mostrarPopUpEditarTiempo() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.pop_up_aniadir_ej_personalizado); // Reusamos el layout o parte de él
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        // Configurar UI del popup para solo editar tiempo
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
+        tvTitulo.setText("Editar tiempo de descanso");
+        
+        // Ocultar lo que no necesitamos
+        dialog.findViewById(R.id.ivSeleccionarImagen).setVisibility(View.GONE);
+        // Cast a View para poder llamar a setVisibility
+        View layoutNombre = (View) dialog.findViewById(R.id.etNombreEjercicio).getParent();
+        if (layoutNombre != null) layoutNombre.setVisibility(View.GONE);
+        
+        dialog.findViewById(R.id.cbPesoCorporal).setVisibility(View.GONE);
+
+        EditText etMinutos = dialog.findViewById(R.id.etMinutosDescanso);
+        EditText etSegundos = dialog.findViewById(R.id.etSegundosDescanso);
+        
+        etMinutos.setText(String.format(Locale.getDefault(), "%02d", tiempoDescansoSegundos / 60));
+        etSegundos.setText(String.format(Locale.getDefault(), "%02d", tiempoDescansoSegundos % 60));
+
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
+
+        btnAceptar.setOnClickListener(v -> {
+            int mins = 0, segs = 0;
+            try {
+                String m = etMinutos.getText().toString();
+                String s = etSegundos.getText().toString();
+                mins = m.isEmpty() ? 0 : Integer.parseInt(m);
+                segs = s.isEmpty() ? 0 : Integer.parseInt(s);
+            } catch (NumberFormatException e) {}
+            
+            tiempoDescansoSegundos = (mins * 60) + segs;
+            if (!timerCorriendo) {
+                actualizarTextoCronometro(tiempoDescansoSegundos);
+            }
+            dialog.dismiss();
+        });
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     private void eliminarUltimoRegistro() {
@@ -245,5 +348,13 @@ public class CargarRegistroActivity extends HeaderActivity {
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
         Toast.makeText(this, "Último registro eliminado", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 }

@@ -164,13 +164,46 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/llInputs" />
 
+            <!-- Cronómetro de descanso -->
+            <LinearLayout
+                android:id="@+id/llCronometro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnCargar">
+
+                <TextView
+                    android:id="@+id/tvCronometro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="02:00"
+                    android:textColor="@color/blanco"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnEditarCronometro"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_edit_outline"
+                    app:tint="@color/blanco" />
+            </LinearLayout>
+
             <FrameLayout
                 android:id="@+id/flHistorialHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:background="#1A1A1A"
-                app:layout_constraintTop_toBottomOf="@id/btnCargar">
+                app:layout_constraintTop_toBottomOf="@id/llCronometro">
 
                 <TextView
                     android:id="@+id/tvHistorialHeader"

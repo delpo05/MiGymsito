@@ -25,4 +25,10 @@ public class Ejercicio implements Serializable {
 
     @NonNull
     public Boolean PesoCorporalEjercicio;
+
+    /**
+     * Tiempo de descanso en segundos.
+     * Por defecto 120 segundos (2 minutos).
+     */
+    public int TiempoDeDescanso = 120;
 }
