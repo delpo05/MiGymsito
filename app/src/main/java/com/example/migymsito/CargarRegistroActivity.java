@@ -16,6 +16,7 @@ import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.RegistroRepository;
+import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private List<Registro> listaHistorial = new ArrayList<>();
 
     private RegistroRepository registroRepository;
+    private UsuarioRepository usuarioRepository;
 
     private int serieActual = 1;
     private int idEjercicio;
@@ -44,10 +46,32 @@ public class CargarRegistroActivity extends HeaderActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cargar_registro_activity);
 
+        usuarioRepository = new UsuarioRepository(getApplication());
+        registroRepository = new RegistroRepository(getApplication());
+
         if (usuarioLogueado != null) {
             idUsuario = usuarioLogueado.IdUsuario;
+            continuarCarga();
+        } else {
+            idUsuario = usuarioRepository.obtenerIdSesion();
+            if (idUsuario != -1) {
+                usuarioRepository.obtenerUsuarioPorId(idUsuario, usuario -> {
+                    if (usuario != null) {
+                        usuarioLogueado = usuario;
+                        continuarCarga();
+                    } else {
+                        Toast.makeText(this, "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Error: No hay una sesión activa", Toast.LENGTH_LONG).show();
+                finish();
+            }
         }
+    }
 
+    private void continuarCarga() {
         Ejercicio ejercicio;
         Seccion seccion;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -67,14 +91,6 @@ public class CargarRegistroActivity extends HeaderActivity {
         if (seccion != null) {
             idSeccion = seccion.IdSeccion;
         }
-
-        if (idUsuario == 0) {
-            Toast.makeText(this, "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
-
-        registroRepository = new RegistroRepository(getApplication());
 
         initViews();
         setupPickers();
@@ -109,26 +125,20 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void setupPickers() {
-        // Habilitar edición por teclado
         npRepeticiones.setDescendantFocusability(NumberPicker.FOCUS_AFTER_DESCENDANTS);
         npPesoEntero.setDescendantFocusability(NumberPicker.FOCUS_AFTER_DESCENDANTS);
-        
-        // El decimal mejor dejarlo solo scroll porque tiene valores fijos (.00, .25, etc)
         npPesoDecimal.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-        // Repeticiones
         npRepeticiones.setMinValue(0);
         npRepeticiones.setMaxValue(100);
         npRepeticiones.setValue(10);
         npRepeticiones.setWrapSelectorWheel(true);
 
-        // Peso Entero
         npPesoEntero.setMinValue(0);
         npPesoEntero.setMaxValue(500);
         npPesoEntero.setValue(0);
         npPesoEntero.setWrapSelectorWheel(true);
 
-        // Peso Decimal
         String[] valoresDecimales = {"00", "25", "50", "75"};
         npPesoDecimal.setMinValue(0);
         npPesoDecimal.setMaxValue(valoresDecimales.length - 1);
@@ -171,7 +181,6 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void guardarRegistro() {
-        // Forzar la validación de lo que el usuario haya escrito manualmente
         npRepeticiones.clearFocus();
         npPesoEntero.clearFocus();
 
@@ -187,7 +196,8 @@ public class CargarRegistroActivity extends HeaderActivity {
         }
 
         btnCargar.setEnabled(false);
-        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, nuevo -> {
+        // Corregido: Agregado el parámetro nulo para pesoCorporalMomento que pide el repositorio
+        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, null, nuevo -> {
             if (nuevo != null) {
                 listaHistorial.add(0, nuevo);
                 adapter.notifyItemInserted(0);
