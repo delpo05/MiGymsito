@@ -4,9 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -45,13 +43,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public abstract class HeaderActivity extends AppCompatActivity {
+public class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-
-    // Variable estática para la sesión global
-    public static Usuario usuarioLogueado;
+    public static Usuario usuarioLogueado; // Cambiado a static para acceso global
+    private UsuarioRepository userRepo;
 
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -65,31 +62,21 @@ public abstract class HeaderActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        userRepo = new UsuarioRepository(getApplication());
 
-        // 1. Intentamos recuperar del Intent si viene (Login manual)
-        if (getIntent() != null && getIntent().hasExtra("usuario")) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                usuarioLogueado = getIntent().getSerializableExtra("usuario", Usuario.class);
-            } else {
-                usuarioLogueado = (Usuario) getIntent().getSerializableExtra("usuario");
-            }
+        // Recuperar usuario de la sesión si no está cargado
+        int idSesion = userRepo.obtenerIdSesion();
+        if (idSesion != -1 && usuarioLogueado == null) {
+            userRepo.obtenerUsuarioPorId(idSesion, usuario -> {
+                if (usuario != null) {
+                    usuarioLogueado = usuario;
+                    actualizarNombreHeader();
+                    onUsuarioCargado();
+                }
+            });
         }
 
-        // 2. Si no hay usuario en memoria (ej. se reinició la app), intentamos recuperar de SharedPreferences
-        if (usuarioLogueado == null) {
-            UsuarioRepository repo = new UsuarioRepository(getApplication());
-            int idSesion = repo.obtenerIdSesion();
-            if (idSesion != -1) {
-                repo.obtenerUsuarioPorId(idSesion, usuario -> {
-                    if (usuario != null) {
-                        usuarioLogueado = usuario;
-                        actualizarNombreHeader();
-                    }
-                });
-            }
-        }
-
-        // Manejo moderno del botón atrás
+        // Manejo del botón atrás
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -102,6 +89,11 @@ public abstract class HeaderActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * Hook para que las actividades hijas sepan cuando el usuario terminó de cargar
+     */
+    protected void onUsuarioCargado() {}
 
     @Override
     protected void onResume() {
@@ -158,11 +150,12 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     }
                 } else if (itemId == R.id.MiPerfil) {
                     Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                    intent.putExtra("usuario", usuarioLogueado);
                     startActivity(intent);
                 } else if (itemId == R.id.MiProgreso) {
                     Intent intent = new Intent(this, EstadisticasActivity.class);
-                    intent.putExtra("usuario", usuarioLogueado);
+                    startActivity(intent);
+                } else if (itemId == R.id.Historial) {
+                    Intent intent = new Intent(this, HistorialPesoActivity.class);
                     startActivity(intent);
                 } else if (itemId == R.id.Exportar) {
                     mostrarPopUpExportar();
@@ -309,7 +302,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 InputStream is = getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
-                String linea = reader.readLine(); // Saltar encabezado
+                String linea = reader.readLine(); 
                 String sep = ";";
 
                 while ((linea = reader.readLine()) != null) {
@@ -321,19 +314,11 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     String nombreEjercicio = datos[2];
                     String tipoEjercicio = datos[3];
 
-                    // 1. Asegurar Rutina
                     Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
-
-                    // 2. Asegurar Sección
                     Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
-
-                    // 3. Asegurar Ejercicio
                     Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
-
-                    // 4. Asegurar Relación
                     SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
 
-                    // 5. Si hay registros, procesarlos
                     if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
                         try {
                             String fechaStr = datos[4];
@@ -348,7 +333,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
                             long fechaLong = sdf.parse(fechaStr).getTime();
 
-                            // Asegurar Entrenamiento (Agrupamos por día y sección)
                             Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
 
                             Registro reg = new Registro();
@@ -363,7 +347,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                             db.registroDao().insertarRegistro(reg);
 
                         } catch (Exception e) {
-                            // Error en una linea de registro individual, continuar
                         }
                     }
                 }
@@ -379,12 +362,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
         }).start();
     }
 
-    /**
-     * Método para que las actividades hijas refresquen su contenido tras una importación.
-     */
-    protected void onImportFinished() {
-        // Implementado por las hijas
-    }
+    protected void onImportFinished() {}
 
     private Rutina buscarOInsertarRutina(AppDatabase db, String nombre) {
         List<Rutina> existentes = db.rutinaDao().obtenerRutinasPorUsuario(usuarioLogueado.IdUsuario);
@@ -419,7 +397,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
         Ejercicio nuevo = new Ejercicio();
         nuevo.NombreEjercicio = nombre;
         nuevo.TipoEjercicio = tipo;
-        nuevo.PesoCorporalEjercicio = false; // Valor por defecto, se podría inferir
+        nuevo.PesoCorporalEjercicio = false; 
         nuevo.IdEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevo);
         return nuevo;
     }
@@ -436,10 +414,9 @@ public abstract class HeaderActivity extends AppCompatActivity {
     }
 
     private Entrenamiento asegurarEntrenamiento(AppDatabase db, int idSeccion, long fecha) {
-        // Buscamos si hay un entrenamiento en esa fecha aproximada para esa sección
         List<Entrenamiento> existentes = db.entrenamientoDao().getEntrenamientosByUsuario(usuarioLogueado.IdUsuario);
         for (Entrenamiento e : existentes) {
-            if (e.IdSeccion == idSeccion && Math.abs(e.FechaInicio - fecha) < 3600000) { // Misma hora
+            if (e.IdSeccion == idSeccion && Math.abs(e.FechaInicio - fecha) < 3600000) { 
                 return e;
             }
         }
@@ -463,10 +440,5 @@ public abstract class HeaderActivity extends AppCompatActivity {
         finish();
 
         Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }

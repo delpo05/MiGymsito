@@ -50,6 +50,10 @@
             android:name=".EstadisticasActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".HistorialPesoActivity"
+            android:exported="false" />
+
         <!-- Configuración para la cámara y compartir archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"

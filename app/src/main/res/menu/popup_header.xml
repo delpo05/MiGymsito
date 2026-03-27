@@ -17,6 +17,10 @@
         android:title="Importar" />
 
     <item
+        android:id="@+id/Historial"
+        android:title="Historial" />
+
+    <item
         android:id="@+id/MiProgreso"
         android:title="@string/mi_progreso" />
 
