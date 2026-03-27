@@ -1,7 +1,6 @@
 package com.example.migymsito.adapter;
 
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -12,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.migymsito.R;
 import com.example.migymsito.data.Ejercicio;
 
@@ -115,8 +116,19 @@ public class EjerciciosAdapter extends BaseAdapter {
             txtNombre.setText(ejercicio.NombreEjercicio);
 
             if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
-                ivImagen.setImageURI(Uri.parse(ejercicio.ImagenEjercicio));
-                ivImagen.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                // --- CARGA ULTRA-EFICIENTE CON GLIDE ---
+                // Glide maneja automáticamente: 
+                // 1. Carga en hilo secundario (no bloquea el scroll)
+                // 2. Corrección de rotación EXIF
+                // 3. Downsampling al tamaño exacto del ImageView
+                // 4. Caché en disco y memoria
+                Glide.with(convertView.getContext())
+                        .load(Uri.parse(ejercicio.ImagenEjercicio))
+                        .placeholder(R.drawable.cargar_imagen_default)
+                        .error(R.drawable.cargar_imagen_default)
+                        .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(ivImagen);
                 
                 // --- DISEÑO PARA EJERCICIOS CON IMAGEN ---
                 params.removeRule(RelativeLayout.CENTER_IN_PARENT);
@@ -132,6 +144,7 @@ public class EjerciciosAdapter extends BaseAdapter {
                 if (container != null) container.setBackgroundResource(R.drawable.card_border_white);
             } else {
                 // --- RESTABLECIDO: DISEÑO PARA EJERCICIOS SIN IMAGEN ---
+                Glide.with(convertView.getContext()).clear(ivImagen);
                 ivImagen.setImageResource(android.R.color.transparent);
                 if (overlay != null) overlay.setVisibility(View.GONE);
                 if (container != null) container.setBackgroundResource(R.drawable.card_border_white);
