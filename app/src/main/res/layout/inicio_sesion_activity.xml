@@ -21,6 +21,7 @@
 
             <!-- Logo -->
             <ImageView
+                android:id="@+id/ivLogo"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_gravity="center"
@@ -106,6 +107,7 @@
             <!-- Botón Login Test -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTestLogin"
+                android:visibility="gone"
                 android:layout_width="220dp"
                 android:layout_height="55dp"
                 android:text="Login Test"
@@ -133,6 +135,7 @@
             <!-- Botón debug al final -->
             <Button
                 android:id="@+id/btnVerUsuarios"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="VER REGISTROS"

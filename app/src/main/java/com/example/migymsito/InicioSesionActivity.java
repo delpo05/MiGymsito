@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,6 +21,7 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
 
     private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
+    private int logoClickCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +48,23 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
         
         configurarWindowInsets(R.id.main);
 
-        findViewById(R.id.btnVerUsuarios).setOnClickListener(v -> {
+        View btnVerUsuarios = findViewById(R.id.btnVerUsuarios);
+        View btnTestLogin = findViewById(R.id.btnTestLogin);
+        ImageView ivLogo = findViewById(R.id.ivLogo);
+
+        btnVerUsuarios.setOnClickListener(v -> {
             Intent intent = new Intent(InicioSesionActivity.this, DebugUsuariosRegistradosActivity.class);
             startActivity(intent);
+        });
+
+        // Truco para desarrolladores: Tocar el logo 10 veces para mostrar botones de debug
+        ivLogo.setOnClickListener(v -> {
+            logoClickCount++;
+            if (logoClickCount == 10) {
+                btnVerUsuarios.setVisibility(View.VISIBLE);
+                btnTestLogin.setVisibility(View.VISIBLE);
+                Toast.makeText(this, "Modo desarrollador activado", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
