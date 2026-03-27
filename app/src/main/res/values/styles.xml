@@ -3,5 +3,12 @@
         <item name="colorPrimary">@color/black</item>
         <item name="colorSecondary">@color/black</item>
         <item name="android:statusBarColor">@color/black</item>
+        <!-- Color de texto por defecto para componentes como NumberPicker -->
+        <item name="android:textColorPrimary">@color/blanco</item>
+    </style>
+
+    <style name="PickerStyle">
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorControlNormal">@color/blanco</item>
     </style>
 </resources>
