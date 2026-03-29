@@ -1,21 +1,12 @@
 <resources>
     <style name="Theme.MiGymsito" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Color principal para botones y elementos destacados (No usar negro aquí) -->
         <item name="colorPrimary">@color/blanco</item>
         <item name="colorOnPrimary">@color/negro</item>
         <item name="colorSecondary">@color/gris_pista</item>
         <item name="android:statusBarColor">@color/black</item>
-
-        <!-- Esto controla el color del cursor y de los Checkbox/RadioButtons activos -->
         <item name="colorControlActivated">@color/blanco</item>
-        
-        <!-- Esto controla el color de los elementos en estado normal (no enfocados) -->
         <item name="colorControlNormal">@color/gris_pista</item>
-        
-        <!-- Color del efecto "ripple" (al tocar un botón) -->
         <item name="colorControlHighlight">#40FFFFFF</item>
-
-        <!-- Color de texto por defecto -->
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="android:textColorSecondary">@color/gris_pista</item>
     </style>
@@ -23,5 +14,12 @@
     <style name="PickerStyle">
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="colorControlNormal">@color/blanco</item>
+    </style>
+
+    <!-- Nuevo nombre más simple para evitar errores -->
+    <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@color/negro</item>
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorPrimary">@color/blanco</item>
     </style>
 </resources>
