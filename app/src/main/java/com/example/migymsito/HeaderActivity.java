@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -122,6 +124,18 @@ public class HeaderActivity extends AppCompatActivity {
                     }
                 });
             }
+
+            // --- REDIRECCIÓN A MI PERFIL AL TOCAR NOMBRE O ICONO ---
+            TextView tvUsername = findViewById(R.id.toolbar_username);
+            ImageView ivUserIcon = findViewById(R.id.toolbar_user_icon);
+
+            View.OnClickListener perfilClickListener = v -> {
+                Intent intent = new Intent(this, DatosPersonalesActivity.class);
+                startActivity(intent);
+            };
+
+            if (tvUsername != null) tvUsername.setOnClickListener(perfilClickListener);
+            if (ivUserIcon != null) ivUserIcon.setOnClickListener(perfilClickListener);
         }
     }
 
