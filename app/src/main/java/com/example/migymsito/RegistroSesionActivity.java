@@ -50,7 +50,8 @@ public class RegistroSesionActivity extends AppCompatActivity {
         etRegGenero = findViewById(R.id.etRegGenero);
 
         String[] opcionesGenero = {"Masculino", "Femenino", "Otro"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, opcionesGenero);
+        // CAMBIO: Usamos R.layout.dropdown_item para que se vea blanco sobre fondo oscuro
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, opcionesGenero);
         etRegGenero.setAdapter(adapter);
 
         etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
@@ -65,6 +66,7 @@ public class RegistroSesionActivity extends AppCompatActivity {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
+        // Sin tema forzado para que use el CustomDatePicker del styles.xml
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, monthOfYear, dayOfMonth) -> {
                     String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
@@ -80,7 +82,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
         if (layout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
                 Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                // Mantenemos el padding lateral del XML y sumamos los systemBars
                 v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), systemBars.bottom);
                 return insets;
             });

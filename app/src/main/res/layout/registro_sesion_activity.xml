@@ -14,7 +14,6 @@
         android:orientation="vertical"
         android:paddingBottom="60dp">
 
-        <!-- Aumentamos el espacio superior para bajar todo el contenido -->
         <View
             android:layout_width="match_parent"
             android:layout_height="80dp" />
@@ -28,7 +27,6 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- CARD PARA AGRUPAR EL FORMULARIO - Reducimos márgenes laterales para ganar espacio -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,9 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp"> <!-- Padding interno optimizado -->
+                android:padding="20dp">
 
-                <!-- Nombre -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -66,7 +63,6 @@
                         android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Correo -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -86,7 +82,6 @@
                         android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Contraseña -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -108,7 +103,6 @@
                         android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Fecha y Género - Fila con más espacio -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -134,7 +128,7 @@
                             android:clickable="true"
                             android:textColor="@color/blanco"
                             android:textStyle="bold"
-                            android:textSize="14sp" /> <!-- Un pelín más chico para asegurar que entre -->
+                            android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -155,11 +149,11 @@
                             android:inputType="none"
                             android:textColor="@color/blanco"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:popupBackground="#1A1A1A" /> <!-- Un gris muy oscuro para que se note sobre el fondo negro -->
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- Peso y Altura -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -207,7 +201,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Botón REGISTRAR -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegistrar"
             android:layout_width="match_parent"
@@ -223,7 +216,6 @@
             app:backgroundTint="@color/blanco"
             app:cornerRadius="30dp" />
 
-        <!-- Botón VOLVER -->
         <ImageButton
             android:id="@+id/btnVolver"
             android:layout_width="48dp"

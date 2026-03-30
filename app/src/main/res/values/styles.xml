@@ -1,27 +1,50 @@
 <resources>
     <style name="Theme.MiGymsito" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Color principal para botones y elementos destacados (No usar negro aquí) -->
         <item name="colorPrimary">@color/blanco</item>
         <item name="colorOnPrimary">@color/negro</item>
         <item name="colorSecondary">@color/gris_pista</item>
         <item name="android:statusBarColor">@color/black</item>
-
-        <!-- Esto controla el color del cursor y de los Checkbox/RadioButtons activos -->
         <item name="colorControlActivated">@color/blanco</item>
-        
-        <!-- Esto controla el color de los elementos en estado normal (no enfocados) -->
         <item name="colorControlNormal">@color/gris_pista</item>
-        
-        <!-- Color del efecto "ripple" (al tocar un botón) -->
         <item name="colorControlHighlight">#40FFFFFF</item>
-
-        <!-- Color de texto por defecto -->
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="android:textColorSecondary">@color/gris_pista</item>
+
+        <!-- Calendario global -->
+        <item name="android:datePickerDialogTheme">@style/CustomDatePicker</item>
     </style>
 
     <style name="PickerStyle">
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="colorControlNormal">@color/blanco</item>
+    </style>
+
+    <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">#1A1A1A</item>
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorPrimary">@color/blanco</item>
+    </style>
+
+    <!-- ESTILO CALENDARIO MODERNO MEJORADO -->
+    <style name="CustomDatePicker" parent="Theme.Material3.Dark.Dialog">
+        <item name="android:windowBackground">#1A1A1A</item>
+        <item name="colorSurface">#1A1A1A</item>
+        
+        <item name="colorPrimary">@color/blanco</item> <!-- Color de cabecera y selección -->
+        <item name="colorOnPrimary">@color/negro</item> <!-- Texto sobre cabecera -->
+        
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="android:textColorSecondary">#CCCCCC</item>
+        
+        <!-- FORZAR BOTONES BLANCOS -->
+        <item name="android:colorAccent">@color/blanco</item>
+        <item name="colorPrimaryAt2">@color/blanco</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
+    </style>
+
+    <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/blanco</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>
