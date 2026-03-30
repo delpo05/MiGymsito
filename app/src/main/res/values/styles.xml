@@ -30,21 +30,21 @@
         <item name="android:windowBackground">#1A1A1A</item>
         <item name="colorSurface">#1A1A1A</item>
         
-        <item name="colorPrimary">@color/blanco</item> <!-- Color de cabecera y selección -->
-        <item name="colorOnPrimary">@color/negro</item> <!-- Texto sobre cabecera -->
+        <!-- Color principal (Círculo de selección y botones) -->
+        <item name="colorPrimary">@color/blanco</item>
+        <item name="colorOnPrimary">@color/negro</item>
         
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="android:textColorSecondary">#CCCCCC</item>
-        
-        <!-- FORZAR BOTONES BLANCOS -->
-        <item name="android:colorAccent">@color/blanco</item>
-        <item name="colorPrimaryAt2">@color/blanco</item>
+
+        <!-- Botones OK/CANCEL -->
         <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
         <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
     </style>
 
+    <!-- Estilo para forzar el texto blanco en los botones -->
     <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
         <item name="android:textColor">@color/blanco</item>
-        <item name="android:textStyle">bold</item>
+        <item name="rippleColor">#40FFFFFF</item>
     </style>
 </resources>
