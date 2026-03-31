@@ -21,6 +21,10 @@
         android:title="Historial de Peso" />
 
     <item
+        android:id="@+id/ComparativaRendimientos"
+        android:title="Comparativa de Rendimientos" />
+
+    <item
         android:id="@+id/MiProgreso"
         android:title="@string/mi_progreso" />
 
