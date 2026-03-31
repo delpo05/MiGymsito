@@ -20,9 +20,11 @@
     </style>
 
     <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
-        <item name="android:windowBackground">#1A1A1A</item>
+        <item name="android:windowBackground">@drawable/bg_dialog_dark</item>
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="colorPrimary">@color/blanco</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
     </style>
 
     <!-- ESTILO CALENDARIO MODERNO MEJORADO -->
@@ -42,9 +44,12 @@
         <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
     </style>
 
-    <!-- Estilo para forzar el texto blanco en los botones -->
+    <!-- Estilo para botones con fondo redondeado forzado -->
     <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
         <item name="android:textColor">@color/blanco</item>
-        <item name="rippleColor">#40FFFFFF</item>
+        <item name="android:background">@drawable/edittext_border</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

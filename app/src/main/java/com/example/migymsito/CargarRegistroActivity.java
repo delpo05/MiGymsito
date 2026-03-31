@@ -196,6 +196,8 @@ public class CargarRegistroActivity extends HeaderActivity {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_ajustar_tiempo, null);
         NumberPicker npMinutos = dialogView.findViewById(R.id.npMinutos);
         NumberPicker npSegundos = dialogView.findViewById(R.id.npSegundos);
+        Button btnCancelar = dialogView.findViewById(R.id.btnCancelarDialog);
+        Button btnAceptar = dialogView.findViewById(R.id.btnAceptarDialog);
 
         npMinutos.setMinValue(0);
         npMinutos.setMaxValue(10);
@@ -205,17 +207,21 @@ public class CargarRegistroActivity extends HeaderActivity {
         npSegundos.setMaxValue(59);
         npSegundos.setValue((int) (startTimeInMillis / 1000) % 60);
 
-        // USAMOS EL TEMA PERSONALIZADO Y QUITAMOS .setTitle PARA USAR EL DEL XML QUE ESTÁ CENTRADO
-        new AlertDialog.Builder(this, R.style.CustomDialogTheme)
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.CustomDialogTheme)
                 .setView(dialogView)
-                .setPositiveButton("Aceptar", (dialog, which) -> {
-                    int min = npMinutos.getValue();
-                    int seg = npSegundos.getValue();
-                    startTimeInMillis = (min * 60 + seg) * 1000L;
-                    resetTimer();
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .create();
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        btnAceptar.setOnClickListener(v -> {
+            int min = npMinutos.getValue();
+            int seg = npSegundos.getValue();
+            startTimeInMillis = (min * 60 + seg) * 1000L;
+            resetTimer();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void startTimer() {

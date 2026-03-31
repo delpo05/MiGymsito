@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -67,5 +68,34 @@
                 android:layout_height="wrap_content"
                 android:theme="@style/PickerStyle" />
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/btnCancelarDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CANCELAR"
+            android:textColor="@color/blanco"
+            android:backgroundTint="#403C3C"
+            android:layout_marginEnd="8dp"
+            app:cornerRadius="20dp"
+            style="@style/Widget.Material3.Button.TonalButton"/>
+
+        <Button
+            android:id="@+id/btnAceptarDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACEPTAR"
+            android:textColor="@color/blanco"
+            android:backgroundTint="#403C3C"
+            app:cornerRadius="20dp"
+            style="@style/Widget.Material3.Button.TonalButton"/>
     </LinearLayout>
 </LinearLayout>
