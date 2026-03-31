@@ -75,6 +75,14 @@ public class RutinasActivity extends HeaderActivity {
         }
 
         gvRutinas = findViewById(R.id.gvGenerico);
+
+        // Configuración específica para Rutinas: una columna y mínimo espacio
+        if (gvRutinas != null) {
+            gvRutinas.setNumColumns(1);
+            float density = getResources().getDisplayMetrics().density;
+            gvRutinas.setVerticalSpacing(0); // Eliminamos el espacio entre filas del GridView
+            gvRutinas.setPadding((int) (8 * density), 0, (int) (8 * density), (int) (8 * density));
+        }
         
         View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
