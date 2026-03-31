@@ -75,7 +75,14 @@ public class SeccionesActivity extends HeaderActivity {
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
-        if (tituloGv != null) tituloGv.setText("Mis Secciones");
+        if (tituloGv != null) {
+            if (rutinaActual != null) {
+                tituloGv.setText("Ejercicios de " + rutinaActual.NombreRutina);
+            } else {
+                tituloGv.setText("Mis Secciones");
+            }
+        }
+        
         seccionRepository = new SeccionRepository(getApplication());
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
@@ -222,7 +229,7 @@ public class SeccionesActivity extends HeaderActivity {
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     tvRutina.setText(s.nombreRutina != null ? "Rutina: " + s.nombreRutina : "Desconocida");
+                     tvRutina.setText(s.nombreRutina != null ? "Rutina: " + s.nombreRutina : "Sistema");
                      
                      GradientDrawable shape = new GradientDrawable();
                      shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
