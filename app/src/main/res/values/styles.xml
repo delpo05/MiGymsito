@@ -47,11 +47,4 @@
         <item name="android:textColor">@color/blanco</item>
         <item name="rippleColor">#40FFFFFF</item>
     </style>
-
-    <!-- Nuevo nombre más simple para evitar errores -->
-    <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
-        <item name="android:windowBackground">@color/negro</item>
-        <item name="android:textColorPrimary">@color/blanco</item>
-        <item name="colorPrimary">@color/blanco</item>
-    </style>
 </resources>
