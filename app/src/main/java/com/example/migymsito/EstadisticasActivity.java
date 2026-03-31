@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.migymsito.data.Ejercicio;
@@ -35,6 +36,7 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private MaterialButton btnConsultarProgreso;
+    private TextView tvFormulaEstadistica;
     private BarChart barChart;
 
     private RutinaRepository rutinaRepository;
@@ -58,6 +60,7 @@ public class EstadisticasActivity extends HeaderActivity {
         autoCompleteEjercicios = findViewById(R.id.autoCompleteEjercicios);
         autoCompleteConsulta = findViewById(R.id.autoCompleteConsulta);
         btnConsultarProgreso = findViewById(R.id.btnConsultarProgreso);
+        tvFormulaEstadistica = findViewById(R.id.tvFormulaEstadistica);
         barChart = findViewById(R.id.barChart);
 
         rutinaRepository = new RutinaRepository(getApplication());
@@ -207,8 +210,11 @@ public class EstadisticasActivity extends HeaderActivity {
                 if (registros == null || registros.isEmpty()) {
                     Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
                     barChart.clear();
+                    tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
                 }
+                tvFormulaEstadistica.setText("Peso Máximo registrado por día");
+                tvFormulaEstadistica.setVisibility(View.VISIBLE);
                 mostrarGraficoBarras(registros, "Peso Máximo (kg)", false);
             });
         } else if (consulta.equals("Volumen de Entrenamiento")) {
@@ -216,11 +222,15 @@ public class EstadisticasActivity extends HeaderActivity {
                 if (registros == null || registros.isEmpty()) {
                     Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
                     barChart.clear();
+                    tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
                 }
+                tvFormulaEstadistica.setText("Fórmula:  (Peso × Repeticiones × Series)");
+                tvFormulaEstadistica.setVisibility(View.VISIBLE);
                 mostrarGraficoBarras(registros, "Volumen Total (kg)", true);
             });
         } else {
+            tvFormulaEstadistica.setVisibility(View.GONE);
             Toast.makeText(this, "Consulta no implementada aún", Toast.LENGTH_SHORT).show();
         }
     }
