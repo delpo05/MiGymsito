@@ -362,9 +362,13 @@ public class EjerciciosActivity extends HeaderActivity {
     private void mostrarPopUpSeccionesParaSeleccion(String tipo) {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.pop_up_secciones_previas);
+        dialog.setContentView(R.layout.pop_up_listado_generico);
         if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
+
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpGenerico);
+        tvTitulo.setText("Seleccionar Sección");
+
+        GridView gvPopup = dialog.findViewById(R.id.gvListadoGenerico);
         SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
             List<Seccion> lista = new ArrayList<>();
             for (Seccion s : secciones) if (seccionActual == null || s.IdSeccion != seccionActual.IdSeccion) lista.add(s);
@@ -383,15 +387,19 @@ public class EjerciciosActivity extends HeaderActivity {
         };
         if (tipo.equals("Preestablecido")) seccionRepository.obtenerSeccionesPreestablecidas(callback);
         else seccionRepository.obtenerSeccionesPersonalizadas(callback);
-        dialog.findViewById(R.id.btnCancelarPrevias).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpEleccionTipoEjercicio(); });
+        dialog.findViewById(R.id.btnCancelarGenerico).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpEleccionTipoEjercicio(); });
         dialog.show();
     }
 
     private void mostrarPopUpEjerciciosDeSeccionSeleccionada(Seccion seccionSel) {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.pop_up_ejercicios_preestablecidos);
+        dialog.setContentView(R.layout.pop_up_listado_generico);
         if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        GridView gv = dialog.findViewById(R.id.gvEjerciciosPreestablecidos);
+
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpGenerico);
+        tvTitulo.setText("Elegir Ejercicio");
+
+        GridView gv = dialog.findViewById(R.id.gvListadoGenerico);
         ejercicioRepository.obtenerEjerciciosPorSeccion(seccionSel.IdSeccion, ejercicios -> {
             gv.setAdapter(new BaseAdapter() {
                 @Override public int getCount() { return ejercicios.size(); }
@@ -410,7 +418,7 @@ public class EjerciciosActivity extends HeaderActivity {
                 }
             });
         });
-        dialog.findViewById(R.id.btnCancelarEjercicios).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpSeccionesParaSeleccion(seccionSel.TipoSeccion); });
+        dialog.findViewById(R.id.btnCancelarGenerico).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpSeccionesParaSeleccion(seccionSel.TipoSeccion); });
         dialog.show();
     }
 

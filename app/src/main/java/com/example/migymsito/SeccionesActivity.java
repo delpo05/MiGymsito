@@ -176,14 +176,17 @@ public class SeccionesActivity extends HeaderActivity {
     private void mostrarPopUpSeccionesPrevias() {
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.pop_up_secciones_previas);
+        dialog.setContentView(R.layout.pop_up_listado_generico);
         
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        GridView gvPopup = dialog.findViewById(R.id.gvSeccionesPrevias);
-        Button btnCancelar = dialog.findViewById(R.id.btnCancelarPrevias);
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpGenerico);
+        tvTitulo.setText("Elegir sección previa");
+
+        GridView gvPopup = dialog.findViewById(R.id.gvListadoGenerico);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarGenerico);
 
         btnCancelar.setOnClickListener(v -> {
             dialog.dismiss();
