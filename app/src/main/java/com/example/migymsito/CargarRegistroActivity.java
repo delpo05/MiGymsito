@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class CargarRegistroActivity extends HeaderActivity {
     private long startTimeInMillis = 60000; 
     private TextView tvTimerValue;
     private ImageButton btnStartTimer, btnResetTimer;
+    private ImageView ivEditTimer;
     private CountDownTimer countDownTimer;
     private boolean timerRunning;
     private long timeLeftInMillis = startTimeInMillis;
@@ -135,6 +137,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         tvTimerValue = findViewById(R.id.tvTimerValue);
         btnStartTimer = findViewById(R.id.btnStartTimer);
         btnResetTimer = findViewById(R.id.btnResetTimer);
+        ivEditTimer = findViewById(R.id.ivEditTimer);
 
         tvNombreEjercicio.setText(nombreEjercicio);
 
@@ -180,6 +183,9 @@ public class CargarRegistroActivity extends HeaderActivity {
 
         btnResetTimer.setOnClickListener(v -> resetTimer());
         tvTimerValue.setOnClickListener(v -> mostrarDialogoAjustarTiempo());
+        if (ivEditTimer != null) {
+            ivEditTimer.setOnClickListener(v -> mostrarDialogoAjustarTiempo());
+        }
     }
 
     private void mostrarDialogoAjustarTiempo() {
