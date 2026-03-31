@@ -392,7 +392,7 @@ public class EjerciciosActivity extends HeaderActivity {
                         if (s.nombreRutina != null) {
                             tvRutina.setText("Rutina: " + s.nombreRutina);
                         } else {
-                            tvRutina.setText("Sistema"); // Cambiado para que se entienda que es preestablecida
+                            tvRutina.setText("Sistema");
                         }
                     }
 
@@ -433,6 +433,12 @@ public class EjerciciosActivity extends HeaderActivity {
                     if (v == null) v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_ejercicio_previo, p, false);
                     Ejercicio e = ejercicios.get(pos);
                     ((TextView)v.findViewById(R.id.tv_nombre_ejercicio_previo)).setText(e.NombreEjercicio);
+                    
+                    TextView tvTipo = v.findViewById(R.id.tv_tipo_ejercicio_previo);
+                    if (tvTipo != null) {
+                        tvTipo.setText(e.TipoEjercicio != null ? e.TipoEjercicio : "Error");
+                    }
+
                     v.setOnClickListener(view -> {
                         ejercicioRepository.insertarRelacionSeccionEjercicio(e.IdEjercicio, seccionActual.IdSeccion);
                         dialog.dismiss();
