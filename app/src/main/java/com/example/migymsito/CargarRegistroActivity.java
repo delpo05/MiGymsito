@@ -205,9 +205,8 @@ public class CargarRegistroActivity extends HeaderActivity {
         npSegundos.setMaxValue(59);
         npSegundos.setValue((int) (startTimeInMillis / 1000) % 60);
 
-        // USAMOS EL TEMA PERSONALIZADO PARA QUE NO SALGA BLANCO
+        // USAMOS EL TEMA PERSONALIZADO Y QUITAMOS .setTitle PARA USAR EL DEL XML QUE ESTÁ CENTRADO
         new AlertDialog.Builder(this, R.style.CustomDialogTheme)
-                .setTitle("Tiempo de descanso")
                 .setView(dialogView)
                 .setPositiveButton("Aceptar", (dialog, which) -> {
                     int min = npMinutos.getValue();
