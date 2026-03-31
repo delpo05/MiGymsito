@@ -169,42 +169,58 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/tvTimerValue"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cvTimer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="01:00"
-                    android:textColor="@color/blanco"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:clickable="true"
-                    android:focusable="true"
+                    android:layout_marginTop="8dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardElevation="8dp"
+                    app:cardMaxElevation="10dp"
+                    app:cardUseCompatPadding="true"
+                    app:strokeColor="#40FFFFFF"
+                    app:strokeWidth="0.5dp"
+                    app:cardCornerRadius="12dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTimerTitle" />
+                    app:layout_constraintTop_toBottomOf="@id/tvTimerTitle">
+
+                    <TextView
+                        android:id="@+id/tvTimerValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="4dp"
+                        android:text="01:00"
+                        android:textColor="@color/blanco"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+                </com.google.android.material.card.MaterialCardView>
 
                 <ImageButton
                     android:id="@+id/btnStartTimer"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_media_play"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvTimerValue"
-                    app:layout_constraintEnd_toStartOf="@+id/tvTimerValue"
-                    app:layout_constraintTop_toTopOf="@+id/tvTimerValue"
+                    app:layout_constraintBottom_toBottomOf="@+id/cvTimer"
+                    app:layout_constraintEnd_toStartOf="@+id/cvTimer"
+                    app:layout_constraintTop_toTopOf="@+id/cvTimer"
                     app:tint="@color/blanco" />
 
                 <ImageButton
                     android:id="@+id/btnResetTimer"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_menu_rotate"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvTimerValue"
-                    app:layout_constraintStart_toEndOf="@+id/tvTimerValue"
-                    app:layout_constraintTop_toTopOf="@+id/tvTimerValue"
+                    app:layout_constraintBottom_toBottomOf="@+id/cvTimer"
+                    app:layout_constraintStart_toEndOf="@+id/cvTimer"
+                    app:layout_constraintTop_toTopOf="@+id/cvTimer"
                     app:tint="@color/blanco" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
