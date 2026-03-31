@@ -96,16 +96,22 @@ public class SeccionRepository {
     }
 
     public void obtenerSeccionesPreestablecidas(RepositoryCallback<List<Seccion>> callback) {
-        executorService.execute(() -> {
-            List<Seccion> lista = seccionDao.obtenerSeccionesPreestablecidas();
-            notificar(callback, lista);
+        obtenerTodasLasSecciones(todas -> {
+            List<Seccion> filtradas = new ArrayList<>();
+            for (Seccion s : todas) {
+                if ("Preestablecido".equals(s.TipoSeccion)) filtradas.add(s);
+            }
+            callback.onResult(filtradas);
         });
     }
 
     public void obtenerSeccionesPersonalizadas(RepositoryCallback<List<Seccion>> callback) {
-        executorService.execute(() -> {
-            List<Seccion> lista = seccionDao.obtenerSeccionesPersonalizadas();
-            notificar(callback, lista);
+        obtenerTodasLasSecciones(todas -> {
+            List<Seccion> filtradas = new ArrayList<>();
+            for (Seccion s : todas) {
+                if ("Personalizado".equals(s.TipoSeccion)) filtradas.add(s);
+            }
+            callback.onResult(filtradas);
         });
     }
 

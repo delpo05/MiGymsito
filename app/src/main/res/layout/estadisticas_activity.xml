@@ -153,12 +153,24 @@
                     android:backgroundTint="#403C3C"
                     app:cornerRadius="25dp" />
 
+                <TextView
+                    android:id="@+id/tvFormulaEstadistica"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:textColor="@color/gris_pista"
+                    android:textSize="14sp"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    tools:text="Fórmula: Σ (Peso × Reps)"
+                    tools:visibility="visible" />
+
                 <!-- Gráfico de Barras -->
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/barChart"
                     android:layout_width="match_parent"
                     android:layout_height="350dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="20dp" />
 
             </LinearLayout>

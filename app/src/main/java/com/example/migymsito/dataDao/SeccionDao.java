@@ -27,7 +27,8 @@ public interface SeccionDao {
     @Query("SELECT * FROM Seccion WHERE IdRutinaSeccion = :idRutina")
     List<Seccion> obtenerSeccionesPorRutina(int idRutina);
 
-    @Query("SELECT * FROM Seccion JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina")
+    // Cambiado a LEFT JOIN para incluir secciones sin rutina (Preestablecidas)
+    @Query("SELECT * FROM Seccion LEFT JOIN Rutina ON Seccion.IdRutinaSeccion = Rutina.IdRutina")
     Map<Seccion, Rutina> obtenerTodasLasSeccionesConRutina();
 
     @Query("SELECT * FROM Seccion WHERE TipoSeccion = 'Preestablecido'")

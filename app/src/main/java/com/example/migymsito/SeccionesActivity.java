@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -57,15 +58,31 @@ public class SeccionesActivity extends HeaderActivity {
             btnFinalizar.setVisibility(View.GONE);
         }
 
-        // El nombre en el toolbar lo maneja automáticamente el HeaderActivity en onResume
-
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
+
+        // Volver a RutinasActivity al presionar atrás
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent intent = new Intent(SeccionesActivity.this, RutinasActivity.class);
+                intent.putExtra("cambiarRutina", true);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
-        if (tituloGv != null) tituloGv.setText("Mis Secciones");
+        if (tituloGv != null) {
+            if (rutinaActual != null) {
+                tituloGv.setText("Ejercicios de " + rutinaActual.NombreRutina);
+            } else {
+                tituloGv.setText("Mis Secciones");
+            }
+        }
+        
         seccionRepository = new SeccionRepository(getApplication());
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
@@ -78,7 +95,6 @@ public class SeccionesActivity extends HeaderActivity {
             public void onSeccionClick(Seccion seccion) {
                 Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
                 intent.putExtra("seccion", seccion);
-                // No es necesario pasar el usuario, ya es estático en HeaderActivity
                 startActivity(intent);
             }
 
@@ -164,7 +180,6 @@ public class SeccionesActivity extends HeaderActivity {
             mostrarPopUpCrearSeccion(null, false);
         });
 
-        // Participa en SeccionesActivity para abrir el popup de secciones previas
         dialog.findViewById(R.id.btnOpcionIzquierda).setOnClickListener(v -> {
             dialog.dismiss();
             mostrarPopUpSeccionesPrevias();
@@ -194,21 +209,27 @@ public class SeccionesActivity extends HeaderActivity {
         });
 
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
+             // Filtrar: NO mostrar las secciones que vienen cargadas por sistema
+             List<Seccion> filtradas = new ArrayList<>();
+             for (Seccion s : secciones) {
+                 if ("Personalizado".equals(s.TipoSeccion)) filtradas.add(s);
+             }
+
              gvPopup.setAdapter(new BaseAdapter() {
-                 @Override public int getCount() { return secciones.size(); }
-                 @Override public Object getItem(int i) { return secciones.get(i); }
+                 @Override public int getCount() { return filtradas.size(); }
+                 @Override public Object getItem(int i) { return filtradas.get(i); }
                  @Override public long getItemId(int i) { return i; }
                  @Override public View getView(int position, View convertView, ViewGroup parent) {
                      if (convertView == null) {
                          convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
                      }
-                     Seccion s = secciones.get(position);
+                     Seccion s = filtradas.get(position);
                      TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
                      TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
                      View container = convertView.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
-                     tvRutina.setText("Rutina: " + (s.nombreRutina != null ? s.nombreRutina : "Desconocida"));
+                     tvRutina.setText(s.nombreRutina != null ? "Rutina: " + s.nombreRutina : "Sistema");
                      
                      GradientDrawable shape = new GradientDrawable();
                      shape.setCornerRadius(15 * parent.getContext().getResources().getDisplayMetrics().density);
