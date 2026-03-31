@@ -1,9 +1,17 @@
 package com.example.migymsito;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +28,7 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CargarRegistroActivity extends HeaderActivity {
 
@@ -40,6 +49,15 @@ public class CargarRegistroActivity extends HeaderActivity {
     private int idSeccion;
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
+
+    // --- Variables del Temporizador ---
+    private long startTimeInMillis = 60000; 
+    private TextView tvTimerValue;
+    private ImageButton btnStartTimer, btnResetTimer;
+    private ImageView ivEditTimer;
+    private CountDownTimer countDownTimer;
+    private boolean timerRunning;
+    private long timeLeftInMillis = startTimeInMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +134,11 @@ public class CargarRegistroActivity extends HeaderActivity {
         btnEliminarUltimo = findViewById(R.id.btnEliminarUltimo);
         rvHistorial = findViewById(R.id.rvHistorial);
 
+        tvTimerValue = findViewById(R.id.tvTimerValue);
+        btnStartTimer = findViewById(R.id.btnStartTimer);
+        btnResetTimer = findViewById(R.id.btnResetTimer);
+        ivEditTimer = findViewById(R.id.ivEditTimer);
+
         tvNombreEjercicio.setText(nombreEjercicio);
 
         if (esPesoCorporal) {
@@ -149,6 +172,114 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void setupListeners() {
         btnCargar.setOnClickListener(v -> guardarRegistro());
         btnEliminarUltimo.setOnClickListener(v -> eliminarUltimoRegistro());
+
+        btnStartTimer.setOnClickListener(v -> {
+            if (timerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        btnResetTimer.setOnClickListener(v -> resetTimer());
+        tvTimerValue.setOnClickListener(v -> mostrarDialogoAjustarTiempo());
+        if (ivEditTimer != null) {
+            ivEditTimer.setOnClickListener(v -> mostrarDialogoAjustarTiempo());
+        }
+    }
+
+    private void mostrarDialogoAjustarTiempo() {
+        if (timerRunning) {
+            pauseTimer();
+        }
+
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_ajustar_tiempo, null);
+        NumberPicker npMinutos = dialogView.findViewById(R.id.npMinutos);
+        NumberPicker npSegundos = dialogView.findViewById(R.id.npSegundos);
+
+        npMinutos.setMinValue(0);
+        npMinutos.setMaxValue(10);
+        npMinutos.setValue((int) (startTimeInMillis / 1000) / 60);
+
+        npSegundos.setMinValue(0);
+        npSegundos.setMaxValue(59);
+        npSegundos.setValue((int) (startTimeInMillis / 1000) % 60);
+
+        // USAMOS EL TEMA PERSONALIZADO PARA QUE NO SALGA BLANCO
+        new AlertDialog.Builder(this, R.style.CustomDialogTheme)
+                .setTitle("Tiempo de descanso")
+                .setView(dialogView)
+                .setPositiveButton("Aceptar", (dialog, which) -> {
+                    int min = npMinutos.getValue();
+                    int seg = npSegundos.getValue();
+                    startTimeInMillis = (min * 60 + seg) * 1000L;
+                    resetTimer();
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void startTimer() {
+        if (timeLeftInMillis <= 0) {
+            resetTimer();
+        }
+
+        countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeftInMillis = millisUntilFinished;
+                updateCountDownText();
+            }
+
+            @Override
+            public void onFinish() {
+                timerRunning = false;
+                btnStartTimer.setImageResource(android.R.drawable.ic_media_play);
+                timeLeftInMillis = startTimeInMillis;
+                updateCountDownText();
+                vibrarAlFinalizar();
+                Toast.makeText(CargarRegistroActivity.this, "¡Descanso terminado!", Toast.LENGTH_SHORT).show();
+            }
+        }.start();
+
+        timerRunning = true;
+        btnStartTimer.setImageResource(android.R.drawable.ic_media_pause);
+    }
+
+    private void pauseTimer() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        timerRunning = false;
+        btnStartTimer.setImageResource(android.R.drawable.ic_media_play);
+    }
+
+    private void resetTimer() {
+        pauseTimer();
+        timeLeftInMillis = startTimeInMillis;
+        updateCountDownText();
+    }
+
+    private void updateCountDownText() {
+        int minutes = (int) (timeLeftInMillis / 1000) / 60;
+        int seconds = (int) (timeLeftInMillis / 1000) % 60;
+        String timeLeftFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+        tvTimerValue.setText(timeLeftFormatted);
+    }
+
+    private void vibrarAlFinalizar() {
+        try {
+            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    vibrator.vibrate(500);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupRecyclerView() {
@@ -170,29 +301,20 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void actualizarSerieActual(List<Registro> registros) {
         if (!registros.isEmpty()) {
             int maxSerie = 0;
-            // El primer registro de la lista es el más reciente
             Registro ultimoRegistro = registros.get(0);
-
             for (Registro r : registros) {
                 if (r.NumSeriesRegistro > maxSerie) maxSerie = r.NumSeriesRegistro;
             }
             serieActual = maxSerie + 1;
-
-            // Pre-llenar campos con la última serie realizada en este entrenamiento
             npRepeticiones.setValue(ultimoRegistro.Repeticiones);
-            
             double peso = ultimoRegistro.PesoRegistro;
             int entero = (int) peso;
             double decimal = peso - entero;
-            
             npPesoEntero.setValue(entero);
-            
-            // Mapear decimal a índice del NumberPicker (00, 25, 50, 75)
             if (decimal < 0.125) npPesoDecimal.setValue(0);
             else if (decimal < 0.375) npPesoDecimal.setValue(1);
             else if (decimal < 0.625) npPesoDecimal.setValue(2);
             else npPesoDecimal.setValue(3);
-            
         } else {
             serieActual = 1;
         }
@@ -202,30 +324,26 @@ public class CargarRegistroActivity extends HeaderActivity {
     private void guardarRegistro() {
         npRepeticiones.clearFocus();
         npPesoEntero.clearFocus();
-
         int reps = npRepeticiones.getValue();
         int entero = npPesoEntero.getValue();
         String[] valoresDecimales = npPesoDecimal.getDisplayedValues();
         double decimal = Double.parseDouble("0." + valoresDecimales[npPesoDecimal.getValue()]);
         double peso = entero + decimal;
-
         if (reps <= 0) {
             Toast.makeText(this, "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
         }
-
         btnCargar.setEnabled(false);
-        // Corregido: Agregado el parámetro nulo para pesoCorporalMomento que pide el repositorio
         registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, null, nuevo -> {
             if (nuevo != null) {
                 listaHistorial.add(0, nuevo);
                 adapter.notifyItemInserted(0);
                 rvHistorial.scrollToPosition(0);
-
                 serieActual++;
                 tvSerieValue.setText(String.valueOf(serieActual));
                 Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
-
+                resetTimer();
+                startTimer();
             } else {
                 Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
             }
@@ -234,16 +352,11 @@ public class CargarRegistroActivity extends HeaderActivity {
     }
 
     private void eliminarUltimoRegistro() {
-        if (listaHistorial.isEmpty()) {
-            Toast.makeText(this, "No hay registros para eliminar", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        if (listaHistorial.isEmpty()) return;
         Registro ultimo = listaHistorial.get(0);
         registroRepository.eliminarRegistro(ultimo);
         listaHistorial.remove(0);
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
-        Toast.makeText(this, "Último registro eliminado", Toast.LENGTH_SHORT).show();
     }
 }

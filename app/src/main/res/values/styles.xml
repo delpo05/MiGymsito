@@ -29,11 +29,11 @@
     <style name="CustomDatePicker" parent="Theme.Material3.Dark.Dialog">
         <item name="android:windowBackground">#1A1A1A</item>
         <item name="colorSurface">#1A1A1A</item>
-        
+
         <!-- Color principal (Círculo de selección y botones) -->
         <item name="colorPrimary">@color/blanco</item>
         <item name="colorOnPrimary">@color/negro</item>
-        
+
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="android:textColorSecondary">#CCCCCC</item>
 
@@ -46,5 +46,12 @@
     <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
         <item name="android:textColor">@color/blanco</item>
         <item name="rippleColor">#40FFFFFF</item>
+    </style>
+
+    <!-- Nuevo nombre más simple para evitar errores -->
+    <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@color/negro</item>
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorPrimary">@color/blanco</item>
     </style>
 </resources>
