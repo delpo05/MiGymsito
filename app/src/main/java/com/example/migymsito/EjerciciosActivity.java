@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -81,7 +82,6 @@ public class EjerciciosActivity extends HeaderActivity {
         tvTituloGrid = findViewById(R.id.tvTituloGrid);
         btnFinalizarEntrenamiento = findViewById(R.id.btnFinalizarEntrenamiento);
 
-        // Volvemos a 2 columnas para ejercicios
         if (gvEjercicios != null) {
             gvEjercicios.setNumColumns(2);
         }
@@ -369,9 +369,15 @@ public class EjerciciosActivity extends HeaderActivity {
         tvTitulo.setText("Seleccionar Sección");
 
         GridView gvPopup = dialog.findViewById(R.id.gvListadoGenerico);
-        SeccionRepository.RepositoryCallback<List<Seccion>> callback = secciones -> {
+        
+        seccionRepository.obtenerTodasLasSecciones(secciones -> {
             List<Seccion> lista = new ArrayList<>();
-            for (Seccion s : secciones) if (seccionActual == null || s.IdSeccion != seccionActual.IdSeccion) lista.add(s);
+            for (Seccion s : secciones) {
+                if ((seccionActual == null || s.IdSeccion != seccionActual.IdSeccion) && s.TipoSeccion.equals(tipo)) {
+                    lista.add(s);
+                }
+            }
+            
             gvPopup.setAdapter(new BaseAdapter() {
                 @Override public int getCount() { return lista.size(); }
                 @Override public Object getItem(int i) { return i < lista.size() ? lista.get(i) : null; }
@@ -380,13 +386,31 @@ public class EjerciciosActivity extends HeaderActivity {
                     if (v == null) v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_seccion_previa, p, false);
                     Seccion s = lista.get(pos);
                     ((TextView)v.findViewById(R.id.tv_nombre_seccion_previa)).setText(s.NombreSeccion);
+                    
+                    TextView tvRutina = v.findViewById(R.id.tv_nombre_rutina_previa);
+                    if (tvRutina != null) {
+                        if (s.nombreRutina != null) {
+                            tvRutina.setText("Rutina: " + s.nombreRutina);
+                        } else {
+                            tvRutina.setText("Sistema"); // Cambiado para que se entienda que es preestablecida
+                        }
+                    }
+
+                    View container = v.findViewById(R.id.container_item_previa);
+                    if (container != null) {
+                        GradientDrawable shape = new GradientDrawable();
+                        shape.setCornerRadius(15 * p.getContext().getResources().getDisplayMetrics().density);
+                        shape.setStroke(4, Color.BLACK);
+                        shape.setColor(Color.WHITE);
+                        container.setBackground(shape);
+                    }
+
                     v.setOnClickListener(view -> { dialog.dismiss(); mostrarPopUpEjerciciosDeSeccionSeleccionada(s); });
                     return v;
                 }
             });
-        };
-        if (tipo.equals("Preestablecido")) seccionRepository.obtenerSeccionesPreestablecidas(callback);
-        else seccionRepository.obtenerSeccionesPersonalizadas(callback);
+        });
+
         dialog.findViewById(R.id.btnCancelarGenerico).setOnClickListener(v -> { dialog.dismiss(); mostrarPopUpEleccionTipoEjercicio(); });
         dialog.show();
     }
