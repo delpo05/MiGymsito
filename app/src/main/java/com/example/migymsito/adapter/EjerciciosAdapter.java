@@ -3,6 +3,7 @@ package com.example.migymsito.adapter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,26 +75,22 @@ public class EjerciciosAdapter extends BaseAdapter {
         ImageView ivImagen = convertView.findViewById(R.id.iv_item_imagen);
         View overlay = convertView.findViewById(R.id.view_overlay);
 
-        // --- Ajuste de tamaño para Ejercicios ---
         if (container != null) {
             ViewGroup.LayoutParams layoutParams = container.getLayoutParams();
             layoutParams.height = dpToPx(220, convertView);
             container.setLayoutParams(layoutParams);
             container.setElevation(0);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                container.setOutlineAmbientShadowColor(Color.BLACK);
-                container.setOutlineSpotShadowColor(Color.BLACK);
-            }
         }
 
-        // RESETEAR DISEÑO POR DEFECTO
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
-        params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        params.setMargins(dpToPx(10, convertView), 0, dpToPx(10, convertView), 0);
-        txtNombre.setTextSize(16f);
-        txtNombre.setShadowLayer(0, 0, 0, 0);
+        // RESETEAR DISEÑO
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, 
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        
+        txtNombre.setMaxLines(2);
+        txtNombre.setEllipsize(TextUtils.TruncateAt.END);
+        txtNombre.setGravity(android.view.Gravity.CENTER);
 
         if (ejercicios == null || position == ejercicios.size()) {
             btnAdd.setVisibility(View.VISIBLE);
@@ -116,12 +113,6 @@ public class EjerciciosAdapter extends BaseAdapter {
             txtNombre.setText(ejercicio.NombreEjercicio);
 
             if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
-                // --- CARGA ULTRA-EFICIENTE CON GLIDE ---
-                // Glide maneja automáticamente: 
-                // 1. Carga en hilo secundario (no bloquea el scroll)
-                // 2. Corrección de rotación EXIF
-                // 3. Downsampling al tamaño exacto del ImageView
-                // 4. Caché en disco y memoria
                 Glide.with(convertView.getContext())
                         .load(Uri.parse(ejercicio.ImagenEjercicio))
                         .placeholder(R.drawable.cargar_imagen_default)
@@ -130,27 +121,24 @@ public class EjerciciosAdapter extends BaseAdapter {
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(ivImagen);
                 
-                // --- DISEÑO PARA EJERCICIOS CON IMAGEN ---
-                params.removeRule(RelativeLayout.CENTER_IN_PARENT);
                 params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 params.topMargin = dpToPx(14, convertView);
-                params.leftMargin = dpToPx(45, convertView);
-                params.rightMargin = dpToPx(45, convertView);
+                // Márgenes laterales de 48dp para que NUNCA toque los tres puntitos
+                params.leftMargin = dpToPx(48, convertView);
+                params.rightMargin = dpToPx(48, convertView);
                 
-                txtNombre.setTextSize(19f);
+                txtNombre.setTextSize(18f);
                 txtNombre.setShadowLayer(4, 2, 2, Color.parseColor("#CC000000"));
-                
                 if (overlay != null) overlay.setVisibility(View.VISIBLE);
-                if (container != null) container.setBackgroundResource(R.drawable.card_border_white);
             } else {
-                // --- RESTABLECIDO: DISEÑO PARA EJERCICIOS SIN IMAGEN ---
                 Glide.with(convertView.getContext()).clear(ivImagen);
                 ivImagen.setImageResource(android.R.color.transparent);
                 if (overlay != null) overlay.setVisibility(View.GONE);
-                if (container != null) container.setBackgroundResource(R.drawable.card_border_white);
                 
-                // Texto en el centro para los que no tienen foto
                 params.addRule(RelativeLayout.CENTER_IN_PARENT);
+                params.leftMargin = dpToPx(15, convertView);
+                params.rightMargin = dpToPx(15, convertView);
+                
                 txtNombre.setTextSize(16f);
                 txtNombre.setShadowLayer(0, 0, 0, 0);
             }

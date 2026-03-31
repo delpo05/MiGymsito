@@ -74,7 +74,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end"
+        android:gravity="center"
         android:layout_marginTop="20dp">
 
         <Button
@@ -84,7 +84,12 @@
             android:text="CANCELAR"
             android:textColor="@color/blanco"
             android:backgroundTint="#403C3C"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
+            android:textSize="14sp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
             app:cornerRadius="20dp"
             style="@style/Widget.Material3.Button.TonalButton"/>
 
@@ -95,6 +100,11 @@
             android:text="ACEPTAR"
             android:textColor="@color/blanco"
             android:backgroundTint="#403C3C"
+            android:textSize="14sp"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
             app:cornerRadius="20dp"
             style="@style/Widget.Material3.Button.TonalButton"/>
     </LinearLayout>

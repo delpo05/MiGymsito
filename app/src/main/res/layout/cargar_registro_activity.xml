@@ -141,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:backgroundTint="#403C3C"
-                android:text="Cargar"
+                android:text="CARGAR"
                 android:textAllCaps="false"
                 android:textColor="@color/blanco"
                 app:cornerRadius="25dp"
