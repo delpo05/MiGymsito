@@ -55,6 +55,10 @@
         <activity android:name=".HistorialPesoActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".CompararEntrenamientosActivity"
+            android:exported="false" />
+
         <!-- Configuración para la cámara y compartir archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"

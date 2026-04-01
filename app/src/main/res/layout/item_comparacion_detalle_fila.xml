@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tv_detalle_set"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:text="1"
+        android:textColor="@color/negro"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tv_detalle_ant"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.2"
+        android:text="80kg x 10"
+        android:textColor="@color/negro"
+        android:gravity="center"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/tv_detalle_post"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.2"
+        android:text="85kg x 8"
+        android:textColor="@color/negro"
+        android:gravity="center"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/tv_detalle_dif"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="+5kg\n-2 reps"
+        android:textColor="@color/negro"
+        android:gravity="center"
+        android:textSize="11sp"/>
+
+</TableRow>

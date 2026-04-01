@@ -35,7 +35,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
@@ -144,19 +146,46 @@ public class EjerciciosActivity extends HeaderActivity {
                     usuarioLogueado.IdUsuario, seccionActual.IdSeccion, success -> {
                         if (success != null && success) {
                             Toast.makeText(this, "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
-                            
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                Intent intent = new Intent(this, RutinasActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                                finish();
-                            }, 500);
+                            validarYRedirigir();
                         } else {
                             Toast.makeText(this, "Error al finalizar", Toast.LENGTH_SHORT).show();
                             btnFinalizarEntrenamiento.setEnabled(true);
                         }
                     });
         });
+    }
+
+    private void validarYRedirigir() {
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getDatabase(this);
+            // Obtener todos los entrenamientos finalizados de esta sección
+            List<Entrenamiento> entrenamientos = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(usuarioLogueado.IdUsuario, seccionActual.IdSeccion);
+            
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (entrenamientos.size() >= 2) {
+                    // Si hay al menos 2, podemos comparar
+                    irAComparativaPostFinalizar(entrenamientos);
+                } else {
+                    // Si es el primero o no hay suficientes, volvemos al inicio normal
+                    Intent intent = new Intent(this, RutinasActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+        }).start();
+    }
+
+    private void irAComparativaPostFinalizar(List<Entrenamiento> entrenamientos) {
+        Intent intent = new Intent(this, CompararEntrenamientosActivity.class);
+        // El último (recién terminado) es entrenamientoA (Columna Izquierda / Nuevo)
+        // El anteúltimo es entrenamientoB (Columna Derecha / Viejo)
+        intent.putExtra("idEntA", entrenamientos.get(entrenamientos.size() - 1).IdEntrenamiento);
+        intent.putExtra("idEntB", entrenamientos.get(entrenamientos.size() - 2).IdEntrenamiento);
+        intent.putExtra("idSeccion", seccionActual.IdSeccion);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void mostrarPopUpCrearEjercicioPersonalizado(Ejercicio ejercicioExistente) {
