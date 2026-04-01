@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:background="#0F0F0F"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_nombre_ejercicio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:textColor="@color/blanco"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:text="Sentadillas" />
+
+        <TextView
+            android:id="@+id/tv_volumen_actual"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:textColor="@color/blanco"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:text="1000 kg" />
+
+        <TextView
+            android:id="@+id/tv_volumen_anterior"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:textColor="@color/blanco"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:text="900 kg" />
+
+        <!-- Columna de Evolución Consolidada -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tv_evolucion_texto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/blanco"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="+100 (11%)" />
+
+            <ImageView
+                android:id="@+id/iv_indicador"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/ic_arrow_up" />
+        </LinearLayout>
+    </TableRow>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1AFFFFFF" />
+</TableLayout>

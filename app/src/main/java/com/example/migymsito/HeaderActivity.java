@@ -167,6 +167,9 @@ public class HeaderActivity extends AppCompatActivity {
                 } else if (itemId == R.id.MiProgreso) {
                     Intent intent = new Intent(this, EstadisticasActivity.class);
                     startActivity(intent);
+                } else if (itemId == R.id.ComparativaRendimientos) {
+                    Intent intent = new Intent(this, CompararEntrenamientosActivity.class);
+                    startActivity(intent);
                 } else if (itemId == R.id.Historial) {
                     Intent intent = new Intent(this, HistorialPesoActivity.class);
                     startActivity(intent);

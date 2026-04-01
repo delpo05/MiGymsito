@@ -37,4 +37,7 @@ public interface EntrenamientoDao {
            "JOIN Seccion ON Entrenamiento.IdSeccion = Seccion.IdSeccion " +
            "WHERE Entrenamiento.IdUsuario = :idUsuario AND Seccion.IdRutinaSeccion = :idRutina AND Entrenamiento.FechaFin IS NULL")
     List<Entrenamiento> getEntrenamientosActivosPorRutina(int idUsuario, int idRutina);
+
+    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NOT NULL ORDER BY FechaFin ASC")
+    List<Entrenamiento> getEntrenamientosFinalizadosPorSeccion(int idUsuario, int idSeccion);
 }
