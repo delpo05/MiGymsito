@@ -21,14 +21,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.RegistroAdapter;
 import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.dataRepository.HistorialRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class CargarRegistroActivity extends HeaderActivity {
 
@@ -42,6 +45,7 @@ public class CargarRegistroActivity extends HeaderActivity {
 
     private RegistroRepository registroRepository;
     private UsuarioRepository usuarioRepository;
+    private HistorialRepository historialRepository;
 
     private int serieActual = 1;
     private int idEjercicio;
@@ -66,6 +70,7 @@ public class CargarRegistroActivity extends HeaderActivity {
 
         usuarioRepository = new UsuarioRepository(getApplication());
         registroRepository = new RegistroRepository(getApplication());
+        historialRepository = new HistorialRepository(getApplication());
 
         if (usuarioLogueado != null) {
             idUsuario = usuarioLogueado.IdUsuario;
@@ -339,20 +344,30 @@ public class CargarRegistroActivity extends HeaderActivity {
             return;
         }
         btnCargar.setEnabled(false);
-        registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, null, nuevo -> {
-            if (nuevo != null) {
-                listaHistorial.add(0, nuevo);
-                adapter.notifyItemInserted(0);
-                rvHistorial.scrollToPosition(0);
-                serieActual++;
-                tvSerieValue.setText(String.valueOf(serieActual));
-                Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
-                resetTimer();
-                startTimer();
-            } else {
-                Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
-            }
-            btnCargar.setEnabled(true);
+
+        // Obtenemos el último peso corporal del usuario antes de guardar
+        Executors.newSingleThreadExecutor().execute(() -> {
+            com.example.migymsito.dataDataBase.AppDatabase db = com.example.migymsito.dataDataBase.AppDatabase.getDatabase(getApplicationContext());
+            Historial ultimoPeso = db.historialDao().obtenerUltimoHistorial(idUsuario);
+            Double pesoCorporal = (ultimoPeso != null) ? ultimoPeso.PesoHistorial : null;
+
+            runOnUiThread(() -> {
+                registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, pesoCorporal, nuevo -> {
+                    if (nuevo != null) {
+                        listaHistorial.add(0, nuevo);
+                        adapter.notifyItemInserted(0);
+                        rvHistorial.scrollToPosition(0);
+                        serieActual++;
+                        tvSerieValue.setText(String.valueOf(serieActual));
+                        Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
+                        resetTimer();
+                        startTimer();
+                    } else {
+                        Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
+                    }
+                    btnCargar.setEnabled(true);
+                });
+            });
         });
     }
 

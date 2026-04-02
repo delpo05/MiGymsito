@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -68,7 +70,6 @@ public class RutinasActivity extends HeaderActivity {
         usuarioRepository = new UsuarioRepository(getApplication());
         rutinaRepository = new RutinaRepository(getApplication());
 
-        // Comprobar si ya hay una rutina seleccionada
         int idRutinaGuardada = usuarioRepository.obtenerIdRutina();
         if (idRutinaGuardada != -1 && getIntent().getBooleanExtra("cambiarRutina", false) == false) {
             saltarASecciones(idRutinaGuardada);
@@ -76,11 +77,10 @@ public class RutinasActivity extends HeaderActivity {
 
         gvRutinas = findViewById(R.id.gvGenerico);
 
-        // Configuración específica para Rutinas: una columna y mínimo espacio
         if (gvRutinas != null) {
             gvRutinas.setNumColumns(1);
             float density = getResources().getDisplayMetrics().density;
-            gvRutinas.setVerticalSpacing(0); // Eliminamos el espacio entre filas del GridView
+            gvRutinas.setVerticalSpacing(0);
             gvRutinas.setPadding((int) (8 * density), 0, (int) (8 * density), (int) (8 * density));
         }
         
@@ -128,9 +128,7 @@ public class RutinasActivity extends HeaderActivity {
 
             @Override
             public void onRutinaClick(Rutina rutina) {
-                // Guardar la elección
                 usuarioRepository.guardarIdRutina(rutina.IdRutina);
-                
                 Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
                 intent.putExtra("rutina", rutina);
                 startActivity(intent);
@@ -254,7 +252,14 @@ public class RutinasActivity extends HeaderActivity {
                         jsonEjercicio.put("nombre", ejercicio.NombreEjercicio);
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
                         jsonEjercicio.put("pesoCorporal", ejercicio.PesoCorporalEjercicio);
-                        jsonEjercicio.put("imagen", ejercicio.ImagenEjercicio);
+                        
+                        // Exportar imagen como Base64 si existe
+                        if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
+                            String base64 = uriToBase64(Uri.parse(ejercicio.ImagenEjercicio));
+                            if (base64 != null) {
+                                jsonEjercicio.put("imagenData", base64);
+                            }
+                        }
                         jsonEjercicios.put(jsonEjercicio);
                     }
                     jsonSeccion.put("ejercicios", jsonEjercicios);
@@ -289,6 +294,40 @@ public class RutinasActivity extends HeaderActivity {
                 runOnUiThread(() -> Toast.makeText(this, "Error al exportar", Toast.LENGTH_SHORT).show());
             }
         });
+    }
+
+    private String uriToBase64(Uri uri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                byteBuffer.write(buffer, 0, len);
+            }
+            return Base64.encodeToString(byteBuffer.toByteArray(), Base64.NO_WRAP);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String guardarImagenDesdeBase64(String base64Str) {
+        try {
+            byte[] data = Base64.decode(base64Str, Base64.DEFAULT);
+            File folder = new File(getFilesDir(), "imagenes_ejercicios");
+            if (!folder.exists()) folder.mkdirs();
+            
+            File file = new File(folder, "img_" + System.currentTimeMillis() + ".jpg");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(data);
+            fos.close();
+            
+            return Uri.fromFile(file).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void cargarRutinasDesdeDB() {
@@ -412,7 +451,15 @@ public class RutinasActivity extends HeaderActivity {
                                     nuevoEj.NombreEjercicio = nombreEj;
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
-                                    nuevoEj.ImagenEjercicio = jsonEjercicio.optString("imagen", null);
+                                    
+                                    // Restaurar imagen si viene en Base64
+                                    String base64Data = jsonEjercicio.optString("imagenData", null);
+                                    if (base64Data != null) {
+                                        nuevoEj.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
+                                    } else {
+                                        nuevoEj.ImagenEjercicio = jsonEjercicio.optString("imagen", null);
+                                    }
+                                    
                                     idEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevoEj);
                                 }
 
