@@ -92,23 +92,71 @@ public abstract class AppDatabase extends RoomDatabase {
 
         if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
 
-            // Sección Pecho
+            // ================= PECHO =================
             long idPecho = insertarSeccion(seccionDao, "Pecho");
             insertarEjercicio(ejercicioDao, sxeDao, "Press de banca", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Apertura de pecho", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Press inclinado con barra", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Press inclinado con mancuernas", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Aperturas con mancuernas", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Aperturas en máquina", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Cruce de poleas", idPecho);
+            insertarEjercicio(ejercicioDao, sxeDao, "Fondos en paralelas (pecho)", idPecho);
 
-            // Sección Espalda
+// ================= ESPALDA =================
             long idEspalda = insertarSeccion(seccionDao, "Espalda");
-            insertarEjercicio(ejercicioDao, sxeDao, "Dominada", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Dominadas", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Jalón al pecho", idEspalda);
             insertarEjercicio(ejercicioDao, sxeDao, "Remo con barra", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Remo con mancuernas", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Remo en máquina", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Peso muerto", idEspalda);
+            insertarEjercicio(ejercicioDao, sxeDao, "Pullover con mancuerna", idEspalda);
 
-            // Sección Bicep
-            long idBicep = insertarSeccion(seccionDao, "Bicep");
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl de bicep con barra", idBicep);
+// ================= BICEPS =================
+            long idBicep = insertarSeccion(seccionDao, "Biceps");
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl con barra", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl con mancuernas", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl alternado", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl martillo", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl concentrado", idBicep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl en banco inclinado", idBicep);
 
-            // Sección Tricep
-            long idTricep = insertarSeccion(seccionDao, "Tricep");
-            insertarEjercicio(ejercicioDao, sxeDao, "Extensión de tricep", idTricep);
+// ================= TRICEPS =================
+            long idTricep = insertarSeccion(seccionDao, "Triceps");
+            insertarEjercicio(ejercicioDao, sxeDao, "Extensión en polea", idTricep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Fondos en paralelas (triceps)", idTricep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Press cerrado", idTricep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Patada de triceps", idTricep);
+            insertarEjercicio(ejercicioDao, sxeDao, "Extensión con mancuerna", idTricep);
+
+// ================= HOMBROS =================
+            long idHombros = insertarSeccion(seccionDao, "Hombros");
+            insertarEjercicio(ejercicioDao, sxeDao, "Press militar", idHombros);
+            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones laterales", idHombros);
+            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones frontales", idHombros);
+            insertarEjercicio(ejercicioDao, sxeDao, "Pájaros", idHombros);
+            insertarEjercicio(ejercicioDao, sxeDao, "Face pull", idHombros);
+            insertarEjercicio(ejercicioDao, sxeDao, "Press con mancuernas", idHombros);
+
+// ================= PIERNAS =================
+            long idPiernas = insertarSeccion(seccionDao, "Piernas");
+            insertarEjercicio(ejercicioDao, sxeDao, "Sentadilla", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Prensa", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Zancadas", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Peso muerto rumano", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Extensión de cuadriceps", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Curl femoral", idPiernas);
+            insertarEjercicio(ejercicioDao, sxeDao, "Hip thrust", idPiernas);
+
+// ================= ABDOMEN =================
+            long idAbdomen = insertarSeccion(seccionDao, "Abdomen");
+            insertarEjercicio(ejercicioDao, sxeDao, "Crunch", idAbdomen);
+            insertarEjercicio(ejercicioDao, sxeDao, "Crunch en máquina", idAbdomen);
+            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones de piernas", idAbdomen);
+            insertarEjercicio(ejercicioDao, sxeDao, "Plancha", idAbdomen);
+            insertarEjercicio(ejercicioDao, sxeDao, "Russian twist", idAbdomen);
+            insertarEjercicio(ejercicioDao, sxeDao, "Bicicleta abdominal", idAbdomen);
+
         }
     }
 
