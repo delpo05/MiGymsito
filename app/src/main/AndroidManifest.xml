@@ -40,11 +40,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".DebugUsuariosRegistradosActivity"
-            android:exported="false"
-            android:label="Usuarios Registrados" />
-
-        <activity
             android:name=".CargarRegistroActivity"
             android:exported="true" />
 
@@ -59,7 +54,9 @@
             android:name=".CompararEntrenamientosActivity"
             android:exported="false" />
 
-        <!-- Configuración para la cámara y compartir archivos -->
+        <activity android:name=".DatosPersonalesActivity"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.migymsito.fileprovider"
@@ -69,9 +66,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity android:name=".DatosPersonalesActivity"
-            android:exported="false" />
 
     </application>
 

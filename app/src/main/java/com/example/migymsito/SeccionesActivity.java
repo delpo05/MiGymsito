@@ -61,7 +61,6 @@ public class SeccionesActivity extends HeaderActivity {
         configurarGridView();
         configurarWindowInsets(R.id.layout_contenedor_grid);
 
-        // Volver a RutinasActivity al presionar atrás
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -77,9 +76,9 @@ public class SeccionesActivity extends HeaderActivity {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
         if (tituloGv != null) {
             if (rutinaActual != null) {
-                tituloGv.setText("Secciones de " + rutinaActual.NombreRutina);
+                tituloGv.setText(getString(R.string.secciones_de, rutinaActual.NombreRutina));
             } else {
-                tituloGv.setText("Mis Secciones");
+                tituloGv.setText(getString(R.string.mis_secciones));
             }
         }
         
@@ -100,7 +99,7 @@ public class SeccionesActivity extends HeaderActivity {
 
             @Override
             public void onOptionsClick(View view, Seccion seccion) {
-                mostrarMenuOpciones(view, seccion);
+                mostrarMenuOpciones(seccion);
             }
         });
         
@@ -108,7 +107,7 @@ public class SeccionesActivity extends HeaderActivity {
         cargarSeccionesDesdeDB();
     }
 
-    private void mostrarMenuOpciones(View view, Seccion seccion) {
+    private void mostrarMenuOpciones(Seccion seccion) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_modificar_eliminar);
         if (dialog.getWindow() != null) {
@@ -147,9 +146,7 @@ public class SeccionesActivity extends HeaderActivity {
 
     private void cargarSeccionesDesdeDB() {
         if (rutinaActual != null) {
-            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
-                adapter.setSecciones(secciones);
-            });
+            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> adapter.setSecciones(secciones));
         }
     }
 
@@ -169,7 +166,7 @@ public class SeccionesActivity extends HeaderActivity {
         TextView tvOpcionIzq = dialog.findViewById(R.id.tvTextoIzquierda);
         TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
 
-        tvTitulo.setText("Añadir Sección");
+        tvTitulo.setText(getString(R.string.anadir_seccion));
         tvOpcionIzq.setText("Sección\nPrevia");
         tvOpcionDer.setText("Nueva\nSección");
 
@@ -198,7 +195,7 @@ public class SeccionesActivity extends HeaderActivity {
         }
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpGenerico);
-        tvTitulo.setText("Elegir sección previa");
+        tvTitulo.setText(getString(R.string.elegir_seccion_previa));
 
         GridView gvPopup = dialog.findViewById(R.id.gvListadoGenerico);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarGenerico);
@@ -209,7 +206,6 @@ public class SeccionesActivity extends HeaderActivity {
         });
 
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
-             // Filtrar: NO mostrar las secciones que vienen cargadas por sistema
              List<Seccion> filtradas = new ArrayList<>();
              for (Seccion s : secciones) {
                  if ("Personalizado".equals(s.TipoSeccion)) filtradas.add(s);
@@ -262,16 +258,16 @@ public class SeccionesActivity extends HeaderActivity {
         Button btnAceptar = dialog.findViewById(R.id.btnConfirmarGenerico);
 
         if (seccionBase == null) {
-            tvTitulo.setText("Crear Sección");
-            btnAceptar.setText("Crear");
+            tvTitulo.setText(getString(R.string.crear_seccion));
+            btnAceptar.setText(getString(R.string.crear));
         } else if (esClonacion) {
-            tvTitulo.setText("Clonar Sección");
+            tvTitulo.setText(getString(R.string.clonar_seccion));
             etNombre.setText(seccionBase.NombreSeccion);
-            btnAceptar.setText("Clonar");
+            btnAceptar.setText(getString(R.string.clonar));
         } else {
-            tvTitulo.setText("Editar Sección");
+            tvTitulo.setText(getString(R.string.editar_seccion));
             etNombre.setText(seccionBase.NombreSeccion);
-            btnAceptar.setText("Guardar");
+            btnAceptar.setText(getString(R.string.guardar));
         }
 
         btnCancelar.setOnClickListener(v -> {
@@ -294,9 +290,7 @@ public class SeccionesActivity extends HeaderActivity {
                     dialog.dismiss();
                     new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
                 } else if (esClonacion) {
-                    seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
-                        cargarSeccionesDesdeDB();
-                    });
+                    seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> cargarSeccionesDesdeDB());
                     dialog.dismiss();
                 } else {
                     seccionBase.NombreSeccion = nombre;

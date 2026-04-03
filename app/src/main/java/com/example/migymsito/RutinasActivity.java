@@ -1,7 +1,6 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -71,7 +70,7 @@ public class RutinasActivity extends HeaderActivity {
         rutinaRepository = new RutinaRepository(getApplication());
 
         int idRutinaGuardada = usuarioRepository.obtenerIdRutina();
-        if (idRutinaGuardada != -1 && getIntent().getBooleanExtra("cambiarRutina", false) == false) {
+        if (idRutinaGuardada != -1 && !getIntent().getBooleanExtra("cambiarRutina", false)) {
             saltarASecciones(idRutinaGuardada);
         }
 
@@ -94,7 +93,7 @@ public class RutinasActivity extends HeaderActivity {
         if (tvUsername != null && usuarioLogueado != null) {
             tvUsername.setText(usuarioLogueado.NombreUsuario);
         } else if (tvUsername != null) {
-            tvUsername.setText("Invitado");
+            tvUsername.setText(R.string.mi_perfil); // O un string genérico
         }
 
         configurarGridView();
@@ -118,7 +117,7 @@ public class RutinasActivity extends HeaderActivity {
 
     private void configurarGridView() {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
-        if (tituloGv != null) tituloGv.setText("Mis Rutinas");
+        if (tituloGv != null) tituloGv.setText(R.string.mis_rutinas);
 
         adapter = new RutinasAdapter(new ArrayList<>(), new RutinasAdapter.OnRutinaClickListener() {
             @Override
@@ -137,7 +136,7 @@ public class RutinasActivity extends HeaderActivity {
 
             @Override
             public void onOptionsClick(View view, Rutina rutina) {
-                mostrarMenuOpciones(view, rutina);
+                mostrarMenuOpciones(rutina);
             }
         });
         
@@ -153,10 +152,10 @@ public class RutinasActivity extends HeaderActivity {
         }
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUp);
-        tvTitulo.setText("Nueva Rutina");
+        tvTitulo.setText(R.string.nueva_rutina);
 
         TextView tvCrear = dialog.findViewById(R.id.tvTextoIzquierda);
-        tvCrear.setText("Crear");
+        tvCrear.setText(R.string.crear);
         ImageView ivCrear = dialog.findViewById(R.id.ivIconoIzquierda);
         ivCrear.setImageResource(R.drawable.ic_add);
         View btnCrear = dialog.findViewById(R.id.btnOpcionIzquierda);
@@ -166,7 +165,7 @@ public class RutinasActivity extends HeaderActivity {
         });
 
         TextView tvImportar = dialog.findViewById(R.id.tvTextoDerecha);
-        tvImportar.setText("Importar");
+        tvImportar.setText(R.string.importar);
         ImageView ivImportar = dialog.findViewById(R.id.ivIconoDerecha);
         ivImportar.setImageResource(R.drawable.ic_import);
         View btnOpcionDerecha = dialog.findViewById(R.id.btnOpcionDerecha);
@@ -181,7 +180,7 @@ public class RutinasActivity extends HeaderActivity {
         dialog.show();
     }
 
-    private void mostrarMenuOpciones(View view, Rutina rutina) {
+    private void mostrarMenuOpciones(Rutina rutina) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.pop_up_modificar_eliminar);
         if (dialog.getWindow() != null) {
@@ -253,7 +252,6 @@ public class RutinasActivity extends HeaderActivity {
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
                         jsonEjercicio.put("pesoCorporal", ejercicio.PesoCorporalEjercicio);
                         
-                        // Exportar imagen como Base64 si existe
                         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
                             String base64 = uriToBase64(Uri.parse(ejercicio.ImagenEjercicio));
                             if (base64 != null) {
@@ -332,9 +330,7 @@ public class RutinasActivity extends HeaderActivity {
 
     private void cargarRutinasDesdeDB() {
         if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
-                adapter.setRutinas(rutinas);
-            });
+            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> adapter.setRutinas(rutinas));
         }
     }
 
@@ -354,12 +350,12 @@ public class RutinasActivity extends HeaderActivity {
         if (btnImportar != null) btnImportar.setVisibility(View.GONE);
 
         if (rutinaExistente == null) {
-            tvTitulo.setText("Crear Rutina");
-            btnAceptar.setText("Crear");
+            tvTitulo.setText(R.string.nueva_rutina);
+            btnAceptar.setText(R.string.crear);
         } else {
-            tvTitulo.setText("Editar Rutina");
+            tvTitulo.setText(R.string.editar_rutina);
             etNombre.setText(rutinaExistente.NombreRutina);
-            btnAceptar.setText("Guardar");
+            btnAceptar.setText(R.string.guardar);
         }
 
         btnCancelar.setOnClickListener(v -> dialog.dismiss());
@@ -452,7 +448,6 @@ public class RutinasActivity extends HeaderActivity {
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
                                     
-                                    // Restaurar imagen si viene en Base64
                                     String base64Data = jsonEjercicio.optString("imagenData", null);
                                     if (base64Data != null) {
                                         nuevoEj.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);

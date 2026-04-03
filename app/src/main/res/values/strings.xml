@@ -8,4 +8,46 @@
     <string name="mi_perfil">Mi Perfil</string>
     <string name="historial">Historial</string>
     <string name="mi_progreso">Mi Progreso</string>
+
+    <!-- Rutinas y Secciones -->
+    <string name="mis_rutinas">Mis Rutinas</string>
+    <string name="mis_secciones">Mis Secciones</string>
+    <string name="secciones_de">Secciones de %1$s</string>
+    <string name="nueva_rutina">Nueva Rutina</string>
+    <string name="editar_rutina">Editar Rutina</string>
+    <string name="crear_seccion">Crear Sección</string>
+    <string name="clonar_seccion">Clonar Sección</string>
+    <string name="editar_seccion">Editar Sección</string>
+    <string name="anadir_seccion">Añadir Sección</string>
+    <string name="elegir_seccion_previa">Elegir sección previa</string>
+
+    <!-- Ejercicios -->
+    <string name="ejercicios_de">Ejercicios de %1$s</string>
+    <string name="anadir_ejercicio">Añadir Ejercicio</string>
+    <string name="crear_nuevo">Crear Nuevo</string>
+    <string name="elegir_existente">Elegir Existente</string>
+    <string name="editar_ejercicio">Editar Ejercicio</string>
+    <string name="lastre_kg">Lastre (kg)</string>
+    <string name="lastre">Lastre</string>
+
+    <!-- Acciones -->
+    <string name="crear">Crear</string>
+    <string name="clonar">Clonar</string>
+    <string name="guardar">Guardar</string>
+    <string name="importar">Importar</string>
+    <string name="exportar">Exportar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="modificar">Modificar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="finalizar">Finalizar</string>
+
+    <!-- Mensajes -->
+    <string name="error_campos_vacios">Por favor complete todos los campos</string>
+    <string name="login_incorrecto">Usuario o contraseña incorrectos</string>
+    <string name="sesion_cerrada">Sesión cerrada</string>
+    <string name="serie_guardada">Serie guardada</string>
+    <string name="error_guardar_serie">Error al guardar serie</string>
+    <string name="reps_validas">Introduce repeticiones válidas</string>
 </resources>
