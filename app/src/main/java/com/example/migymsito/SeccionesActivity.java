@@ -77,7 +77,7 @@ public class SeccionesActivity extends HeaderActivity {
         TextView tituloGv = findViewById(R.id.tvTituloGrid);
         if (tituloGv != null) {
             if (rutinaActual != null) {
-                tituloGv.setText("Ejercicios de " + rutinaActual.NombreRutina);
+                tituloGv.setText("Secciones de " + rutinaActual.NombreRutina);
             } else {
                 tituloGv.setText("Mis Secciones");
             }
