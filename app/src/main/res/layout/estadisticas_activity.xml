@@ -123,7 +123,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="30dp"
                     android:layout_marginEnd="30dp"
-                    android:layout_marginBottom="32dp"
+                    android:layout_marginBottom="16dp"
                     android:hint="Tipo de estadistica"
                     app:boxStrokeColor="@color/blanco"
                     app:hintTextColor="@color/blanco"
@@ -140,6 +140,71 @@
                         android:textColor="@color/blanco"
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Filtros de Fecha (Desde y Hasta en un solo renglón) -->
+                <!-- Se redujeron los márgenes laterales (de 30dp a 10dp) para evitar que la fecha se corte -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="32dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_fecha_desde"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:hint="Desde"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="@color/gris_pista"
+                        app:endIconMode="custom"
+                        app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+                        app:endIconTint="@color/blanco">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etFechaDesde"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:inputType="none"
+                            android:padding="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/blanco" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_fecha_hasta"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:hint="Hasta"
+                        app:boxStrokeColor="@color/blanco"
+                        app:hintTextColor="@color/blanco"
+                        android:textColorHint="@color/gris_pista"
+                        app:endIconMode="custom"
+                        app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+                        app:endIconTint="@color/blanco">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etFechaHasta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:inputType="none"
+                            android:padding="10dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/blanco" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnConsultarProgreso"
