@@ -141,8 +141,7 @@
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Filtros de Fecha (Desde y Hasta en un solo renglón) -->
-                <!-- Se redujeron los márgenes laterales (de 30dp a 10dp) para evitar que la fecha se corte -->
+                <!-- Filtros de Fecha -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -217,6 +216,18 @@
                     android:textColor="@color/blanco"
                     android:backgroundTint="#403C3C"
                     app:cornerRadius="25dp" />
+
+                <!-- Botón para Limpiar Filtros -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLimpiarFiltros"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Limpiar Fechas"
+                    android:textAllCaps="false"
+                    android:textColor="@color/gris_pista"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvFormulaEstadistica"
