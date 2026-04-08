@@ -37,11 +37,20 @@
 
     <CheckBox
         android:id="@+id/cbConfirmarExportar"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/negro"
+        android:text="Incluir progreso de ejercicios"
+        android:textColor="@color/negro"
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/cbExportarHistorialPeso"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:buttonTint="@color/negro"
-        android:text="Incluir mi historial de registros (progresos)"
+        android:text="Incluir historial de peso"
         android:textColor="@color/negro"
         android:textSize="14sp" />
 

@@ -26,6 +26,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
+import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
@@ -45,20 +46,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class HeaderActivity extends AppCompatActivity {
+public abstract class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-    public static Usuario usuarioLogueado; 
+    public static Usuario usuarioLogueado; // Cambiado a static para acceso global en la sesión
     protected UsuarioRepository userRepo;
 
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    importarDatosDesdeCsv(uri);
-                }
-            }
+            this::importarDatosDesdeCsv
     );
 
     @Override
@@ -66,19 +63,19 @@ public class HeaderActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         userRepo = new UsuarioRepository(getApplication());
 
-        // Recuperar usuario de la sesión si no está cargado
-        int idSesion = userRepo.obtenerIdSesion();
-        if (idSesion != -1 && usuarioLogueado == null) {
-            userRepo.obtenerUsuarioPorId(idSesion, usuario -> {
-                if (usuario != null) {
-                    usuarioLogueado = usuario;
-                    actualizarNombreHeader();
-                    onUsuarioCargado();
-                }
-            });
+        if (usuarioLogueado == null) {
+            int idUsuario = userRepo.obtenerIdSesion();
+            if (idUsuario != -1) {
+                userRepo.obtenerUsuarioPorId(idUsuario, user -> {
+                    if (user != null) {
+                        usuarioLogueado = user;
+                        actualizarNombreHeader();
+                        onUsuarioCargado();
+                    }
+                });
+            }
         }
 
-        // Manejo del botón atrás
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -125,7 +122,6 @@ public class HeaderActivity extends AppCompatActivity {
                 });
             }
 
-            // --- REDIRECCIÓN A MI PERFIL AL TOCAR NOMBRE O ICONO ---
             TextView tvUsername = findViewById(R.id.toolbar_username);
             ImageView ivUserIcon = findViewById(R.id.toolbar_user_icon);
 
@@ -154,7 +150,6 @@ public class HeaderActivity extends AppCompatActivity {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.Home) {
-                    // Acción de "Cambiar Rutina": Borrar preferencia y volver
                     userRepo.eliminarRutinaSeleccionada();
                     Intent intent = new Intent(this, RutinasActivity.class);
                     intent.putExtra("cambiarRutina", true);
@@ -196,13 +191,15 @@ public class HeaderActivity extends AppCompatActivity {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         }
 
-        CheckBox cbRegistros = dialog.findViewById(R.id.cbConfirmarExportar);
+        CheckBox cbProgresoEjercicios = dialog.findViewById(R.id.cbConfirmarExportar);
+        CheckBox cbHistorialPeso = dialog.findViewById(R.id.cbExportarHistorialPeso);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarExportar);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarExportar);
 
         btnAceptar.setOnClickListener(v -> {
-            boolean incluirRegistros = cbRegistros.isChecked();
-            exportarDatosCsv(incluirRegistros);
+            boolean incluirProgreso = cbProgresoEjercicios.isChecked();
+            boolean incluirHistorial = cbHistorialPeso.isChecked();
+            exportarDatosCsv(incluirProgreso, incluirHistorial);
             dialog.dismiss();
         });
 
@@ -211,7 +208,7 @@ public class HeaderActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void exportarDatosCsv(boolean incluirRegistros) {
+    private void exportarDatosCsv(boolean incluirProgreso, boolean incluirHistorial) {
         if (usuarioLogueado == null) {
             Toast.makeText(this, "Inicia sesión para exportar", Toast.LENGTH_SHORT).show();
             return;
@@ -223,8 +220,8 @@ public class HeaderActivity extends AppCompatActivity {
                 StringBuilder csv = new StringBuilder();
                 String sep = ";";
 
-                // Encabezados
-                if (incluirRegistros) {
+                // Encabezados de Rutinas/Ejercicios
+                if (incluirProgreso) {
                     csv.append("Rutina").append(sep).append("Seccion").append(sep).append("Ejercicio").append(sep)
                             .append("Tipo").append(sep).append("Fecha").append(sep).append("Peso").append(sep)
                             .append("Serie").append(sep).append("Reps").append(sep).append("Peso Corporal")
@@ -236,11 +233,6 @@ public class HeaderActivity extends AppCompatActivity {
 
                 List<Rutina> rutinas = db.rutinaDao().obtenerRutinasPorUsuario(usuarioLogueado.IdUsuario);
 
-                if (rutinas == null || rutinas.isEmpty()) {
-                    runOnUiThread(() -> Toast.makeText(this, "No hay datos para exportar", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
                 for (Rutina r : rutinas) {
                     List<Seccion> secciones = db.seccionDao().obtenerSeccionesPorRutina(r.IdRutina);
                     for (Seccion s : secciones) {
@@ -248,7 +240,7 @@ public class HeaderActivity extends AppCompatActivity {
                         for (Ejercicio ej : ejercicios) {
                             String base = r.NombreRutina + sep + s.NombreSeccion + sep + ej.NombreEjercicio + sep + ej.TipoEjercicio;
 
-                            if (incluirRegistros) {
+                            if (incluirProgreso) {
                                 List<Registro> registros = db.registroDao().obtenerHistorialPorEjercicioYUsuario(usuarioLogueado.IdUsuario, ej.IdEjercicio);
                                 if (registros.isEmpty()) {
                                     csv.append(base).append(sep).append("Sin registros").append(sep).append("-").append(sep).append("-").append(sep).append("-\n");
@@ -277,7 +269,23 @@ public class HeaderActivity extends AppCompatActivity {
                     }
                 }
 
-                generarYCompartirArchivo(csv.toString(), incluirRegistros);
+                // Sección opcional de Historial de Peso
+                if (incluirHistorial) {
+                    List<Historial> historiales = db.historialDao().obtenerHistorialPorUsuario(usuarioLogueado.IdUsuario);
+                    if (historiales != null && !historiales.isEmpty()) {
+                        csv.append("\n--- HISTORIAL DE PESO ---\n");
+                        csv.append("HISTORIAL_PESO;Fecha;Peso;Altura\n");
+                        SimpleDateFormat sdfHist = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                        for (Historial h : historiales) {
+                            csv.append("HISTORIAL_PESO").append(sep)
+                                    .append(sdfHist.format(new Date(h.FechaHistorial))).append(sep)
+                                    .append(String.valueOf(h.PesoHistorial).replace(".", ",")).append(sep)
+                                    .append(String.valueOf(h.AlturaHistorial).replace(".", ",")).append("\n");
+                        }
+                    }
+                }
+
+                generarYCompartirArchivo(csv.toString(), incluirProgreso || incluirHistorial);
 
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(this, "Error al exportar: " + e.getMessage(), Toast.LENGTH_LONG).show());
@@ -318,12 +326,36 @@ public class HeaderActivity extends AppCompatActivity {
                 InputStream is = getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
-                String linea = reader.readLine(); 
+                String linea = reader.readLine();
                 String sep = ";";
 
                 while ((linea = reader.readLine()) != null) {
+                    if (linea.isEmpty() || linea.startsWith("-")) continue;
                     String[] datos = linea.split(sep);
                     if (datos.length < 4) continue;
+
+                    // Manejo de registros de historial de peso
+                    if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
+                        try {
+                            String fechaStr = datos[1];
+                            double peso = Double.parseDouble(datos[2].replace(",", "."));
+                            double altura = Double.parseDouble(datos[3].replace(",", "."));
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                            long fechaLong = sdf.parse(fechaStr).getTime();
+
+                            Historial h = new Historial();
+                            h.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
+                            h.FechaHistorial = fechaLong;
+                            h.PesoHistorial = peso;
+                            h.AlturaHistorial = altura;
+
+                            db.historialDao().insertarHistorial(h);
+                        } catch (Exception ignored) {}
+                        continue;
+                    }
+
+                    if (datos[0].equalsIgnoreCase("Rutina") || datos[0].equalsIgnoreCase("TIPO_REGISTRO")) continue;
 
                     String nombreRutina = datos[0];
                     String nombreSeccion = datos[1];
@@ -362,8 +394,7 @@ public class HeaderActivity extends AppCompatActivity {
 
                             db.registroDao().insertarRegistro(reg);
 
-                        } catch (Exception e) {
-                        }
+                        } catch (Exception e) {}
                     }
                 }
                 reader.close();
