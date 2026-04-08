@@ -50,6 +50,9 @@ public class EstadisticasActivity extends HeaderActivity {
     private Calendar calendarHasta = Calendar.getInstance();
     private SimpleDateFormat dateFormatoVisual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
+    // --- NUEVO BOTÓN PARA LIMPIAR FILTROS ---
+    private MaterialButton btnLimpiarFiltros;
+
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
     private EjercicioRepository ejerciciosRepository;
@@ -77,6 +80,9 @@ public class EstadisticasActivity extends HeaderActivity {
         // Inicialización de los nuevos campos de fecha
         etFechaDesde = findViewById(R.id.etFechaDesde);
         etFechaHasta = findViewById(R.id.etFechaHasta);
+        
+        // Inicialización del botón de limpiar
+        btnLimpiarFiltros = findViewById(R.id.btnLimpiarFiltros);
 
         rutinaRepository = new RutinaRepository(getApplication());
         seccionRepository = new SeccionRepository(getApplication());
@@ -89,6 +95,20 @@ public class EstadisticasActivity extends HeaderActivity {
         configurarFiltrosFecha(); // Configura el comportamiento de los DatePickers
 
         btnConsultarProgreso.setOnClickListener(v -> consultarProgreso());
+
+        // Configuración del click para limpiar filtros
+        btnLimpiarFiltros.setOnClickListener(v -> limpiarFiltrosYCampos());
+    }
+
+    // --- LÓGICA PARA LIMPIAR FILTROS ---
+    // Este método restablece los calendarios y limpia el texto de los campos de fecha.
+    // Permite que el usuario vuelva a consultar toda la información sin restricciones.
+    private void limpiarFiltrosYCampos() {
+        etFechaDesde.setText("");
+        etFechaHasta.setText("");
+        calendarDesde = Calendar.getInstance();
+        calendarHasta = Calendar.getInstance();
+        Toast.makeText(this, "Filtros de fecha eliminados", Toast.LENGTH_SHORT).show();
     }
 
     // Este método asigna los Listeners a los campos de fecha para abrir un diálogo de selección (DatePicker).
