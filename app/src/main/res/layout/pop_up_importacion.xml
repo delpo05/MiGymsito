@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_white"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_gravity="center">
+
+    <ProgressBar
+        android:id="@+id/pbImportacion"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="16dp"
+        android:indeterminateDrawable="@drawable/loading_dumbbell"
+        android:indeterminateTint="@color/negro" />
+
+    <TextView
+        android:id="@+id/tvMensajeImportacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="Realizando importación..."
+        android:textColor="@color/negro"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnCancelarImportacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/rojo"
+        android:text="CANCELAR IMPORTACIÓN"
+        android:textAllCaps="true"
+        android:textColor="@color/blanco"
+        android:textStyle="bold"
+        app:cornerRadius="8dp" />
+
+</LinearLayout>
