@@ -52,6 +52,8 @@ public abstract class HeaderActivity extends AppCompatActivity {
     protected NavigationView navigationView;
     public static Usuario usuarioLogueado; // Cambiado a static para acceso global en la sesión
     protected UsuarioRepository userRepo;
+    private Dialog progressDialog;
+    private volatile boolean importacionCancelada = false;
 
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -317,8 +319,39 @@ public abstract class HeaderActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarPopUpImportacion() {
+        runOnUiThread(() -> {
+            progressDialog = new Dialog(this);
+            progressDialog.setContentView(R.layout.pop_up_importacion);
+            progressDialog.setCancelable(false);
+            if (progressDialog.getWindow() != null) {
+                progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            }
+
+            Button btnCancelar = progressDialog.findViewById(R.id.btnCancelarImportacion);
+            btnCancelar.setOnClickListener(v -> {
+                importacionCancelada = true;
+                progressDialog.dismiss();
+                Toast.makeText(this, "Cancelando importación...", Toast.LENGTH_SHORT).show();
+            });
+
+            progressDialog.show();
+        });
+    }
+
+    private void ocultarPopUpImportacion() {
+        runOnUiThread(() -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        });
+    }
+
     private void importarDatosDesdeCsv(Uri uri) {
         if (usuarioLogueado == null) return;
+
+        importacionCancelada = false;
+        mostrarPopUpImportacion();
 
         new Thread(() -> {
             try {
@@ -326,85 +359,103 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 InputStream is = getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
-                String linea = reader.readLine();
-                String sep = ";";
+                db.runInTransaction(() -> {
+                    try {
+                        String linea = reader.readLine();
+                        String sep = ";";
 
-                while ((linea = reader.readLine()) != null) {
-                    if (linea.isEmpty() || linea.startsWith("-")) continue;
-                    String[] datos = linea.split(sep);
-                    if (datos.length < 4) continue;
+                        while ((linea = reader.readLine()) != null) {
+                            if (importacionCancelada) throw new RuntimeException("CANCEL");
+                            
+                            if (linea.isEmpty() || linea.startsWith("-")) continue;
+                            String[] datos = linea.split(sep);
+                            if (datos.length < 4) continue;
 
-                    // Manejo de registros de historial de peso
-                    if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
-                        try {
-                            String fechaStr = datos[1];
-                            double peso = Double.parseDouble(datos[2].replace(",", "."));
-                            double altura = Double.parseDouble(datos[3].replace(",", "."));
+                            // Manejo de registros de historial de peso
+                            if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
+                                try {
+                                    String fechaStr = datos[1];
+                                    double peso = Double.parseDouble(datos[2].replace(",", "."));
+                                    double altura = Double.parseDouble(datos[3].replace(",", "."));
 
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                            long fechaLong = sdf.parse(fechaStr).getTime();
+                                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                    long fechaLong = sdf.parse(fechaStr).getTime();
 
-                            Historial h = new Historial();
-                            h.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
-                            h.FechaHistorial = fechaLong;
-                            h.PesoHistorial = peso;
-                            h.AlturaHistorial = altura;
+                                    Historial h = new Historial();
+                                    h.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
+                                    h.FechaHistorial = fechaLong;
+                                    h.PesoHistorial = peso;
+                                    h.AlturaHistorial = altura;
 
-                            db.historialDao().insertarHistorial(h);
-                        } catch (Exception ignored) {}
-                        continue;
-                    }
-
-                    if (datos[0].equalsIgnoreCase("Rutina") || datos[0].equalsIgnoreCase("TIPO_REGISTRO")) continue;
-
-                    String nombreRutina = datos[0];
-                    String nombreSeccion = datos[1];
-                    String nombreEjercicio = datos[2];
-                    String tipoEjercicio = datos[3];
-
-                    Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
-                    Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
-                    Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
-                    SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
-
-                    if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
-                        try {
-                            String fechaStr = datos[4];
-                            double peso = Double.parseDouble(datos[5].replace(",", "."));
-                            int serie = Integer.parseInt(datos[6]);
-                            int reps = Integer.parseInt(datos[7]);
-                            Double pesoUsuario = null;
-                            if (datos.length > 9 && !datos[9].equals("-")) {
-                                pesoUsuario = Double.parseDouble(datos[9].replace(",", "."));
+                                    db.historialDao().insertarHistorial(h);
+                                } catch (Exception ignored) {}
+                                continue;
                             }
 
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                            long fechaLong = sdf.parse(fechaStr).getTime();
+                            if (datos[0].equalsIgnoreCase("Rutina") || datos[0].equalsIgnoreCase("TIPO_REGISTRO")) continue;
 
-                            Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
+                            String nombreRutina = datos[0];
+                            String nombreSeccion = datos[1];
+                            String nombreEjercicio = datos[2];
+                            String tipoEjercicio = datos[3];
 
-                            Registro reg = new Registro();
-                            reg.IdEntrenamiento = ent.IdEntrenamiento;
-                            reg.IdSeccionXejercicio = sxe.IdSeccionXejercicio;
-                            reg.FechaRegistro = fechaLong;
-                            reg.PesoRegistro = peso;
-                            reg.NumSeriesRegistro = serie;
-                            reg.Repeticiones = reps;
-                            reg.PesoCorporalMomento = pesoUsuario;
+                            Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
+                            Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
+                            Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
+                            SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
 
-                            db.registroDao().insertarRegistro(reg);
+                            if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
+                                try {
+                                    String fechaStr = datos[4];
+                                    double peso = Double.parseDouble(datos[5].replace(",", "."));
+                                    int serie = Integer.parseInt(datos[6]);
+                                    int reps = Integer.parseInt(datos[7]);
+                                    Double pesoUsuario = null;
+                                    if (datos.length > 9 && !datos[9].equals("-")) {
+                                        pesoUsuario = Double.parseDouble(datos[9].replace(",", "."));
+                                    }
 
-                        } catch (Exception e) {}
+                                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                    long fechaLong = sdf.parse(fechaStr).getTime();
+
+                                    Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
+
+                                    Registro reg = new Registro();
+                                    reg.IdEntrenamiento = ent.IdEntrenamiento;
+                                    reg.IdSeccionXejercicio = sxe.IdSeccionXejercicio;
+                                    reg.FechaRegistro = fechaLong;
+                                    reg.PesoRegistro = peso;
+                                    reg.NumSeriesRegistro = serie;
+                                    reg.Repeticiones = reps;
+                                    reg.PesoCorporalMomento = pesoUsuario;
+
+                                    db.registroDao().insertarRegistro(reg);
+
+                                } catch (Exception e) {}
+                            }
+                        }
+                        reader.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                }
-                reader.close();
+                });
+
+                ocultarPopUpImportacion();
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Importación completada", Toast.LENGTH_SHORT).show();
                     onImportFinished();
                 });
 
             } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error al importar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                ocultarPopUpImportacion();
+                if (e.getCause() != null && "CANCEL".equals(e.getCause().getMessage()) || "CANCEL".equals(e.getMessage())) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Importación cancelada", Toast.LENGTH_SHORT).show();
+                        onImportFinished();
+                    });
+                } else {
+                    runOnUiThread(() -> Toast.makeText(this, "Error al importar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                }
             }
         }).start();
     }

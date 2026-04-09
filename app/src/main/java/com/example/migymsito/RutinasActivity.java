@@ -52,6 +52,8 @@ public class RutinasActivity extends HeaderActivity {
     private RutinaRepository rutinaRepository;
     private UsuarioRepository usuarioRepository;
     private RutinasAdapter adapter;
+    private Dialog progressDialog;
+    private volatile boolean importacionCancelada = false;
 
     private final ActivityResultLauncher<String> filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -391,7 +393,37 @@ public class RutinasActivity extends HeaderActivity {
         cargarRutinasDesdeDB();
     }
 
+    private void mostrarPopUpImportacion() {
+        runOnUiThread(() -> {
+            progressDialog = new Dialog(this);
+            progressDialog.setContentView(R.layout.pop_up_importacion);
+            progressDialog.setCancelable(false);
+            if (progressDialog.getWindow() != null) {
+                progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+            }
+
+            Button btnCancelar = progressDialog.findViewById(R.id.btnCancelarImportacion);
+            btnCancelar.setOnClickListener(v -> {
+                importacionCancelada = true;
+                progressDialog.dismiss();
+                Toast.makeText(this, "Cancelando importación...", Toast.LENGTH_SHORT).show();
+            });
+
+            progressDialog.show();
+        });
+    }
+
+    private void ocultarPopUpImportacion() {
+        runOnUiThread(() -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        });
+    }
+
     private void leerArchivoImportacion(Uri uri) {
+        importacionCancelada = false;
+        mostrarPopUpImportacion();
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
@@ -399,6 +431,11 @@ public class RutinasActivity extends HeaderActivity {
                 StringBuilder stringBuilder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (importacionCancelada) {
+                        inputStream.close();
+                        ocultarPopUpImportacion();
+                        return;
+                    }
                     stringBuilder.append(line);
                 }
                 inputStream.close();
@@ -407,6 +444,7 @@ public class RutinasActivity extends HeaderActivity {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                ocultarPopUpImportacion();
                 runOnUiThread(() -> Toast.makeText(this, "Error al leer el archivo", Toast.LENGTH_SHORT).show());
             }
         });
@@ -421,6 +459,8 @@ public class RutinasActivity extends HeaderActivity {
                 AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
                 
                 db.runInTransaction(() -> {
+                    if (importacionCancelada) throw new RuntimeException("CANCEL");
+
                     Rutina nuevaRutina = new Rutina();
                     nuevaRutina.NombreRutina = nombreRutina + " (Importada)";
                     nuevaRutina.IdUsuarioRutina = usuarioLogueado.IdUsuario;
@@ -430,6 +470,8 @@ public class RutinasActivity extends HeaderActivity {
                     try {
                         JSONArray jsonSecciones = jsonRutina.getJSONArray("secciones");
                         for (int i = 0; i < jsonSecciones.length(); i++) {
+                            if (importacionCancelada) throw new RuntimeException("CANCEL");
+
                             JSONObject jsonSeccion = jsonSecciones.getJSONObject(i);
                             Seccion nuevaSeccion = new Seccion();
                             nuevaSeccion.NombreSeccion = jsonSeccion.getString("nombre");
@@ -440,6 +482,8 @@ public class RutinasActivity extends HeaderActivity {
                             
                             JSONArray jsonEjercicios = jsonSeccion.getJSONArray("ejercicios");
                             for (int j = 0; j < jsonEjercicios.length(); j++) {
+                                if (importacionCancelada) throw new RuntimeException("CANCEL");
+
                                 JSONObject jsonEjercicio = jsonEjercicios.getJSONObject(j);
                                 String nombreEj = jsonEjercicio.getString("nombre");
                                 
@@ -447,7 +491,6 @@ public class RutinasActivity extends HeaderActivity {
                                 Ejercicio ejExistente = buscarEjercicioPorNombre(db, nombreEj);
                                 if (ejExistente != null) {
                                     idEjercicio = ejExistente.IdEjercicio;
-                                    // Si el ejercicio ya existe pero no tiene imagen localmente, intentamos restaurar la del importado
                                     if (ejExistente.ImagenEjercicio == null || ejExistente.ImagenEjercicio.isEmpty()) {
                                         String base64Data = jsonEjercicio.optString("imagenData", null);
                                         if (base64Data != null) {
@@ -461,7 +504,6 @@ public class RutinasActivity extends HeaderActivity {
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
                                     
-                                    // Restaurar imagen si viene en Base64
                                     String base64Data = jsonEjercicio.optString("imagenData", null);
                                     if (base64Data != null) {
                                         nuevoEj.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
@@ -483,14 +525,24 @@ public class RutinasActivity extends HeaderActivity {
                     }
                 });
 
+                ocultarPopUpImportacion();
+
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Rutina importada con éxito", Toast.LENGTH_SHORT).show();
                     cargarRutinasDesdeDB();
                 });
 
             } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(this, "Error al importar: Formato inválido", Toast.LENGTH_SHORT).show());
+                ocultarPopUpImportacion();
+                if ("CANCEL".equals(e.getMessage())) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Importación cancelada", Toast.LENGTH_SHORT).show();
+                        cargarRutinasDesdeDB();
+                    });
+                } else {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(this, "Error al importar: Formato inválido", Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
