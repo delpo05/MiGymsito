@@ -318,7 +318,8 @@ public class RutinasActivity extends HeaderActivity {
             File folder = new File(getFilesDir(), "imagenes_ejercicios");
             if (!folder.exists()) folder.mkdirs();
             
-            File file = new File(folder, "img_" + System.currentTimeMillis() + ".jpg");
+            // Usamos un sufijo aleatorio para evitar colisiones si se procesan varias imágenes en el mismo milisegundo
+            File file = new File(folder, "img_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000) + ".jpg");
             FileOutputStream fos = new FileOutputStream(file);
             fos.write(data);
             fos.close();
@@ -446,6 +447,14 @@ public class RutinasActivity extends HeaderActivity {
                                 Ejercicio ejExistente = buscarEjercicioPorNombre(db, nombreEj);
                                 if (ejExistente != null) {
                                     idEjercicio = ejExistente.IdEjercicio;
+                                    // Si el ejercicio ya existe pero no tiene imagen localmente, intentamos restaurar la del importado
+                                    if (ejExistente.ImagenEjercicio == null || ejExistente.ImagenEjercicio.isEmpty()) {
+                                        String base64Data = jsonEjercicio.optString("imagenData", null);
+                                        if (base64Data != null) {
+                                            ejExistente.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
+                                            db.ejercicioDao().actualizarEjercicio(ejExistente);
+                                        }
+                                    }
                                 } else {
                                     Ejercicio nuevoEj = new Ejercicio();
                                     nuevoEj.NombreEjercicio = nombreEj;
