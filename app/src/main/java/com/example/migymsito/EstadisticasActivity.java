@@ -18,6 +18,7 @@ import com.example.migymsito.dataRepository.RegistroRepository;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -147,18 +148,37 @@ public class EstadisticasActivity extends HeaderActivity {
 
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
-        barChart.getLegend().setTextColor(Color.WHITE);
+        
+        // --- CONFIGURAR LEYENDA (Mover arriba para evitar colisiones) ---
+        Legend legend = barChart.getLegend();
+        legend.setTextColor(Color.WHITE);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+
+        // --- HABILITAR ZOOM Y DESPLAZAMIENTO ---
+        barChart.setTouchEnabled(true);
+        barChart.setDragEnabled(true);
+        barChart.setScaleEnabled(true);
+        barChart.setPinchZoom(true);
+        barChart.setDoubleTapToZoomEnabled(true);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextColor(Color.WHITE);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
+        // Rotar etiquetas para que no se pisen si hay muchas
+        xAxis.setLabelRotationAngle(-45f);
 
         barChart.getAxisLeft().setTextColor(Color.WHITE);
         barChart.getAxisRight().setEnabled(false);
         barChart.setNoDataText("Selecciona opciones y consulta para ver datos");
         barChart.setNoDataTextColor(Color.GRAY);
+        
+        // --- MARGEN INFERIOR (Aumentado para evitar colisiones con fechas rotadas) ---
+        barChart.setExtraBottomOffset(40f);
     }
 
     private void cargarRutinasDelUsuario() {
@@ -414,6 +434,17 @@ public class EstadisticasActivity extends HeaderActivity {
         });
 
         barChart.animateY(1000);
+
+        // --- LIMITAR BARRAS VISIBLES ---
+        // Si hay muchos registros, mostramos solo los últimos 7 para que no se pisen
+        if (fechas.size() > 7) {
+            barChart.setVisibleXRangeMaximum(7);
+            // Hacer scroll hasta el final para ver los datos más recientes
+            barChart.moveViewToX(fechas.size() - 7);
+        } else {
+            barChart.setVisibleXRangeMaximum(fechas.size());
+        }
+
         barChart.invalidate();
     }
 
