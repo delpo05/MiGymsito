@@ -7,6 +7,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -84,7 +87,6 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
         btnComparar.setOnClickListener(v -> realizarComparacion());
 
-        // Manejar el intent si venimos de finalizar un entrenamiento
         manejarIntentDirecto();
     }
 
@@ -96,7 +98,6 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
             new Thread(() -> {
                 AppDatabase db = AppDatabase.getDatabase(this);
-                // Buscar la sección
                 List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario);
                 for (Seccion s : todas) {
                     if (s.IdSeccion == idSeccion) {
@@ -295,8 +296,8 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
             }
 
             runOnUiThread(() -> {
-                tvHeaderVolA.setText("Ent. #" + nA_final);
-                tvHeaderVolB.setText("Ent. #" + nB_final);
+                if (tvHeaderVolA != null) tvHeaderVolA.setText("Ent. #" + nA_final);
+                if (tvHeaderVolB != null) tvHeaderVolB.setText("Ent. #" + nB_final);
                 llTablaComparacion.setVisibility(View.VISIBLE);
                 rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, eA_final, nA_final, eB_final, nB_final)));
             });
@@ -319,9 +320,16 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
     private void mostrarPopUpDetalle(ComparacionAdapter.ComparacionFila item, Entrenamiento entA, int nA, Entrenamiento entB, int nB) {
         Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_detalle_ejercicio_comparacion);
+        
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            lp.copyFrom(dialog.getWindow().getAttributes());
+            lp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(lp);
         }
 
         TextView tvTitulo = dialog.findViewById(R.id.tv_titulo_detalle);
@@ -330,9 +338,9 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
         LinearLayout llFilas = dialog.findViewById(R.id.ll_filas_detalle);
         Button btnCerrar = dialog.findViewById(R.id.btn_cerrar_detalle);
 
-        tvTitulo.setText("Detalle: " + item.getNombreEjercicio());
-        tvLabelA.setText("Ent. #" + nA);
-        tvLabelB.setText("Ent. #" + nB);
+        tvTitulo.setText(item.getNombreEjercicio());
+        if (tvLabelA != null) tvLabelA.setText("Ent. #" + nA);
+        if (tvLabelB != null) tvLabelB.setText("Ent. #" + nB);
 
         new Thread(() -> {
             AppDatabase db = AppDatabase.getDatabase(this);

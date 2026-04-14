@@ -1,67 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_dialog_white"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:layout_margin="16dp">
-
-    <TextView
-        android:id="@+id/tv_titulo_detalle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Detalle: Sentadillas"
-        android:textColor="@color/negro"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"/>
-
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="*">
-
-        <TableRow android:background="#EEEEEE" android:padding="8dp">
-            <TextView android:text="Serie" android:textStyle="bold" android:textColor="@color/negro" android:gravity="center"/>
-            <TextView android:id="@+id/tv_label_ant" android:textStyle="bold" android:textColor="@color/negro" android:gravity="center"/>
-            <TextView android:id="@+id/tv_label_post"  android:textStyle="bold" android:textColor="@color/negro" android:gravity="center"/>
-            <TextView android:text="Dif." android:textStyle="bold" android:textColor="@color/negro" android:gravity="center"/>
-        </TableRow>
-
-        <!-- Contenedor dinámico para las filas -->
-        <LinearLayout
-            android:id="@+id/ll_filas_detalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-    </TableLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#CCCCCC"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"/>
+    app:cardBackgroundColor="#121212"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#333333"
+    app:strokeWidth="1.2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <Button
-            android:id="@+id/btn_cerrar_detalle"
-            android:layout_width="wrap_content"
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:background="#333333"
+            android:backgroundTint="#333333" />
+
+        <TextView
+            android:id="@+id/tv_titulo_detalle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cerrar"
-            android:textAllCaps="false"
-            android:backgroundTint="#403C3C"
+            android:gravity="center"
+            android:text="Detalle Ejercicio"
             android:textColor="@color/blanco"
-            app:cornerRadius="20dp"/>
-    </LinearLayout>
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="-0.02" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Comparativa por series"
+            android:textColor="@color/gris_pista"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Header con más aire -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1A1A1A"
+            android:paddingVertical="14dp"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:gravity="center"
+                android:text="SET"
+                android:textColor="@color/gris_pista"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tv_label_ant"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.1"
+                android:gravity="center"
+                android:text="BASE"
+                android:textColor="@color/gris_pista"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tv_label_post"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.1"
+                android:gravity="center"
+                android:text="COMP."
+                android:textColor="@color/gris_pista"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:gravity="center"
+                android:text="EVOL."
+                android:textColor="@color/gris_pista"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constrainedHeight="true"
+            android:maxHeight="350dp">
+
+            <LinearLayout
+                android:id="@+id/ll_filas_detalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cerrar_detalle"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:text="Cerrar Detalle"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:backgroundTint="#262626"
+            app:cornerRadius="16dp"
+            app:strokeColor="#333333"
+            app:strokeWidth="1dp" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

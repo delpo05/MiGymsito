@@ -15,7 +15,7 @@
 
         <include layout="@layout/header" />
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true">
@@ -23,141 +23,147 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="30dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="24dp"
                     android:text="Comparar Rendimientos"
                     android:textColor="@color/blanco"
-                    android:textSize="26sp"
+                    android:textSize="24sp"
                     android:textStyle="bold" />
 
-                <!-- Selector Rutinas -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_rutina"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                <!-- Selectores en un Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="16dp"
-                    android:hint="Seleccionar Rutina"
-                    app:boxStrokeColor="@color/blanco"
-                    app:hintTextColor="@color/blanco"
-                    android:textColorHint="@color/gris_pista"
-                    app:endIconTint="@color/blanco">
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="#1A1A1A"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="#333333"
+                    app:strokeWidth="1dp">
 
-                    <AutoCompleteTextView
-                        android:id="@+id/actv_rutina"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:padding="12dp"
-                        android:textSize="14sp"
-                        android:popupBackground="#1A1A1A"
-                        android:textColor="@color/blanco" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                <!-- Selector Secciones -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_seccion"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="16dp"
-                    android:hint="Seleccionar Sección"
-                    app:boxStrokeColor="@color/blanco"
-                    app:hintTextColor="@color/blanco"
-                    android:textColorHint="@color/gris_pista"
-                    app:endIconTint="@color/blanco">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/actv_seccion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:padding="12dp"
-                        android:textSize="14sp"
-                        android:popupBackground="#1A1A1A"
-                        android:textColor="@color/blanco" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Contenedor Selectores de Entrenamiento -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="32dp"
-                    android:baselineAligned="false">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_entrenamiento_a"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="4dp"
-                        android:hint="Ent. (A)"
-                        app:boxStrokeColor="@color/blanco"
-                        app:hintTextColor="@color/blanco"
-                        android:textColorHint="@color/gris_pista">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/tiet_entrenamiento_a"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/til_rutina"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:clickable="true"
-                            android:textSize="13sp"
-                            android:textColor="@color/blanco" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_marginBottom="12dp"
+                            android:hint="Seleccionar Rutina"
+                            app:boxStrokeColor="@color/blanco"
+                            app:hintTextColor="@color/gris_pista"
+                            android:textColorHint="@color/gris_pista"
+                            app:endIconTint="@color/blanco">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_entrenamiento_b"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:hint="Ent. (B)"
-                        app:boxStrokeColor="@color/blanco"
-                        app:hintTextColor="@color/blanco"
-                        android:textColorHint="@color/gris_pista">
+                            <AutoCompleteTextView
+                                android:id="@+id/actv_rutina"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:textSize="14sp"
+                                android:popupBackground="#1A1A1A"
+                                android:textColor="@color/blanco" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/tiet_entrenamiento_b"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/til_seccion"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:clickable="true"
-                            android:textSize="13sp"
-                            android:textColor="@color/blanco" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                            android:layout_marginBottom="16dp"
+                            android:hint="Seleccionar Sección"
+                            app:boxStrokeColor="@color/blanco"
+                            app:hintTextColor="@color/gris_pista"
+                            android:textColorHint="@color/gris_pista"
+                            app:endIconTint="@color/blanco">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_comparar"
-                    android:layout_width="200dp"
-                    android:layout_height="50dp"
-                    android:layout_marginBottom="30dp"
-                    android:text="Comparar"
-                    android:textAllCaps="false"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/blanco"
-                    android:backgroundTint="#403C3C"
-                    app:cornerRadius="25dp" />
+                            <AutoCompleteTextView
+                                android:id="@+id/actv_seccion"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none"
+                                android:textSize="14sp"
+                                android:popupBackground="#1A1A1A"
+                                android:textColor="@color/blanco" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Tabla de Comparación Consolidada -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/til_entrenamiento_a"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="6dp"
+                                android:hint="Ent. Base"
+                                app:boxStrokeColor="@color/blanco"
+                                app:hintTextColor="@color/gris_pista"
+                                android:textColorHint="@color/gris_pista">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/tiet_entrenamiento_a"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"
+                                    android:textSize="13sp"
+                                    android:textColor="@color/blanco" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/til_entrenamiento_b"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                android:hint="Ent. Comparar"
+                                app:boxStrokeColor="@color/blanco"
+                                app:hintTextColor="@color/gris_pista"
+                                android:textColorHint="@color/gris_pista">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/tiet_entrenamiento_b"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:focusable="false"
+                                    android:clickable="true"
+                                    android:textSize="13sp"
+                                    android:textColor="@color/blanco" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_comparar"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:layout_marginTop="20dp"
+                            android:text="Realizar Comparativa"
+                            android:textAllCaps="false"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/blanco"
+                            android:backgroundTint="#2E2E2E"
+                            app:cornerRadius="12dp"
+                            app:iconGravity="textStart" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Resultados -->
                 <LinearLayout
                     android:id="@+id/ll_tabla_comparacion"
                     android:layout_width="match_parent"
@@ -166,64 +172,24 @@
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#333333"
-                        android:layout_marginBottom="16dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Resultados de Evolución"
+                        android:textColor="@color/blanco"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="12dp"/>
 
-                    <!-- Header de la Tabla -->
+                    <!-- Ocultamos los headers viejos ya que el card tiene sus propios labels -->
                     <TableLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="#1A1A1A">
-
-                        <TableRow
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="12dp"
-                            android:gravity="center_vertical">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1.2"
-                                android:text="Ejercicio"
-                                android:textColor="@color/blanco"
-                                android:textStyle="bold"
-                                android:textSize="13sp" />
-
-                            <TextView
-                                android:id="@+id/tv_header_vol_ent_a"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="0.8"
-                                android:text="Vol (A)"
-                                android:textColor="@color/blanco"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:gravity="center" />
-
-                            <TextView
-                                android:id="@+id/tv_header_vol_ent_b"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="0.8"
-                                android:text="Vol (B)"
-                                android:textColor="@color/blanco"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:gravity="center" />
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Evolución"
-                                android:textColor="@color/blanco"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:gravity="center" />
+                        android:visibility="gone">
+                        <TableRow>
+                            <TextView android:id="@+id/tv_header_vol_ent_a" />
+                            <TextView android:id="@+id/tv_header_vol_ent_b" />
                         </TableRow>
                     </TableLayout>
 
@@ -233,24 +199,30 @@
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false" />
 
-                    <!-- Cartelito Informativo -->
-                    <TextView
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
-                        android:layout_marginBottom="16dp"
-                        android:padding="16dp"
-                        android:background="#0F0F0F"
-                        android:text="* El Volumen se calcula multiplicando:\nPeso × Repeticiones × Series"
-                        android:textColor="@color/gris_pista"
-                        android:textSize="13sp"
-                        android:textStyle="italic"
-                        android:gravity="center" />
+                        android:layout_marginBottom="32dp"
+                        app:cardBackgroundColor="#0D0D0D"
+                        app:cardCornerRadius="12dp"
+                        app:strokeColor="#222222"
+                        app:strokeWidth="1dp">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="16dp"
+                            android:text="* El rendimiento se mide en puntos (pts).\nSe calcula: Peso × Repeticiones × Series."
+                            android:textColor="@color/gris_pista"
+                            android:textSize="12sp"
+                            android:textStyle="italic"
+                            android:gravity="center" />
+                    </com.google.android.material.card.MaterialCardView>
 
                 </LinearLayout>
 
             </LinearLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

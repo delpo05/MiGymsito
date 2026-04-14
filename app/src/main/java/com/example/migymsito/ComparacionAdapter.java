@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -38,30 +39,30 @@ public class ComparacionAdapter extends RecyclerView.Adapter<ComparacionAdapter.
         ComparacionFila item = items.get(position);
         holder.tvNombre.setText(item.getNombreEjercicio());
         
-        // Volumen A (Antiguo) va en la columna que corresponde al header A (Izquierda)
-        holder.tvVolumenA.setText(String.format(Locale.getDefault(), "%.0f kg", item.getVolumenA()));
+        // Volumen A (Antiguo) - Mostrado como Puntos
+        holder.tvVolumenA.setText(String.format(Locale.getDefault(), "%.0f pts", item.getVolumenA()));
         
-        // Volumen B (Reciente) va en la columna que corresponde al header B (Derecha)
-        holder.tvVolumenB.setText(String.format(Locale.getDefault(), "%.0f kg", item.getVolumenB()));
+        // Volumen B (Reciente) - Mostrado como Puntos
+        holder.tvVolumenB.setText(String.format(Locale.getDefault(), "%.0f pts", item.getVolumenB()));
         
         double dif = item.getDiferencia();
         double porc = item.getPorcentajeDif();
         
-        String evolucion = String.format(Locale.getDefault(), "%s%.0f (%.1f%%)", 
-                                        dif >= 0 ? "+" : "", dif, porc);
+        String evolucion = String.format(Locale.getDefault(), "%s%.0f (%s%.1f%%)", 
+                                        dif >= 0 ? "+" : "", dif, dif >= 0 ? "+" : "", porc);
         holder.tvEvolucionTexto.setText(evolucion);
 
         if (dif > 0) {
             holder.ivIndicador.setImageResource(R.drawable.ic_arrow_up);
-            holder.ivIndicador.setColorFilter(0xFF4CAF50); // Verde
-            holder.tvEvolucionTexto.setTextColor(0xFF4CAF50);
+            holder.ivIndicador.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_light));
+            holder.tvEvolucionTexto.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_green_light));
         } else if (dif < 0) {
             holder.ivIndicador.setImageResource(R.drawable.ic_arrow_down);
-            holder.ivIndicador.setColorFilter(0xFFF44336); // Rojo
-            holder.tvEvolucionTexto.setTextColor(0xFFF44336);
+            holder.ivIndicador.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_light));
+            holder.tvEvolucionTexto.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_light));
         } else {
             holder.ivIndicador.setImageDrawable(null);
-            holder.tvEvolucionTexto.setTextColor(0xFFFFFFFF);
+            holder.tvEvolucionTexto.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.blanco));
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -83,9 +84,7 @@ public class ComparacionAdapter extends RecyclerView.Adapter<ComparacionAdapter.
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tv_nombre_ejercicio);
-            // tv_volumen_actual es la columna de la izquierda en el XML
             tvVolumenA = itemView.findViewById(R.id.tv_volumen_actual);
-            // tv_volumen_anterior es la columna de la derecha en el XML
             tvVolumenB = itemView.findViewById(R.id.tv_volumen_anterior);
             tvEvolucionTexto = itemView.findViewById(R.id.tv_evolucion_texto);
             ivIndicador = itemView.findViewById(R.id.iv_indicador);
