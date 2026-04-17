@@ -173,7 +173,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 } else if (itemId == R.id.Exportar) {
                     mostrarPopUpExportar();
                 } else if (itemId == R.id.Importar) {
-                    importLauncher.launch("*/*");
+                    importLauncher.launch("text/*");
                 } else if (itemId == R.id.CerrarSesion) {
                     cerrarSesion();
                 }
@@ -348,7 +348,20 @@ public abstract class HeaderActivity extends AppCompatActivity {
     }
 
     private void importarDatosDesdeCsv(Uri uri) {
-        if (usuarioLogueado == null) return;
+        if (uri == null || usuarioLogueado == null) return;
+
+        // Validación previa del contenido del archivo
+        try (InputStream isCheck = getContentResolver().openInputStream(uri);
+             BufferedReader readerCheck = new BufferedReader(new InputStreamReader(isCheck))) {
+            String primeraLinea = readerCheck.readLine();
+            if (primeraLinea == null || !primeraLinea.contains("Rutina")) {
+                Toast.makeText(this, "El archivo seleccionado no tiene un formato CSV válido de MiGymsito", Toast.LENGTH_LONG).show();
+                return;
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error al leer el archivo seleccionado", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         importacionCancelada = false;
         mostrarPopUpImportacion();
@@ -361,7 +374,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
                 db.runInTransaction(() -> {
                     try {
-                        String linea = reader.readLine();
+                        String linea = reader.readLine(); // Saltamos la cabecera ya validada
                         String sep = ";";
 
                         while ((linea = reader.readLine()) != null) {
