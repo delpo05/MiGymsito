@@ -12,7 +12,6 @@ import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDao.UsuarioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,7 +29,7 @@ public class UsuarioRepository {
         void onResult(T result);
     }
 
-    public interface DebugCallback {
+    public interface ResultCallback {
         void onResult(boolean success, String errorMessage);
     }
 
@@ -107,7 +106,7 @@ public class UsuarioRepository {
         });
     }
 
-    public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, DebugCallback callback) {
+    public void actualizarPerfilUsuario(Usuario usuario, Historial nuevoHistorial, ResultCallback callback) {
         executorService.execute(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(application);
@@ -135,36 +134,6 @@ public class UsuarioRepository {
             AppDatabase db = AppDatabase.getDatabase(application);
             Historial historial = db.historialDao().obtenerUltimoHistorial(idUsuario);
             mainThreadHandler.post(() -> callback.onResult(historial));
-        });
-    }
-
-    public void obtenerTodosLosUsuarios(RepositoryCallback<List<Usuario>> callback) {
-        executorService.execute(() -> {
-            List<Usuario> usuarios = usuarioDao.obtenerTodosLosUsuarios();
-            mainThreadHandler.post(() -> callback.onResult(usuarios));
-        });
-    }
-
-    public void borrarTodosLosUsuarios(RepositoryCallback<Boolean> callback) {
-        executorService.execute(() -> {
-            try {
-                usuarioDao.deleteAll();
-                mainThreadHandler.post(() -> callback.onResult(true));
-            } catch (Exception e) {
-                mainThreadHandler.post(() -> callback.onResult(false));
-            }
-        });
-    }
-
-    public void borrarTodaLaBaseDeDatos(RepositoryCallback<Boolean> callback) {
-        executorService.execute(() -> {
-            try {
-                AppDatabase db = AppDatabase.getDatabase(application);
-                db.clearAllTables();
-                mainThreadHandler.post(() -> callback.onResult(true));
-            } catch (Exception e) {
-                mainThreadHandler.post(() -> callback.onResult(false));
-            }
         });
     }
 }

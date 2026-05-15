@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -25,7 +24,6 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
 
     private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
-    private int logoClickCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,28 +69,6 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
         etPassword = findViewById(R.id.etPassword);
         
         configurarWindowInsets(R.id.main);
-
-        View btnVerUsuarios = findViewById(R.id.btnVerUsuarios);
-        View btnTestLogin = findViewById(R.id.btnTestLogin);
-        ImageView ivLogo = findViewById(R.id.ivLogo);
-
-        if (btnVerUsuarios != null) {
-            btnVerUsuarios.setOnClickListener(v -> {
-                Intent intent = new Intent(InicioSesionActivity.this, DebugUsuariosRegistradosActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        if (ivLogo != null) {
-            ivLogo.setOnClickListener(v -> {
-                logoClickCount++;
-                if (logoClickCount == 10) {
-                    if (btnVerUsuarios != null) btnVerUsuarios.setVisibility(View.VISIBLE);
-                    if (btnTestLogin != null) btnTestLogin.setVisibility(View.VISIBLE);
-                    Toast.makeText(this, "Modo desarrollador activado", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
 
     private void saltarDirectoASecciones(int idRutina) {
@@ -145,42 +121,6 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
     public void EventoRegistrarse(View view) {
         Intent intent = new Intent(this, RegistroSesionActivity.class);
         startActivity(intent);
-    }
-
-    public void EventoLoginTest(View view) {
-        String testEmail = "test@gmail.com";
-        String testPass = "test123";
-
-        usuarioRepository.validarLogin(testEmail, testPass, usuario -> {
-            if (usuario != null) {
-                onResult(usuario);
-            } else {
-                crearUsuarioTest(testEmail, testPass);
-            }
-        });
-    }
-
-    private void crearUsuarioTest(String email, String pass) {
-        Usuario testUser = new Usuario();
-        testUser.CorreoElectronicoUsuario = email;
-        testUser.ContraseniaUsuario = pass;
-        testUser.NombreUsuario = "test_";
-        testUser.FechaNacimientoUsuario = System.currentTimeMillis();
-        testUser.GeneroUsuario = "Otro";
-
-        Historial testHistorial = new Historial();
-        testHistorial.PesoHistorial = 70.0;
-        testHistorial.AlturaHistorial = 170.0;
-        testHistorial.FechaHistorial = System.currentTimeMillis();
-
-        usuarioRepository.registrarUsuarioConHistorial(testUser, testHistorial, idGenerado -> {
-            if (idGenerado != -1) {
-                testUser.IdUsuario = idGenerado;
-                onResult(testUser);
-            } else {
-                Toast.makeText(this, "Error al crear usuario de prueba", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override

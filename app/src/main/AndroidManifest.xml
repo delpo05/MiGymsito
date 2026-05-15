@@ -40,11 +40,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".DebugUsuariosRegistradosActivity"
-            android:exported="false"
-            android:label="Usuarios Registrados" />
-
-        <activity
             android:name=".CargarRegistroActivity"
             android:exported="true" />
 
