@@ -166,6 +166,7 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
         testUser.ContraseniaUsuario = pass;
         testUser.NombreUsuario = "test_";
         testUser.FechaNacimientoUsuario = System.currentTimeMillis();
+        testUser.GeneroUsuario = "Otro";
 
         Historial testHistorial = new Historial();
         testHistorial.PesoHistorial = 70.0;
