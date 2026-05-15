@@ -21,6 +21,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.migymsito.adapter.SeccionesAdapter;
@@ -36,6 +37,7 @@ public class SeccionesFragment extends Fragment {
     private GridView gvSecciones;
     private Rutina rutinaActual;
     private SeccionRepository seccionRepository;
+    private SharedViewModel sharedViewModel;
     private SeccionesAdapter adapter;
 
     @Nullable
@@ -51,6 +53,14 @@ public class SeccionesFragment extends Fragment {
         if (getActivity() != null) {
             View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
             if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarSeccionesDesdeDB();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         if (getArguments() != null) {

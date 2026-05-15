@@ -22,6 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private NavController navController;
+    private SharedViewModel sharedViewModel;
     public static Usuario usuarioLogueado;
     private UsuarioRepository userRepo;
     private Dialog progressDialog;
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         userRepo = new UsuarioRepository(getApplication());
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -454,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
                 ocultarPopUpImportacion();
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Importación completada", Toast.LENGTH_SHORT).show();
-                    // trigger refresh in current fragment if needed
+                    sharedViewModel.notifyImportFinished();
                 });
 
             } catch (Exception e) {

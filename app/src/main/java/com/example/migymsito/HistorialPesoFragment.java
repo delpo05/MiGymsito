@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +39,7 @@ public class HistorialPesoFragment extends Fragment {
 
     private RecyclerView rvHistorialPeso;
     private LineChart chartPeso;
+    private SharedViewModel sharedViewModel;
     private HistorialRepository historialRepository;
 
     @Nullable
@@ -55,6 +57,14 @@ public class HistorialPesoFragment extends Fragment {
             if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
             
             historialRepository = new HistorialRepository(getActivity().getApplication());
+            
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarDatos();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         rvHistorialPeso = view.findViewById(R.id.rvHistorialPeso);

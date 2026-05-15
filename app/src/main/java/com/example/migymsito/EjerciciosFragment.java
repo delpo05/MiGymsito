@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.migymsito.adapter.EjerciciosAdapter;
@@ -59,6 +60,7 @@ public class EjerciciosFragment extends Fragment {
     private EjercicioRepository ejercicioRepository;
     private SeccionRepository seccionRepository;
     private EntrenamientoRepository entrenamientoRepository;
+    private SharedViewModel sharedViewModel;
     private EjerciciosAdapter adapter;
     private Button btnFinalizarEntrenamiento;
 
@@ -81,6 +83,14 @@ public class EjerciciosFragment extends Fragment {
         if (getActivity() != null) {
             View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
             if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarEjerciciosDesdeDB();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         if (getArguments() != null) {

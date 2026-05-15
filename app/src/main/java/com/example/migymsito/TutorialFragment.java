@@ -111,7 +111,7 @@ public class TutorialFragment extends Fragment {
                 params.height = (int) (250 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
             } else {
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                params.height = (int) (550 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
+                params.height = (int) (475 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
             }
             holder.ivTutorial.setLayoutParams(params);
         }

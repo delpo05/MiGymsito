@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.migymsito.adapter.RutinasAdapter;
@@ -55,6 +56,7 @@ public class RutinasFragment extends Fragment {
     private RutinaRepository rutinaRepository;
     private UsuarioRepository usuarioRepository;
     private RutinasAdapter adapter;
+    private SharedViewModel sharedViewModel;
     private Dialog progressDialog;
     private volatile boolean importacionCancelada = false;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -81,6 +83,14 @@ public class RutinasFragment extends Fragment {
         if (getActivity() != null) {
             View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
             if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarRutinasDesdeDB();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         usuarioRepository = new UsuarioRepository(getActivity().getApplication());

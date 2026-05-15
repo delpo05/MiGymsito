@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,6 +51,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     private LinearLayout llTablaComparacion;
     private RecyclerView rvComparacion;
     private TextView tvHeaderVolA, tvHeaderVolB;
+    private SharedViewModel sharedViewModel;
 
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
@@ -80,6 +82,14 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
             
             rutinaRepository = new RutinaRepository(getActivity().getApplication());
             seccionRepository = new SeccionRepository(getActivity().getApplication());
+
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarRutinas();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         actvRutina = view.findViewById(R.id.actv_rutina);

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,6 +50,7 @@ public class CargarRegistroFragment extends Fragment {
     private final List<Registro> listaHistorial = new ArrayList<>();
 
     private RegistroRepository registroRepository;
+    private SharedViewModel sharedViewModel;
     private UsuarioRepository usuarioRepository;
 
     private int serieActual = 1;
@@ -83,6 +85,14 @@ public class CargarRegistroFragment extends Fragment {
             
             usuarioRepository = new UsuarioRepository(getActivity().getApplication());
             registroRepository = new RegistroRepository(getActivity().getApplication());
+
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarSeriesDelDia();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         if (MainActivity.usuarioLogueado != null) {

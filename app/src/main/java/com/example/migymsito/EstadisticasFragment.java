@@ -14,7 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
@@ -48,6 +48,7 @@ public class EstadisticasFragment extends Fragment {
     private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private TextView tvFormulaEstadistica;
     private BarChart barChart;
+    private SharedViewModel sharedViewModel;
 
     private TextInputEditText etFechaDesde, etFechaHasta;
     private Calendar calendarDesde = Calendar.getInstance();
@@ -82,6 +83,14 @@ public class EstadisticasFragment extends Fragment {
             seccionRepository = new SeccionRepository(getActivity().getApplication());
             ejerciciosRepository = new EjercicioRepository(getActivity().getApplication());
             registroRepository = new RegistroRepository(getActivity().getApplication());
+
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarRutinasDelUsuario();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
         }
 
         autoCompleteRutinas = view.findViewById(R.id.autoCompleteRutinas);
