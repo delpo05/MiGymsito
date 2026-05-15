@@ -1,14 +1,15 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -18,10 +19,11 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.graphics.Insets;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Ejercicio;
@@ -44,9 +46,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class RutinasActivity extends HeaderActivity {
+public class RutinasFragment extends Fragment {
 
     private GridView gvRutinas;
     private RutinaRepository rutinaRepository;
@@ -54,6 +57,7 @@ public class RutinasActivity extends HeaderActivity {
     private RutinasAdapter adapter;
     private Dialog progressDialog;
     private volatile boolean importacionCancelada = false;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private final ActivityResultLauncher<String> filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -64,20 +68,32 @@ public class RutinasActivity extends HeaderActivity {
             }
     );
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.secciones_rutinas_activity);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.secciones_rutinas_activity, container, false);
+    }
 
-        usuarioRepository = new UsuarioRepository(getApplication());
-        rutinaRepository = new RutinaRepository(getApplication());
-
-        int idRutinaGuardada = usuarioRepository.obtenerIdRutina();
-        if (idRutinaGuardada != -1 && getIntent().getBooleanExtra("cambiarRutina", false) == false) {
-            saltarASecciones(idRutinaGuardada);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
         }
 
-        gvRutinas = findViewById(R.id.gvGenerico);
+        usuarioRepository = new UsuarioRepository(getActivity().getApplication());
+        rutinaRepository = new RutinaRepository(getActivity().getApplication());
+
+        if (getArguments() == null || !getArguments().getBoolean("cambiarRutina", false)) {
+            int idRutinaGuardada = usuarioRepository.obtenerIdRutina();
+            if (idRutinaGuardada != -1) {
+                saltarASecciones(idRutinaGuardada);
+            }
+        }
+
+        gvRutinas = view.findViewById(R.id.gvGenerico);
 
         if (gvRutinas != null) {
             gvRutinas.setNumColumns(1);
@@ -86,40 +102,30 @@ public class RutinasActivity extends HeaderActivity {
             gvRutinas.setPadding((int) (8 * density), 0, (int) (8 * density), (int) (8 * density));
         }
         
-        View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
+        View btnFinalizar = view.findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
             btnFinalizar.setVisibility(View.GONE);
         }
 
-        TextView tvUsername = findViewById(R.id.toolbar_username);
-
-        if (tvUsername != null && usuarioLogueado != null) {
-            tvUsername.setText(usuarioLogueado.NombreUsuario);
-        } else if (tvUsername != null) {
-            tvUsername.setText("Invitado");
-        }
-
-        configurarGridView();
-        configurarWindowInsets(R.id.layout_contenedor_grid);
+        configurarGridView(view);
     }
 
     private void saltarASecciones(int idRutina) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+        executorService.execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getContext());
             Rutina rutina = db.rutinaDao().obtenerRutinaPorId(idRutina);
-            if (rutina != null) {
-                runOnUiThread(() -> {
-                    Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
-                    intent.putExtra("rutina", rutina);
-                    startActivity(intent);
-                    finish();
+            if (rutina != null && isAdded()) {
+                getActivity().runOnUiThread(() -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("rutina", rutina);
+                    Navigation.findNavController(requireView()).navigate(R.id.seccionesFragment, bundle);
                 });
             }
         });
     }
 
-    private void configurarGridView() {
-        TextView tituloGv = findViewById(R.id.tvTituloGrid);
+    private void configurarGridView(View view) {
+        TextView tituloGv = view.findViewById(R.id.tvTituloGrid);
         if (tituloGv != null) tituloGv.setText("Mis Rutinas");
 
         adapter = new RutinasAdapter(new ArrayList<>(), new RutinasAdapter.OnRutinaClickListener() {
@@ -131,10 +137,9 @@ public class RutinasActivity extends HeaderActivity {
             @Override
             public void onRutinaClick(Rutina rutina) {
                 usuarioRepository.guardarIdRutina(rutina.IdRutina);
-                Intent intent = new Intent(RutinasActivity.this, SeccionesActivity.class);
-                intent.putExtra("rutina", rutina);
-                startActivity(intent);
-                finish();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("rutina", rutina);
+                Navigation.findNavController(requireView()).navigate(R.id.seccionesFragment, bundle);
             }
 
             @Override
@@ -148,7 +153,7 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void mostrarPopUpOpcionesCrear() {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_dos_opciones);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -184,7 +189,7 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void mostrarMenuOpciones(View view, Rutina rutina) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_modificar_eliminar);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -203,7 +208,7 @@ public class RutinasActivity extends HeaderActivity {
                 }
                 rutinaRepository.eliminarRutina(rutina);
                 dialog.dismiss();
-                new Handler().postDelayed(this::cargarRutinasDesdeDB, 200);
+                new Handler(Looper.getMainLooper()).postDelayed(this::cargarRutinasDesdeDB, 200);
             });
         }
 
@@ -233,8 +238,8 @@ public class RutinasActivity extends HeaderActivity {
     }
 
     private void exportarRutinaAArchivo(Rutina rutina) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+        executorService.execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getContext());
             try {
                 JSONObject jsonRutina = new JSONObject();
                 jsonRutina.put("nombre", rutina.NombreRutina);
@@ -255,7 +260,6 @@ public class RutinasActivity extends HeaderActivity {
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
                         jsonEjercicio.put("pesoCorporal", ejercicio.PesoCorporalEjercicio);
                         
-                        // Exportar imagen como Base64 si existe
                         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
                             String base64 = uriToBase64(Uri.parse(ejercicio.ImagenEjercicio));
                             if (base64 != null) {
@@ -271,45 +275,54 @@ public class RutinasActivity extends HeaderActivity {
 
                 String jsonString = jsonRutina.toString();
                 
-                File path = new File(getCacheDir(), "rutinas");
-                if (!path.exists()) path.mkdirs();
+                File path = new File(requireContext().getCacheDir(), "rutinas");
+                if (!path.exists()) {
+                    boolean created = path.mkdirs();
+                    if (!created) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error al crear directorio", Toast.LENGTH_SHORT).show());
+                        }
+                        return;
+                    }
+                }
                 
                 String fileName = "Rutina_" + rutina.NombreRutina.replaceAll("[^a-zA-Z0-9]", "_") + ".json";
                 File file = new File(path, fileName);
                 
-                FileOutputStream stream = new FileOutputStream(file);
-                stream.write(jsonString.getBytes());
-                stream.close();
+                try (FileOutputStream stream = new FileOutputStream(file)) {
+                    stream.write(jsonString.getBytes());
+                }
 
-                Uri contentUri = FileProvider.getUriForFile(this, "com.example.migymsito.fileprovider", file);
+                Uri contentUri = FileProvider.getUriForFile(requireContext(), "com.example.migymsito.fileprovider", file);
 
-                runOnUiThread(() -> {
-                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                    shareIntent.setType("application/json");
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-                    shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(Intent.createChooser(shareIntent, "Compartir Rutina con..."));
-                });
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+                        shareIntent.setType("application/json");
+                        shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, contentUri);
+                        shareIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(android.content.Intent.createChooser(shareIntent, "Compartir Rutina con..."));
+                    });
+                }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(this, "Error al exportar", Toast.LENGTH_SHORT).show());
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error al exportar", Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
 
     private String uriToBase64(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        try (InputStream inputStream = getActivity().getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int len;
-            while ((len = inputStream.read(buffer)) != -1) {
+            while (inputStream != null && (len = inputStream.read(buffer)) != -1) {
                 byteBuffer.write(buffer, 0, len);
             }
             return Base64.encodeToString(byteBuffer.toByteArray(), Base64.NO_WRAP);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -317,32 +330,31 @@ public class RutinasActivity extends HeaderActivity {
     private String guardarImagenDesdeBase64(String base64Str) {
         try {
             byte[] data = Base64.decode(base64Str, Base64.DEFAULT);
-            File folder = new File(getFilesDir(), "imagenes_ejercicios");
-            if (!folder.exists()) folder.mkdirs();
+            File folder = new File(requireContext().getFilesDir(), "imagenes_ejercicios");
+            if (!folder.exists()) {
+                boolean created = folder.mkdirs();
+                if (!created) return null;
+            }
             
-            // Usamos un sufijo aleatorio para evitar colisiones si se procesan varias imágenes en el mismo milisegundo
             File file = new File(folder, "img_" + System.currentTimeMillis() + "_" + (int)(Math.random() * 1000) + ".jpg");
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(data);
-            fos.close();
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(data);
+            }
             
             return Uri.fromFile(file).toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     private void cargarRutinasDesdeDB() {
-        if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
-                adapter.setRutinas(rutinas);
-            });
+        if (MainActivity.usuarioLogueado != null) {
+            rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> adapter.setRutinas(rutinas));
         }
     }
 
     private void mostrarPopUpRutina(Rutina rutinaExistente) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -371,10 +383,10 @@ public class RutinasActivity extends HeaderActivity {
             String nombre = etNombre.getText().toString().trim();
             if (!nombre.isEmpty()) {
                 if (rutinaExistente == null) {
-                    com.example.migymsito.data.Rutina nueva = new com.example.migymsito.data.Rutina();
+                    Rutina nueva = new Rutina();
                     nueva.NombreRutina = nombre;
-                    if (usuarioLogueado != null) {
-                        nueva.IdUsuarioRutina = usuarioLogueado.IdUsuario;
+                    if (MainActivity.usuarioLogueado != null) {
+                        nueva.IdUsuarioRutina = MainActivity.usuarioLogueado.IdUsuario;
                         rutinaRepository.insertarRutina(nueva);
                     }
                 } else {
@@ -382,88 +394,85 @@ public class RutinasActivity extends HeaderActivity {
                     rutinaRepository.actualizarRutina(rutinaExistente);
                 }
                 dialog.dismiss();
-                new Handler().postDelayed(this::cargarRutinasDesdeDB, 300);
+                new Handler(Looper.getMainLooper()).postDelayed(this::cargarRutinasDesdeDB, 300);
             }
         });
         dialog.show();
     }
 
-    @Override
-    protected void onImportFinished() {
-        cargarRutinasDesdeDB();
-    }
-
     private void mostrarPopUpImportacion() {
-        runOnUiThread(() -> {
-            progressDialog = new Dialog(this);
-            progressDialog.setContentView(R.layout.pop_up_importacion);
-            progressDialog.setCancelable(false);
-            if (progressDialog.getWindow() != null) {
-                progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            }
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                progressDialog = new Dialog(requireContext());
+                progressDialog.setContentView(R.layout.pop_up_importacion);
+                progressDialog.setCancelable(false);
+                if (progressDialog.getWindow() != null) {
+                    progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                }
 
-            Button btnCancelar = progressDialog.findViewById(R.id.btnCancelarImportacion);
-            btnCancelar.setOnClickListener(v -> {
-                importacionCancelada = true;
-                progressDialog.dismiss();
-                Toast.makeText(this, "Cancelando importación...", Toast.LENGTH_SHORT).show();
+                Button btnCancelar = progressDialog.findViewById(R.id.btnCancelarImportacion);
+                btnCancelar.setOnClickListener(v -> {
+                    importacionCancelada = true;
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), "Cancelando importación...", Toast.LENGTH_SHORT).show();
+                });
+
+                progressDialog.show();
             });
-
-            progressDialog.show();
-        });
+        }
     }
 
     private void ocultarPopUpImportacion() {
-        runOnUiThread(() -> {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-        });
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+            });
+        }
     }
 
     private void leerArchivoImportacion(Uri uri) {
         importacionCancelada = false;
         mostrarPopUpImportacion();
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        executorService.execute(() -> {
+            try (InputStream inputStream = getActivity().getContentResolver().openInputStream(uri);
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
                 StringBuilder stringBuilder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (importacionCancelada) {
-                        inputStream.close();
                         ocultarPopUpImportacion();
                         return;
                     }
                     stringBuilder.append(line);
                 }
-                inputStream.close();
                 
                 procesarJsonImportacion(stringBuilder.toString());
 
             } catch (Exception e) {
-                e.printStackTrace();
                 ocultarPopUpImportacion();
-                runOnUiThread(() -> Toast.makeText(this, "Error al leer el archivo", Toast.LENGTH_SHORT).show());
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error al leer el archivo", Toast.LENGTH_SHORT).show());
+                }
             }
         });
     }
 
     private void procesarJsonImportacion(String jsonString) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executorService.execute(() -> {
             try {
                 JSONObject jsonRutina = new JSONObject(jsonString);
                 String nombreRutina = jsonRutina.getString("nombre");
 
-                AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+                AppDatabase db = AppDatabase.getDatabase(getContext());
                 
                 db.runInTransaction(() -> {
                     if (importacionCancelada) throw new RuntimeException("CANCEL");
 
                     Rutina nuevaRutina = new Rutina();
                     nuevaRutina.NombreRutina = nombreRutina + " (Importada)";
-                    nuevaRutina.IdUsuarioRutina = usuarioLogueado.IdUsuario;
+                    nuevaRutina.IdUsuarioRutina = MainActivity.usuarioLogueado.IdUsuario;
                     
                     long idRutina = db.rutinaDao().insertarRutina(nuevaRutina);
                     
@@ -492,8 +501,8 @@ public class RutinasActivity extends HeaderActivity {
                                 if (ejExistente != null) {
                                     idEjercicio = ejExistente.IdEjercicio;
                                     if (ejExistente.ImagenEjercicio == null || ejExistente.ImagenEjercicio.isEmpty()) {
-                                        String base64Data = jsonEjercicio.optString("imagenData", null);
-                                        if (base64Data != null) {
+                                        String base64Data = jsonEjercicio.optString("imagenData", "");
+                                        if (!base64Data.isEmpty()) {
                                             ejExistente.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
                                             db.ejercicioDao().actualizarEjercicio(ejExistente);
                                         }
@@ -504,8 +513,8 @@ public class RutinasActivity extends HeaderActivity {
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
                                     
-                                    String base64Data = jsonEjercicio.optString("imagenData", null);
-                                    if (base64Data != null) {
+                                    String base64Data = jsonEjercicio.optString("imagenData", "");
+                                    if (!base64Data.isEmpty()) {
                                         nuevoEj.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
                                     } else {
                                         nuevoEj.ImagenEjercicio = jsonEjercicio.optString("imagen", null);
@@ -527,21 +536,26 @@ public class RutinasActivity extends HeaderActivity {
 
                 ocultarPopUpImportacion();
 
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Rutina importada con éxito", Toast.LENGTH_SHORT).show();
-                    cargarRutinasDesdeDB();
-                });
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Rutina importada con éxito", Toast.LENGTH_SHORT).show();
+                        cargarRutinasDesdeDB();
+                    });
+                }
 
             } catch (Exception e) {
                 ocultarPopUpImportacion();
                 if ("CANCEL".equals(e.getMessage())) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Importación cancelada", Toast.LENGTH_SHORT).show();
-                        cargarRutinasDesdeDB();
-                    });
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Importación cancelada", Toast.LENGTH_SHORT).show();
+                            cargarRutinasDesdeDB();
+                        });
+                    }
                 } else {
-                    e.printStackTrace();
-                    runOnUiThread(() -> Toast.makeText(this, "Error al importar: Formato inválido", Toast.LENGTH_SHORT).show());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error al importar: Formato inválido", Toast.LENGTH_SHORT).show());
+                    }
                 }
             }
         });
@@ -555,14 +569,9 @@ public class RutinasActivity extends HeaderActivity {
         return null;
     }
 
-    private void configurarWindowInsets(int layoutId) {
-        View layout = findViewById(layoutId);
-        if (layout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

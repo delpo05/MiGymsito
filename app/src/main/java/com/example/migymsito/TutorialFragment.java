@@ -1,7 +1,6 @@
 package com.example.migymsito;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,31 +10,37 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.migymsito.utils.LocaleHelper;
 import com.google.android.material.button.MaterialButton;
 
-public class TutorialActivity extends AppCompatActivity {
+public class TutorialFragment extends Fragment {
 
     private static final String PREFS_NAME = "AppConfig";
     private static final String KEY_TUTORIAL_DONE = "tutorial_done";
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        LocaleHelper.applyLocale(this);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.tutorial_activity);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.tutorial_activity, container, false);
+    }
 
-        ViewPager2 viewPager = findViewById(R.id.viewPager);
-        MaterialButton btnNext = findViewById(R.id.btnNext);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        View toolbar = getActivity().findViewById(R.id.include_toolbar);
+        if (toolbar != null) toolbar.setVisibility(View.GONE);
+
+        ViewPager2 viewPager = view.findViewById(R.id.viewPager);
+        MaterialButton btnNext = view.findViewById(R.id.btnNext);
 
         TutorialAdapter adapter = new TutorialAdapter();
         viewPager.setAdapter(adapter);
-
-
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -58,12 +63,10 @@ public class TutorialActivity extends AppCompatActivity {
     }
 
     private void finishTutorial() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putBoolean(KEY_TUTORIAL_DONE, true).apply();
 
-        Intent intent = new Intent(this, RegistroSesionActivity.class);
-        startActivity(intent);
-        finish();
+        Navigation.findNavController(requireView()).navigate(R.id.registroSesionFragment);
     }
 
     private static class TutorialAdapter extends RecyclerView.Adapter<TutorialAdapter.ViewHolder> {
@@ -102,8 +105,6 @@ public class TutorialActivity extends AppCompatActivity {
             holder.tvDescription.setText(descriptions[position]);
             holder.ivTutorial.setImageResource(images[position]);
 
-            // Si es la primera diapositiva (Logo), mantenemos el tamaño original
-            // Para el resto de diapositivas (Imágenes del tutorial), aumentamos el tamaño
             ViewGroup.LayoutParams params = holder.ivTutorial.getLayoutParams();
             if (position == 0) {
                 params.width = (int) (250 * holder.itemView.getContext().getResources().getDisplayMetrics().density);

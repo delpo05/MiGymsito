@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/inicioSesionFragment">
+
+    <fragment
+        android:id="@+id/inicioSesionFragment"
+        android:name="com.example.migymsito.InicioSesionFragment"
+        android:label="Inicio de Sesión"
+        tools:layout="@layout/inicio_sesion_activity" />
+
+    <fragment
+        android:id="@+id/languageSelectionFragment"
+        android:name="com.example.migymsito.LanguageSelectionFragment"
+        android:label="Selección de Idioma"
+        tools:layout="@layout/language_selection_activity" />
+
+    <fragment
+        android:id="@+id/tutorialFragment"
+        android:name="com.example.migymsito.TutorialFragment"
+        android:label="Tutorial"
+        tools:layout="@layout/tutorial_activity" />
+
+    <fragment
+        android:id="@+id/registroSesionFragment"
+        android:name="com.example.migymsito.RegistroSesionFragment"
+        android:label="Registro de Sesión"
+        tools:layout="@layout/registro_sesion_activity" />
+
+    <fragment
+        android:id="@+id/rutinasFragment"
+        android:name="com.example.migymsito.RutinasFragment"
+        android:label="Rutinas"
+        tools:layout="@layout/secciones_rutinas_activity" />
+
+    <fragment
+        android:id="@+id/seccionesFragment"
+        android:name="com.example.migymsito.SeccionesFragment"
+        android:label="Secciones"
+        tools:layout="@layout/secciones_rutinas_activity" />
+
+    <fragment
+        android:id="@+id/ejerciciosFragment"
+        android:name="com.example.migymsito.EjerciciosFragment"
+        android:label="Ejercicios"
+        tools:layout="@layout/secciones_rutinas_activity" />
+
+    <fragment
+        android:id="@+id/cargarRegistroFragment"
+        android:name="com.example.migymsito.CargarRegistroFragment"
+        android:label="Cargar Registro"
+        tools:layout="@layout/cargar_registro_activity" />
+
+    <fragment
+        android:id="@+id/estadisticasFragment"
+        android:name="com.example.migymsito.EstadisticasFragment"
+        android:label="Estadísticas"
+        tools:layout="@layout/estadisticas_activity" />
+
+    <fragment
+        android:id="@+id/historialPesoFragment"
+        android:name="com.example.migymsito.HistorialPesoFragment"
+        android:label="Historial de Peso"
+        tools:layout="@layout/historial_peso_activity" />
+
+    <fragment
+        android:id="@+id/compararEntrenamientosFragment"
+        android:name="com.example.migymsito.CompararEntrenamientosFragment"
+        android:label="Comparar Entrenamientos"
+        tools:layout="@layout/comparar_entrenamientos_activity" />
+
+    <fragment
+        android:id="@+id/datosPersonalesFragment"
+        android:name="com.example.migymsito.DatosPersonalesFragment"
+        android:label="Datos Personales"
+        tools:layout="@layout/datos_personales" />
+
+</navigation>

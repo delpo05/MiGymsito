@@ -1,73 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/layout_contenedor_grid"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/negro"
-    android:fitsSystemWindows="true">
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/layout_contenedor_grid"
+    <TextView
+        android:id="@+id/tvTituloGrid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="Título"
+        android:textColor="@color/blanco"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
-        <include
-            layout="@layout/header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <GridView
+        android:id="@+id/gvGenerico"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:horizontalSpacing="10dp"
+        android:numColumns="2"
+        android:padding="8dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp" />
 
-        <TextView
-            android:id="@+id/tvTituloGrid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:text="Título"
-            android:textColor="@color/blanco"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnFinalizarEntrenamiento"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:text="FINALIZAR ENTRENAMIENTO"
+        android:textColor="@color/negro"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/blanco"
+        app:cornerRadius="12dp"
+        android:elevation="4dp"/>
 
-        <GridView
-            android:id="@+id/gvGenerico"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:horizontalSpacing="10dp"
-            android:numColumns="2"
-            android:padding="8dp"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="10dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFinalizarEntrenamiento"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:text="FINALIZAR ENTRENAMIENTO"
-            android:textColor="@color/negro"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/blanco"
-            app:cornerRadius="12dp"
-            android:elevation="4dp"/>
-
-    </LinearLayout>
-
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@color/negro"
-        app:headerLayout="@layout/header_menu_desplegable"
-        app:menu="@menu/popup_header"
-        app:itemTextColor="@color/blanco"
-        app:itemIconTint="@color/blanco" />
-
-</androidx.drawerlayout.widget.DrawerLayout>
+</LinearLayout>

@@ -15,66 +15,13 @@
         android:theme="@style/Theme.MiGymsito">
 
         <activity
-            android:name=".InicioSesionActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".LanguageSelectionActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".TutorialActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".RegistroSesionActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".RutinasActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".SeccionesActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".EjerciciosActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CargarRegistroActivity"
-            android:exported="true" />
-
-        <activity
-            android:name=".EstadisticasActivity"
-            android:exported="false" />
-
-        <activity android:name=".HistorialPesoActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CompararEntrenamientosActivity"
-            android:exported="false" />
-
-        <!-- Configuración para la cámara y compartir archivos -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.migymsito.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
-        <activity android:name=".DatosPersonalesActivity"
-            android:exported="false" />
 
     </application>
 

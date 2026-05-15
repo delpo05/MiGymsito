@@ -17,6 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,11 +43,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class CompararEntrenamientosActivity extends HeaderActivity implements ComparacionAdapter.OnItemClickListener {
+public class CompararEntrenamientosFragment extends Fragment implements ComparacionAdapter.OnItemClickListener {
 
     private AutoCompleteTextView actvRutina, actvSeccion;
     private TextInputEditText tietEntrenamientoA, tietEntrenamientoB;
-    private MaterialButton btnComparar;
     private LinearLayout llTablaComparacion;
     private RecyclerView rvComparacion;
     private TextView tvHeaderVolA, tvHeaderVolB;
@@ -60,45 +62,55 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
     private Entrenamiento entrenamientoA, entrenamientoB;
     private int numEntA, numEntB;
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.comparar_entrenamientos_activity, container, false);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.comparar_entrenamientos_activity);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            rutinaRepository = new RutinaRepository(getActivity().getApplication());
+            seccionRepository = new SeccionRepository(getActivity().getApplication());
+        }
 
-        actvRutina = findViewById(R.id.actv_rutina);
-        actvSeccion = findViewById(R.id.actv_seccion);
-        tietEntrenamientoA = findViewById(R.id.tiet_entrenamiento_a);
-        tietEntrenamientoB = findViewById(R.id.tiet_entrenamiento_b);
-        btnComparar = findViewById(R.id.btn_comparar);
-        llTablaComparacion = findViewById(R.id.ll_tabla_comparacion);
-        rvComparacion = findViewById(R.id.rv_comparacion);
-        tvHeaderVolA = findViewById(R.id.tv_header_vol_ent_a);
-        tvHeaderVolB = findViewById(R.id.tv_header_vol_ent_b);
+        actvRutina = view.findViewById(R.id.actv_rutina);
+        actvSeccion = view.findViewById(R.id.actv_seccion);
+        tietEntrenamientoA = view.findViewById(R.id.tiet_entrenamiento_a);
+        tietEntrenamientoB = view.findViewById(R.id.tiet_entrenamiento_b);
+        MaterialButton btnComparar = view.findViewById(R.id.btn_comparar);
+        llTablaComparacion = view.findViewById(R.id.ll_tabla_comparacion);
+        rvComparacion = view.findViewById(R.id.rv_comparacion);
+        tvHeaderVolA = view.findViewById(R.id.tv_header_vol_ent_a);
+        tvHeaderVolB = view.findViewById(R.id.tv_header_vol_ent_b);
 
-        rutinaRepository = new RutinaRepository(getApplication());
-        seccionRepository = new SeccionRepository(getApplication());
-
-        rvComparacion.setLayoutManager(new LinearLayoutManager(this));
+        rvComparacion.setLayoutManager(new LinearLayoutManager(getContext()));
 
         cargarRutinas();
         configurarSelectoresEntrenamiento();
 
         btnComparar.setOnClickListener(v -> realizarComparacion());
 
-        manejarIntentDirecto();
+        manejarArgumentsDirecto();
     }
 
-    private void manejarIntentDirecto() {
-        if (getIntent() != null && getIntent().hasExtra("idSeccion")) {
-            int idSeccion = getIntent().getIntExtra("idSeccion", -1);
-            int idEntB_intent = getIntent().getIntExtra("idEntB", -1);
-            int idEntA_intent = getIntent().getIntExtra("idEntA", -1);
+    private void manejarArgumentsDirecto() {
+        if (getArguments() != null && getArguments().containsKey("idSeccion")) {
+            int idSeccion = getArguments().getInt("idSeccion", -1);
+            int idEntB_intent = getArguments().getInt("idEntB", -1);
+            int idEntA_intent = getArguments().getInt("idEntA", -1);
 
             new Thread(() -> {
-                AppDatabase db = AppDatabase.getDatabase(this);
-                List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario);
+                AppDatabase db = AppDatabase.getDatabase(getContext());
+                List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
                 for (Seccion s : todas) {
                     if (s.IdSeccion == idSeccion) {
                         seccionSeleccionada = s;
@@ -107,7 +119,7 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
                 }
 
                 if (seccionSeleccionada != null) {
-                    entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(usuarioLogueado.IdUsuario, idSeccion);
+                    entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, idSeccion);
 
                     if (idEntB_intent != -1) {
                         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
@@ -128,34 +140,38 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
                         }
                     }
 
-                    runOnUiThread(() -> {
-                        actvSeccion.setText(seccionSeleccionada.NombreSeccion);
-                        if (entrenamientoA != null) {
-                            tietEntrenamientoA.setText("Entrenamiento #" + numEntA + " (" + dateFormat.format(new Date(entrenamientoA.FechaFin)) + ")");
-                        }
-                        if (entrenamientoB != null) {
-                            tietEntrenamientoB.setText("Entrenamiento #" + numEntB + " (" + dateFormat.format(new Date(entrenamientoB.FechaFin)) + ")");
-                        }
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            actvSeccion.setText(seccionSeleccionada.NombreSeccion);
+                            if (entrenamientoA != null) {
+                                String textA = String.format("Entrenamiento #%d (%s)", numEntA, dateFormat.format(new Date(entrenamientoA.FechaFin)));
+                                tietEntrenamientoA.setText(textA);
+                            }
+                            if (entrenamientoB != null) {
+                                String textB = String.format("Entrenamiento #%d (%s)", numEntB, dateFormat.format(new Date(entrenamientoB.FechaFin)));
+                                tietEntrenamientoB.setText(textB);
+                            }
 
-                        if (entrenamientoA != null && entrenamientoB != null) {
-                            realizarComparacion();
-                        }
-                    });
+                            if (entrenamientoA != null && entrenamientoB != null) {
+                                realizarComparacion();
+                            }
+                        });
+                    }
                 }
             }).start();
         }
     }
 
     private void cargarRutinas() {
-        if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
+        if (MainActivity.usuarioLogueado != null && rutinaRepository != null) {
+            rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> {
                 this.listaRutinas = new ArrayList<>(rutinas);
                 List<String> nombres = new ArrayList<>();
                 nombres.add("Todas");
 
                 for (Rutina r : rutinas) nombres.add(r.NombreRutina);
 
-                actvRutina.setAdapter(new ArrayAdapter<>(this, R.layout.dropdown_item, nombres));
+                actvRutina.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres));
 
                 actvRutina.setOnItemClickListener((parent, view, position, id) -> {
                     limpiarSeleccionSeccion();
@@ -178,25 +194,27 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
     }
 
     private void cargarTodasLasSecciones() {
-        if (usuarioLogueado != null) {
-            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, secciones -> {
+        if (MainActivity.usuarioLogueado != null && seccionRepository != null) {
+            seccionRepository.obtenerSeccionesPorUsuario(MainActivity.usuarioLogueado.IdUsuario, secciones -> {
                 this.listaSecciones = secciones;
                 List<String> nombres = new ArrayList<>();
                 for (Seccion s : secciones) nombres.add(s.NombreSeccion);
-                actvSeccion.setAdapter(new ArrayAdapter<>(this, R.layout.dropdown_item, nombres));
+                actvSeccion.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres));
                 actvSeccion.setOnItemClickListener((p, v, pos, id) -> onSeccionSeleccionada(listaSecciones.get(pos)));
             });
         }
     }
 
     private void cargarSeccionesDeRutina(int idRutina) {
-        seccionRepository.obtenerSeccionesDeRutina(idRutina, secciones -> {
-            this.listaSecciones = secciones;
-            List<String> nombres = new ArrayList<>();
-            for (Seccion s : secciones) nombres.add(s.NombreSeccion);
-            actvSeccion.setAdapter(new ArrayAdapter<>(this, R.layout.dropdown_item, nombres));
-            actvSeccion.setOnItemClickListener((p, v, pos, id) -> onSeccionSeleccionada(listaSecciones.get(pos)));
-        });
+        if (seccionRepository != null) {
+            seccionRepository.obtenerSeccionesDeRutina(idRutina, secciones -> {
+                this.listaSecciones = secciones;
+                List<String> nombres = new ArrayList<>();
+                for (Seccion s : secciones) nombres.add(s.NombreSeccion);
+                actvSeccion.setAdapter(new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres));
+                actvSeccion.setOnItemClickListener((p, v, pos, id) -> onSeccionSeleccionada(listaSecciones.get(pos)));
+            });
+        }
     }
 
     private void onSeccionSeleccionada(Seccion seccion) {
@@ -208,8 +226,8 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
         llTablaComparacion.setVisibility(View.GONE);
 
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getDatabase(this);
-            entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(usuarioLogueado.IdUsuario, seccion.IdSeccion);
+            AppDatabase db = AppDatabase.getDatabase(getContext());
+            entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccion.IdSeccion);
         }).start();
     }
 
@@ -220,12 +238,12 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
     private void mostrarDialogoSeleccionEntrenamiento(boolean esA) {
         if (seccionSeleccionada == null) {
-            Toast.makeText(this, "Primero selecciona una sección", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Primero selecciona una sección", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (entrenamientosFinalizados.isEmpty()) {
-            Toast.makeText(this, "No hay entrenamientos finalizados para esta sección", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No hay entrenamientos finalizados para esta sección", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -233,11 +251,11 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
             Entrenamiento e = entrenamientosFinalizados.get(i);
             String fechaStr = dateFormat.format(new Date(e.FechaFin));
-            opciones[i] = "Entrenamiento #" + (i + 1) + " (" + fechaStr + ")";
+            opciones[i] = String.format("Entrenamiento #%d (%s)", (i + 1), fechaStr);
         }
 
-        new AlertDialog.Builder(this)
-                .setTitle("Seleccionar Entrenamiento (" + (esA ? "A" : "B") + ")")
+        new AlertDialog.Builder(requireContext())
+                .setTitle(String.format("Seleccionar Entrenamiento (%s)", (esA ? "A" : "B")))
                 .setItems(opciones, (dialog, which) -> {
                     Entrenamiento seleccionado = entrenamientosFinalizados.get(which);
                     String textoSeleccionado = opciones[which];
@@ -256,12 +274,12 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
     private void realizarComparacion() {
         if (entrenamientoA == null || entrenamientoB == null) {
-            Toast.makeText(this, "Selecciona ambos entrenamientos para comparar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Selecciona ambos entrenamientos para comparar", Toast.LENGTH_SHORT).show();
             return;
         }
 
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getDatabase(this);
+            AppDatabase db = AppDatabase.getDatabase(getContext());
 
             Entrenamiento eBase, eTarget;
             int nBase, nTarget;
@@ -287,20 +305,24 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
             for (SeccionXejercicio sxe : sxeList) {
                 Ejercicio ej = db.ejercicioDao().obtenerEjercicioPorId(sxe.IdEjercicio);
-                double vBase = volumenesBase.getOrDefault(sxe.IdSeccionXejercicio, 0.0);
-                double vTarget = volumenesTarget.getOrDefault(sxe.IdSeccionXejercicio, 0.0);
+                Double volBase = volumenesBase.get(sxe.IdSeccionXejercicio);
+                double vBase = volBase != null ? volBase : 0.0;
+                Double volTarget = volumenesTarget.get(sxe.IdSeccionXejercicio);
+                double vTarget = volTarget != null ? volTarget : 0.0;
 
                 if (vBase > 0 || vTarget > 0) {
                     filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, sxe.IdSeccionXejercicio, vTarget, vBase));
                 }
             }
 
-            runOnUiThread(() -> {
-                if (tvHeaderVolA != null) tvHeaderVolA.setText("Ent. #" + nA_final);
-                if (tvHeaderVolB != null) tvHeaderVolB.setText("Ent. #" + nB_final);
-                llTablaComparacion.setVisibility(View.VISIBLE);
-                rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, eA_final, nA_final, eB_final, nB_final)));
-            });
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (tvHeaderVolA != null) tvHeaderVolA.setText(String.format("Ent. #%d", nA_final));
+                    if (tvHeaderVolB != null) tvHeaderVolB.setText(String.format("Ent. #%d", nB_final));
+                    llTablaComparacion.setVisibility(View.VISIBLE);
+                    rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, eA_final, nA_final, eB_final, nB_final)));
+                });
+            }
         }).start();
     }
 
@@ -309,7 +331,8 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
         Map<Integer, Double> volumenes = new HashMap<>();
         for (Registro r : registros) {
             double vol = r.PesoRegistro * r.Repeticiones;
-            volumenes.put(r.IdSeccionXejercicio, volumenes.getOrDefault(r.IdSeccionXejercicio, 0.0) + vol);
+            Double current = volumenes.get(r.IdSeccionXejercicio);
+            volumenes.put(r.IdSeccionXejercicio, (current != null ? current : 0.0) + vol);
         }
         return volumenes;
     }
@@ -319,7 +342,7 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
     }
 
     private void mostrarPopUpDetalle(ComparacionAdapter.ComparacionFila item, Entrenamiento entA, int nA, Entrenamiento entB, int nB) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_detalle_ejercicio_comparacion);
         
@@ -339,11 +362,11 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
         Button btnCerrar = dialog.findViewById(R.id.btn_cerrar_detalle);
 
         tvTitulo.setText(item.getNombreEjercicio());
-        if (tvLabelA != null) tvLabelA.setText("Ent. #" + nA);
-        if (tvLabelB != null) tvLabelB.setText("Ent. #" + nB);
+        if (tvLabelA != null) tvLabelA.setText(String.format("Ent. #%d", nA));
+        if (tvLabelB != null) tvLabelB.setText(String.format("Ent. #%d", nB));
 
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getDatabase(this);
+            AppDatabase db = AppDatabase.getDatabase(getContext());
             List<Registro> registrosA = db.registroDao().obtenerRegistrosPorEntrenamiento(entA.IdEntrenamiento);
             List<Registro> registrosB = db.registroDao().obtenerRegistrosPorEntrenamiento(entB.IdEntrenamiento);
 
@@ -355,41 +378,43 @@ public class CompararEntrenamientosActivity extends HeaderActivity implements Co
 
             int maxSets = Math.max(filtradosA.size(), filtradosB.size());
 
-            runOnUiThread(() -> {
-                for (int i = 0; i < maxSets; i++) {
-                    View filaView = LayoutInflater.from(this).inflate(R.layout.item_comparacion_detalle_fila, llFilas, false);
-                    TextView tvSet = filaView.findViewById(R.id.tv_detalle_set);
-                    TextView tvA = filaView.findViewById(R.id.tv_detalle_ant);
-                    TextView tvB = filaView.findViewById(R.id.tv_detalle_post);
-                    TextView tvDif = filaView.findViewById(R.id.tv_detalle_dif);
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    for (int index = 0; index < maxSets; index++) {
+                        View filaView = LayoutInflater.from(requireContext()).inflate(R.layout.item_comparacion_detalle_fila, llFilas, false);
+                        TextView tvSet = filaView.findViewById(R.id.tv_detalle_set);
+                        TextView tvA = filaView.findViewById(R.id.tv_detalle_ant);
+                        TextView tvB = filaView.findViewById(R.id.tv_detalle_post);
+                        TextView tvDif = filaView.findViewById(R.id.tv_detalle_dif);
 
-                    tvSet.setText(String.valueOf(i + 1));
+                        tvSet.setText(String.valueOf(index + 1));
 
-                    Registro rA = i < filtradosA.size() ? filtradosA.get(i) : null;
-                    Registro rB = i < filtradosB.size() ? filtradosB.get(i) : null;
+                        Registro rA = index < filtradosA.size() ? filtradosA.get(index) : null;
+                        Registro rB = index < filtradosB.size() ? filtradosB.get(index) : null;
 
-                    String sA = rA != null ? String.format(Locale.getDefault(), "%.1fk x %d", rA.PesoRegistro, rA.Repeticiones) : "-";
-                    String sB = rB != null ? String.format(Locale.getDefault(), "%.1fk x %d", rB.PesoRegistro, rB.Repeticiones) : "-";
+                        String sA = rA != null ? String.format(Locale.getDefault(), "%.1fk x %d", rA.PesoRegistro, rA.Repeticiones) : "-";
+                        String sB = rB != null ? String.format(Locale.getDefault(), "%.1fk x %d", rB.PesoRegistro, rB.Repeticiones) : "-";
 
-                    tvA.setText(sA);
-                    tvB.setText(sB);
+                        tvA.setText(sA);
+                        tvB.setText(sB);
 
-                    if (rA != null && rB != null) {
-                        double difPeso = rB.PesoRegistro - rA.PesoRegistro;
-                        int difReps = rB.Repeticiones - rA.Repeticiones;
-                        String d = String.format(Locale.getDefault(), "%s%.1fk\n%s%d reps", 
-                                difPeso >= 0 ? "+" : "", difPeso,
-                                difReps >= 0 ? "+" : "", difReps);
-                        tvDif.setText(d);
-                        if (difPeso > 0 || difReps > 0) tvDif.setTextColor(Color.parseColor("#4CAF50"));
-                        else if (difPeso < 0 || difReps < 0) tvDif.setTextColor(Color.parseColor("#F44336"));
-                    } else {
-                        tvDif.setText("-");
+                        if (rA != null && rB != null) {
+                            double difPeso = rB.PesoRegistro - rA.PesoRegistro;
+                            int difReps = rB.Repeticiones - rA.Repeticiones;
+                            String d = String.format(Locale.getDefault(), "%s%.1fk\n%s%d reps", 
+                                    difPeso >= 0 ? "+" : "", difPeso,
+                                    difReps >= 0 ? "+" : "", difReps);
+                            tvDif.setText(d);
+                            if (difPeso > 0 || difReps > 0) tvDif.setTextColor(Color.parseColor("#4CAF50"));
+                            else if (difPeso < 0 || difReps < 0) tvDif.setTextColor(Color.parseColor("#F44336"));
+                        } else {
+                            tvDif.setText("-");
+                        }
+
+                        llFilas.addView(filaView);
                     }
-
-                    llFilas.addView(filaView);
-                }
-            });
+                });
+            }
         }).start();
 
         btnCerrar.setOnClickListener(v -> dialog.dismiss());

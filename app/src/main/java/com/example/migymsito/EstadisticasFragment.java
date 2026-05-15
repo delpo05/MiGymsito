@@ -3,11 +3,17 @@ package com.example.migymsito;
 import android.app.DatePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
@@ -35,24 +41,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
-public class EstadisticasActivity extends HeaderActivity {
+public class EstadisticasFragment extends Fragment {
 
     private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
-    private MaterialButton btnConsultarProgreso;
     private TextView tvFormulaEstadistica;
     private BarChart barChart;
 
-    // Se utilizan para filtrar los registros obtenidos de la base de datos antes de graficarlos.
-    // etFechaDesde: Campo para seleccionar la fecha de inicio del rango.
-    // etFechaHasta: Campo para seleccionar la fecha de fin del rango.
     private TextInputEditText etFechaDesde, etFechaHasta;
     private Calendar calendarDesde = Calendar.getInstance();
     private Calendar calendarHasta = Calendar.getInstance();
-    private SimpleDateFormat dateFormatoVisual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-
-    // --- NUEVO BOTÓN PARA LIMPIAR FILTROS ---
-    private MaterialButton btnLimpiarFiltros;
+    private final SimpleDateFormat dateFormatoVisual = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
@@ -64,69 +64,67 @@ public class EstadisticasActivity extends HeaderActivity {
     private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
     private Ejercicio ejercicioSeleccionado;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.estadisticas_activity);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.estadisticas_activity, container, false);
+    }
 
-        // Inicializar vistas
-        autoCompleteRutinas = findViewById(R.id.autoCompleteRutinas);
-        autoCompleteSecciones = findViewById(R.id.autoCompleteSecciones);
-        autoCompleteEjercicios = findViewById(R.id.autoCompleteEjercicios);
-        autoCompleteConsulta = findViewById(R.id.autoCompleteConsulta);
-        btnConsultarProgreso = findViewById(R.id.btnConsultarProgreso);
-        tvFormulaEstadistica = findViewById(R.id.tvFormulaEstadistica);
-        barChart = findViewById(R.id.barChart);
-
-        // Inicialización de los nuevos campos de fecha
-        etFechaDesde = findViewById(R.id.etFechaDesde);
-        etFechaHasta = findViewById(R.id.etFechaHasta);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         
-        // Inicialización del botón de limpiar
-        btnLimpiarFiltros = findViewById(R.id.btnLimpiarFiltros);
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            rutinaRepository = new RutinaRepository(getActivity().getApplication());
+            seccionRepository = new SeccionRepository(getActivity().getApplication());
+            ejerciciosRepository = new EjercicioRepository(getActivity().getApplication());
+            registroRepository = new RegistroRepository(getActivity().getApplication());
+        }
 
-        rutinaRepository = new RutinaRepository(getApplication());
-        seccionRepository = new SeccionRepository(getApplication());
-        ejerciciosRepository = new EjercicioRepository(getApplication());
-        registroRepository = new RegistroRepository(getApplication());
+        autoCompleteRutinas = view.findViewById(R.id.autoCompleteRutinas);
+        autoCompleteSecciones = view.findViewById(R.id.autoCompleteSecciones);
+        autoCompleteEjercicios = view.findViewById(R.id.autoCompleteEjercicios);
+        autoCompleteConsulta = view.findViewById(R.id.autoCompleteConsulta);
+        MaterialButton btnConsultarProgreso = view.findViewById(R.id.btnConsultarProgreso);
+        tvFormulaEstadistica = view.findViewById(R.id.tvFormulaEstadistica);
+        barChart = view.findViewById(R.id.barChart);
+
+        etFechaDesde = view.findViewById(R.id.etFechaDesde);
+        etFechaHasta = view.findViewById(R.id.etFechaHasta);
+        
+        MaterialButton btnLimpiarFiltros = view.findViewById(R.id.btnLimpiarFiltros);
 
         cargarRutinasDelUsuario();
         configurarDropdownConsulta();
         configurarGrafico();
-        configurarFiltrosFecha(); // Configura el comportamiento de los DatePickers
+        configurarFiltrosFecha(); 
 
         btnConsultarProgreso.setOnClickListener(v -> consultarProgreso());
-
-        // Configuración del click para limpiar filtros
         btnLimpiarFiltros.setOnClickListener(v -> limpiarFiltrosYCampos());
     }
 
-    // --- LÓGICA PARA LIMPIAR FILTROS ---
-    // Este método restablece los calendarios y limpia el texto de los campos de fecha.
-    // Permite que el usuario vuelva a consultar toda la información sin restricciones.
     private void limpiarFiltrosYCampos() {
-        etFechaDesde.setText("");
-        etFechaHasta.setText("");
+        if (etFechaDesde != null) etFechaDesde.setText("");
+        if (etFechaHasta != null) etFechaHasta.setText("");
         calendarDesde = Calendar.getInstance();
         calendarHasta = Calendar.getInstance();
-        Toast.makeText(this, "Filtros de fecha eliminados", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "Filtros de fecha eliminados", Toast.LENGTH_SHORT).show();
     }
 
-    // Este método asigna los Listeners a los campos de fecha para abrir un diálogo de selección (DatePicker).
-    // Cuando el usuario elige una fecha, se actualiza el texto del campo y se ajusta el calendario correspondiente.
     private void configurarFiltrosFecha() {
-        etFechaDesde.setOnClickListener(v -> mostrarDatePicker(calendarDesde, etFechaDesde));
-        etFechaHasta.setOnClickListener(v -> mostrarDatePicker(calendarHasta, etFechaHasta));
+        if (etFechaDesde != null) etFechaDesde.setOnClickListener(v -> mostrarDatePicker(calendarDesde, etFechaDesde));
+        if (etFechaHasta != null) etFechaHasta.setOnClickListener(v -> mostrarDatePicker(calendarHasta, etFechaHasta));
     }
 
     private void mostrarDatePicker(Calendar calendar, TextInputEditText editText) {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), (view, year, month, dayOfMonth) -> {
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month);
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-            // Si es fecha "Desde", ponemos al inicio del día (00:00:00)
-            // Si es fecha "Hasta", ponemos al final del día (23:59:59) para incluir registros de ese día
             if (editText.getId() == R.id.etFechaDesde) {
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
                 calendar.set(Calendar.MINUTE, 0);
@@ -149,7 +147,6 @@ public class EstadisticasActivity extends HeaderActivity {
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
         
-        // --- CONFIGURAR LEYENDA (Mover arriba para evitar colisiones) ---
         Legend legend = barChart.getLegend();
         legend.setTextColor(Color.WHITE);
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
@@ -157,7 +154,6 @@ public class EstadisticasActivity extends HeaderActivity {
         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         legend.setDrawInside(false);
 
-        // --- HABILITAR ZOOM Y DESPLAZAMIENTO ---
         barChart.setTouchEnabled(true);
         barChart.setDragEnabled(true);
         barChart.setScaleEnabled(true);
@@ -169,7 +165,6 @@ public class EstadisticasActivity extends HeaderActivity {
         xAxis.setTextColor(Color.WHITE);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
-        // Rotar etiquetas para que no se pisen si hay muchas
         xAxis.setLabelRotationAngle(-45f);
 
         barChart.getAxisLeft().setTextColor(Color.WHITE);
@@ -177,13 +172,12 @@ public class EstadisticasActivity extends HeaderActivity {
         barChart.setNoDataText("Selecciona opciones y consulta para ver datos");
         barChart.setNoDataTextColor(Color.GRAY);
         
-        // --- MARGEN INFERIOR (Aumentado para evitar colisiones con fechas rotadas) ---
         barChart.setExtraBottomOffset(40f);
     }
 
     private void cargarRutinasDelUsuario() {
-        if (usuarioLogueado != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(usuarioLogueado.IdUsuario, rutinas -> {
+        if (MainActivity.usuarioLogueado != null && rutinaRepository != null) {
+            rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> {
                 this.listaRutinas = rutinas;
                 List<String> nombresRutinas = new ArrayList<>();
                 nombresRutinas.add("Todas las rutinas");
@@ -191,7 +185,7 @@ public class EstadisticasActivity extends HeaderActivity {
                     nombresRutinas.add(r.NombreRutina);
                 }
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresRutinas);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombresRutinas);
                 autoCompleteRutinas.setAdapter(adapter);
 
                 autoCompleteRutinas.setOnItemClickListener((parent, view, position, id) -> {
@@ -199,11 +193,9 @@ public class EstadisticasActivity extends HeaderActivity {
                     autoCompleteEjercicios.setText("");
                     ejercicioSeleccionado = null;
 
-                    // Todas las rutinas
                     if (position == 0) {
                         cargarTodasLasSeccionesDelUsuario();
                     } else {
-                        // Rutina específica (position - 1 porque agregamos "Todas")
                         Rutina seleccionada = listaRutinas.get(position - 1);
                         cargarSeccionesDeRutina(seleccionada.IdRutina);
                     }
@@ -213,13 +205,15 @@ public class EstadisticasActivity extends HeaderActivity {
     }
 
     private void cargarTodasLasSeccionesDelUsuario() {
-        if (usuarioLogueado != null) {
-            seccionRepository.obtenerSeccionesPorUsuario(usuarioLogueado.IdUsuario, this::actualizarDropdownSecciones);
+        if (MainActivity.usuarioLogueado != null && seccionRepository != null) {
+            seccionRepository.obtenerSeccionesPorUsuario(MainActivity.usuarioLogueado.IdUsuario, this::actualizarDropdownSecciones);
         }
     }
 
     private void cargarSeccionesDeRutina(int idRutina) {
-        seccionRepository.obtenerSeccionesDeRutina(idRutina, this::actualizarDropdownSecciones);
+        if (seccionRepository != null) {
+            seccionRepository.obtenerSeccionesDeRutina(idRutina, this::actualizarDropdownSecciones);
+        }
     }
 
     private void actualizarDropdownSecciones(List<Seccion> secciones) {
@@ -231,7 +225,7 @@ public class EstadisticasActivity extends HeaderActivity {
             nombresSecciones.add(s.NombreSeccion);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombresSecciones);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombresSecciones);
         autoCompleteSecciones.setAdapter(adapter);
 
         autoCompleteSecciones.setOnItemClickListener((parent, view, position, id) -> {
@@ -239,7 +233,6 @@ public class EstadisticasActivity extends HeaderActivity {
             ejercicioSeleccionado = null;
 
             if (position == 0) {
-                // Todas las secciones de la rutina elegida (o de todas las rutinas)
                 cargarEjerciciosEnUso();
             } else {
                 Seccion seleccionada = listaSecciones.get(position - 1);
@@ -249,16 +242,14 @@ public class EstadisticasActivity extends HeaderActivity {
     }
 
     private void cargarEjerciciosDeSeccion(int idSeccion) {
-        ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, ejercicios -> {
-            actualizarDropdownEjercicios(ejercicios);
-        });
+        if (ejerciciosRepository != null) {
+            ejerciciosRepository.obtenerEjerciciosPorSeccion(idSeccion, this::actualizarDropdownEjercicios);
+        }
     }
 
     private void cargarEjerciciosEnUso() {
-        if (usuarioLogueado != null) {
-            ejerciciosRepository.obtenerEjerciciosEnUso(usuarioLogueado.IdUsuario, ejercicios -> {
-                actualizarDropdownEjercicios(ejercicios);
-            });
+        if (MainActivity.usuarioLogueado != null && ejerciciosRepository != null) {
+            ejerciciosRepository.obtenerEjerciciosEnUso(MainActivity.usuarioLogueado.IdUsuario, this::actualizarDropdownEjercicios);
         }
     }
 
@@ -269,7 +260,7 @@ public class EstadisticasActivity extends HeaderActivity {
             nombres.add(e.NombreEjercicio);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, nombres);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres);
         autoCompleteEjercicios.setAdapter(adapter);
 
         autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
@@ -279,7 +270,7 @@ public class EstadisticasActivity extends HeaderActivity {
 
     private void configurarDropdownConsulta() {
         String[] opcionesConsulta = {"Peso Máximo", "Volumen de Entrenamiento"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, opcionesConsulta);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, opcionesConsulta);
         autoCompleteConsulta.setAdapter(adapter);
     }
 
@@ -287,28 +278,24 @@ public class EstadisticasActivity extends HeaderActivity {
         String consulta = autoCompleteConsulta.getText().toString();
 
         if (ejercicioSeleccionado == null) {
-            Toast.makeText(this, "Por favor selecciona un ejercicio", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Por favor selecciona un ejercicio", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // --- VALIDACIÓN DE RANGO DE FECHAS ---
-        // Si uno de los campos está lleno, el otro también debe estarlo.
-        // Si ambos están vacíos, se traen todos los registros.
-        String desdeStr = etFechaDesde.getText().toString();
-        String hastaStr = etFechaHasta.getText().toString();
+        String desdeStr = etFechaDesde != null ? Objects.requireNonNull(etFechaDesde.getText()).toString() : "";
+        String hastaStr = etFechaHasta != null ? Objects.requireNonNull(etFechaHasta.getText()).toString() : "";
         
         boolean tieneDesde = !desdeStr.isEmpty();
         boolean tieneHasta = !hastaStr.isEmpty();
         
         if (tieneDesde != tieneHasta) {
-            Toast.makeText(this, "Debes completar ambos campos de fecha o ninguno", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Debes completar ambos campos de fecha o ninguno", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // VALIDACIÓN: La fecha hasta no puede ser menor a la fecha desde
-        if (tieneDesde && tieneHasta) {
+        if (tieneDesde) {
             if (calendarHasta.before(calendarDesde)) {
-                Toast.makeText(this, "La fecha 'Hasta' no puede ser anterior a 'Desde'", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "La fecha 'Hasta' no puede ser anterior a 'Desde'", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -316,16 +303,15 @@ public class EstadisticasActivity extends HeaderActivity {
         if (consulta.equals("Peso Máximo")) {
             registroRepository.obtenerProgresoCargas(ejercicioSeleccionado.IdEjercicio, registros -> {
                 if (registros == null || registros.isEmpty()) {
-                    Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
                     barChart.clear();
                     tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
                 }
-                // Aplicamos el filtro de fecha manualmente sobre la lista obtenida
                 List<Registro> registrosFiltrados = filtrarPorFecha(registros, tieneDesde, calendarDesde, calendarHasta);
                 
                 if (registrosFiltrados.isEmpty()) {
-                    Toast.makeText(this, "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
                     barChart.clear();
                     tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
@@ -338,16 +324,15 @@ public class EstadisticasActivity extends HeaderActivity {
         } else if (consulta.equals("Volumen de Entrenamiento")) {
             registroRepository.obtenerVolumenEntrenamiento(ejercicioSeleccionado.IdEjercicio, registros -> {
                 if (registros == null || registros.isEmpty()) {
-                    Toast.makeText(this, "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
                     barChart.clear();
                     tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
                 }
-                // Aplicamos el filtro de fecha manualmente sobre la lista obtenida
                 List<Registro> registrosFiltrados = filtrarPorFecha(registros, tieneDesde, calendarDesde, calendarHasta);
 
                 if (registrosFiltrados.isEmpty()) {
-                    Toast.makeText(this, "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
                     barChart.clear();
                     tvFormulaEstadistica.setVisibility(View.GONE);
                     return;
@@ -359,12 +344,10 @@ public class EstadisticasActivity extends HeaderActivity {
             });
         } else {
             tvFormulaEstadistica.setVisibility(View.GONE);
-            Toast.makeText(this, "Consulta no implementada aún", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Consulta no implementada aún", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // --- LÓGICA DE FILTRADO POR FECHA ---
-    // Este método recorre la lista de registros y devuelve solo aquellos que se encuentren dentro del rango temporal seleccionado por el usuario.
     private List<Registro> filtrarPorFecha(List<Registro> original, boolean aplicarFiltro, Calendar desde, Calendar hasta) {
         if (!aplicarFiltro) return original;
         
@@ -399,18 +382,20 @@ public class EstadisticasActivity extends HeaderActivity {
 
             if (datosConsolidados.containsKey(fechaStr)) {
                 if (calcularVolumen) {
-                    datosConsolidados.put(fechaStr, datosConsolidados.get(fechaStr) + valorRegistro);
+                    Float current = datosConsolidados.get(fechaStr);
+                    datosConsolidados.put(fechaStr, (current != null ? current : 0f) + valorRegistro);
                 } else {
-                    datosConsolidados.put(fechaStr, Math.max(datosConsolidados.get(fechaStr), valorRegistro));
+                    Float current = datosConsolidados.get(fechaStr);
+                    datosConsolidados.put(fechaStr, Math.max(current != null ? current : 0f, valorRegistro));
                 }
             } else {
                 datosConsolidados.put(fechaStr, valorRegistro);
             }
         }
 
-        int i = 0;
+        int index = 0;
         for (Map.Entry<String, Float> entry : datosConsolidados.entrySet()) {
-            entries.add(new BarEntry(i++, entry.getValue()));
+            entries.add(new BarEntry(index++, entry.getValue()));
             fechas.add(entry.getKey());
         }
 
@@ -425,9 +410,9 @@ public class EstadisticasActivity extends HeaderActivity {
         barChart.getXAxis().setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
-                int index = (int) value;
-                if (index >= 0 && index < fechas.size()) {
-                    return fechas.get(index);
+                int i = (int) value;
+                if (i >= 0 && i < fechas.size()) {
+                    return fechas.get(i);
                 }
                 return "";
             }
@@ -435,21 +420,13 @@ public class EstadisticasActivity extends HeaderActivity {
 
         barChart.animateY(1000);
 
-        // --- LIMITAR BARRAS VISIBLES ---
-        // Si hay muchos registros, mostramos solo los últimos 7 para que no se pisen
         if (fechas.size() > 7) {
             barChart.setVisibleXRangeMaximum(7);
-            // Hacer scroll hasta el final para ver los datos más recientes
             barChart.moveViewToX(fechas.size() - 7);
         } else {
             barChart.setVisibleXRangeMaximum(fechas.size());
         }
 
         barChart.invalidate();
-    }
-
-    @Override
-    protected void onImportFinished() {
-        cargarRutinasDelUsuario();
     }
 }

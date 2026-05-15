@@ -9,6 +9,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -16,6 +17,9 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,16 +28,17 @@ import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.dataRepository.HistorialRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
+import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CargarRegistroActivity extends HeaderActivity {
+public class CargarRegistroFragment extends Fragment {
 
     private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso;
     private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
@@ -41,11 +46,10 @@ public class CargarRegistroActivity extends HeaderActivity {
     private Button btnCargar;
     private RecyclerView rvHistorial;
     private RegistroAdapter adapter;
-    private List<Registro> listaHistorial = new ArrayList<>();
+    private final List<Registro> listaHistorial = new ArrayList<>();
 
     private RegistroRepository registroRepository;
     private UsuarioRepository usuarioRepository;
-    private HistorialRepository historialRepository;
 
     private int serieActual = 1;
     private int idEjercicio;
@@ -54,7 +58,6 @@ public class CargarRegistroActivity extends HeaderActivity {
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
 
-    // --- Variables del Temporizador ---
     private long startTimeInMillis = 60000; 
     private TextView tvTimerValue;
     private ImageButton btnStartTimer, btnResetTimer;
@@ -62,60 +65,70 @@ public class CargarRegistroActivity extends HeaderActivity {
     private CountDownTimer countDownTimer;
     private boolean timerRunning;
     private long timeLeftInMillis = startTimeInMillis;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.cargar_registro_activity, container, false);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.cargar_registro_activity);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            usuarioRepository = new UsuarioRepository(getActivity().getApplication());
+            registroRepository = new RegistroRepository(getActivity().getApplication());
+        }
 
-        usuarioRepository = new UsuarioRepository(getApplication());
-        registroRepository = new RegistroRepository(getApplication());
-        historialRepository = new HistorialRepository(getApplication());
-
-        if (usuarioLogueado != null) {
-            idUsuario = usuarioLogueado.IdUsuario;
-            continuarCarga();
-        } else {
+        if (MainActivity.usuarioLogueado != null) {
+            idUsuario = MainActivity.usuarioLogueado.IdUsuario;
+            continuarCarga(view);
+        } else if (usuarioRepository != null) {
             idUsuario = usuarioRepository.obtenerIdSesion();
             if (idUsuario != -1) {
                 usuarioRepository.obtenerUsuarioPorId(idUsuario, usuario -> {
                     if (usuario != null) {
-                        usuarioLogueado = usuario;
-                        continuarCarga();
+                        MainActivity.usuarioLogueado = usuario;
+                        continuarCarga(view);
                     } else {
-                        Toast.makeText(this, "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
-                        finish();
+                        Toast.makeText(getContext(), "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
                     }
                 });
             } else {
-                Toast.makeText(this, "Error: No hay una sesión activa", Toast.LENGTH_LONG).show();
-                finish();
+                Toast.makeText(getContext(), "Error: No hay una sesión activa", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    private void continuarCarga() {
-        Ejercicio ejercicio;
-        Seccion seccion;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ejercicio = getIntent().getSerializableExtra("ejercicio", Ejercicio.class);
-            seccion = getIntent().getSerializableExtra("seccion", Seccion.class);
-        } else {
-            ejercicio = (Ejercicio) getIntent().getSerializableExtra("ejercicio");
-            seccion = (Seccion) getIntent().getSerializableExtra("seccion");
+    private void continuarCarga(View view) {
+        if (getArguments() != null) {
+            Ejercicio ejercicio;
+            Seccion seccion;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ejercicio = getArguments().getSerializable("ejercicio", Ejercicio.class);
+                seccion = getArguments().getSerializable("seccion", Seccion.class);
+            } else {
+                ejercicio = (Ejercicio) getArguments().getSerializable("ejercicio");
+                seccion = (Seccion) getArguments().getSerializable("seccion");
+            }
+            
+            if (ejercicio != null) {
+                idEjercicio = ejercicio.IdEjercicio;
+                nombreEjercicio = ejercicio.NombreEjercicio;
+                esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
+            }
+            
+            if (seccion != null) {
+                idSeccion = seccion.IdSeccion;
+            }
         }
 
-        if (ejercicio != null) {
-            idEjercicio = ejercicio.IdEjercicio;
-            nombreEjercicio = ejercicio.NombreEjercicio;
-            esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
-        }
-        
-        if (seccion != null) {
-            idSeccion = seccion.IdSeccion;
-        }
-
-        initViews();
+        initViews(view);
         setupPickers();
         setupListeners();
         setupRecyclerView();
@@ -125,24 +138,24 @@ public class CargarRegistroActivity extends HeaderActivity {
         }
     }
 
-    private void initViews() {
-        tvNombreEjercicio = findViewById(R.id.tvNombreEjercicio);
-        tvSerieValue = findViewById(R.id.tvSerieValue);
-        tvPesoLabel = findViewById(R.id.tvPesoLabel);
-        tvColumnaPeso = findViewById(R.id.tvColumnaPeso);
+    private void initViews(View view) {
+        tvNombreEjercicio = view.findViewById(R.id.tvNombreEjercicio);
+        tvSerieValue = view.findViewById(R.id.tvSerieValue);
+        tvPesoLabel = view.findViewById(R.id.tvPesoLabel);
+        tvColumnaPeso = view.findViewById(R.id.tvColumnaPeso);
         
-        npRepeticiones = findViewById(R.id.npRepeticiones);
-        npPesoEntero = findViewById(R.id.npPesoEntero);
-        npPesoDecimal = findViewById(R.id.npPesoDecimal);
+        npRepeticiones = view.findViewById(R.id.npRepeticiones);
+        npPesoEntero = view.findViewById(R.id.npPesoEntero);
+        npPesoDecimal = view.findViewById(R.id.npPesoDecimal);
         
-        btnCargar = findViewById(R.id.btnCargar);
-        btnEliminarUltimo = findViewById(R.id.btnEliminarUltimo);
-        rvHistorial = findViewById(R.id.rvHistorial);
+        btnCargar = view.findViewById(R.id.btnCargar);
+        btnEliminarUltimo = view.findViewById(R.id.btnEliminarUltimo);
+        rvHistorial = view.findViewById(R.id.rvHistorial);
 
-        tvTimerValue = findViewById(R.id.tvTimerValue);
-        btnStartTimer = findViewById(R.id.btnStartTimer);
-        btnResetTimer = findViewById(R.id.btnResetTimer);
-        ivEditTimer = findViewById(R.id.ivEditTimer);
+        tvTimerValue = view.findViewById(R.id.tvTimerValue);
+        btnStartTimer = view.findViewById(R.id.btnStartTimer);
+        btnResetTimer = view.findViewById(R.id.btnResetTimer);
+        ivEditTimer = view.findViewById(R.id.ivEditTimer);
 
         tvNombreEjercicio.setText(nombreEjercicio);
 
@@ -198,7 +211,7 @@ public class CargarRegistroActivity extends HeaderActivity {
             pauseTimer();
         }
 
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_ajustar_tiempo, null);
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_ajustar_tiempo, null);
         NumberPicker npMinutos = dialogView.findViewById(R.id.npMinutos);
         NumberPicker npSegundos = dialogView.findViewById(R.id.npSegundos);
         Button btnCancelar = dialogView.findViewById(R.id.btnCancelarDialog);
@@ -212,7 +225,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         npSegundos.setMaxValue(59);
         npSegundos.setValue((int) (startTimeInMillis / 1000) % 60);
 
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.CustomDialogTheme)
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
                 .setView(dialogView)
                 .create();
 
@@ -221,7 +234,7 @@ public class CargarRegistroActivity extends HeaderActivity {
         btnAceptar.setOnClickListener(v -> {
             int min = npMinutos.getValue();
             int seg = npSegundos.getValue();
-            startTimeInMillis = (min * 60 + seg) * 1000L;
+            startTimeInMillis = (min * 60L + seg) * 1000L;
             resetTimer();
             dialog.dismiss();
         });
@@ -248,7 +261,9 @@ public class CargarRegistroActivity extends HeaderActivity {
                 timeLeftInMillis = startTimeInMillis;
                 updateCountDownText();
                 vibrarAlFinalizar();
-                Toast.makeText(CargarRegistroActivity.this, "¡Descanso terminado!", Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "¡Descanso terminado!", Toast.LENGTH_SHORT).show();
+                }
             }
         }.start();
 
@@ -279,22 +294,22 @@ public class CargarRegistroActivity extends HeaderActivity {
 
     private void vibrarAlFinalizar() {
         try {
-            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            if (vibrator != null && vibrator.hasVibrator()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
-                } else {
-                    vibrator.vibrate(500);
+            if (getActivity() != null) {
+                Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                if (vibrator != null && vibrator.hasVibrator()) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                    } else {
+                        vibrator.vibrate(500);
+                    }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     private void setupRecyclerView() {
         adapter = new RegistroAdapter(listaHistorial, esPesoCorporal);
-        rvHistorial.setLayoutManager(new LinearLayoutManager(this));
+        rvHistorial.setLayoutManager(new LinearLayoutManager(getContext()));
         rvHistorial.setAdapter(adapter);
     }
 
@@ -340,34 +355,35 @@ public class CargarRegistroActivity extends HeaderActivity {
         double decimal = Double.parseDouble("0." + valoresDecimales[npPesoDecimal.getValue()]);
         double peso = entero + decimal;
         if (reps <= 0) {
-            Toast.makeText(this, "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
         }
         btnCargar.setEnabled(false);
 
-        // Obtenemos el último peso corporal del usuario antes de guardar
-        Executors.newSingleThreadExecutor().execute(() -> {
-            com.example.migymsito.dataDataBase.AppDatabase db = com.example.migymsito.dataDataBase.AppDatabase.getDatabase(getApplicationContext());
+        executorService.execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getContext());
             Historial ultimoPeso = db.historialDao().obtenerUltimoHistorial(idUsuario);
             Double pesoCorporal = (ultimoPeso != null) ? ultimoPeso.PesoHistorial : null;
 
-            runOnUiThread(() -> {
-                registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, pesoCorporal, nuevo -> {
-                    if (nuevo != null) {
-                        listaHistorial.add(0, nuevo);
-                        adapter.notifyItemInserted(0);
-                        rvHistorial.scrollToPosition(0);
-                        serieActual++;
-                        tvSerieValue.setText(String.valueOf(serieActual));
-                        Toast.makeText(CargarRegistroActivity.this, "Serie guardada", Toast.LENGTH_SHORT).show();
-                        resetTimer();
-                        startTimer();
-                    } else {
-                        Toast.makeText(CargarRegistroActivity.this, "Error al guardar serie", Toast.LENGTH_SHORT).show();
-                    }
-                    btnCargar.setEnabled(true);
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, pesoCorporal, nuevo -> {
+                        if (nuevo != null) {
+                            listaHistorial.add(0, nuevo);
+                            adapter.notifyItemInserted(0);
+                            rvHistorial.scrollToPosition(0);
+                            serieActual++;
+                            tvSerieValue.setText(String.valueOf(serieActual));
+                            Toast.makeText(getContext(), "Serie guardada", Toast.LENGTH_SHORT).show();
+                            resetTimer();
+                            startTimer();
+                        } else {
+                            Toast.makeText(getContext(), "Error al guardar serie", Toast.LENGTH_SHORT).show();
+                        }
+                        btnCargar.setEnabled(true);
+                    });
                 });
-            });
+            }
         });
     }
 
@@ -378,5 +394,11 @@ public class CargarRegistroActivity extends HeaderActivity {
         listaHistorial.remove(0);
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 }

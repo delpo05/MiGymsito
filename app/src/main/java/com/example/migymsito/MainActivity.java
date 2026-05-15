@@ -16,13 +16,14 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
@@ -47,12 +48,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public abstract class HeaderActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
-    protected DrawerLayout drawerLayout;
-    protected NavigationView navigationView;
-    public static Usuario usuarioLogueado; 
-    protected UsuarioRepository userRepo;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private NavController navController;
+    public static Usuario usuarioLogueado;
+    private UsuarioRepository userRepo;
     private Dialog progressDialog;
     private volatile boolean importacionCancelada = false;
 
@@ -65,7 +67,24 @@ public abstract class HeaderActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
         userRepo = new UsuarioRepository(getApplication());
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        
+        // El ID 'include_toolbar' es el ID de la etiqueta <include> que sobreescribe el ID root del layout incluido.
+        Toolbar toolbar = findViewById(R.id.include_toolbar);
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+            setupToolbar(toolbar);
+            setupNavigationDrawer();
+        }
 
         if (usuarioLogueado == null) {
             int idUsuario = userRepo.obtenerIdSesion();
@@ -74,10 +93,11 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     if (user != null) {
                         usuarioLogueado = user;
                         actualizarNombreHeader();
-                        onUsuarioCargado();
                     }
                 });
             }
+        } else {
+            actualizarNombreHeader();
         }
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -85,39 +105,21 @@ public abstract class HeaderActivity extends AppCompatActivity {
             public void handleOnBackPressed() {
                 if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    setEnabled(false);
-                    HeaderActivity.super.onBackPressed();
+                } else if (navController != null && !navController.popBackStack()) {
+                    finish();
                 }
             }
         });
     }
 
-    protected void onUsuarioCargado() {}
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        actualizarNombreHeader();
-    }
-
-    @Override
-    public void setContentView(@LayoutRes int layoutResID) {
-        super.setContentView(layoutResID);
-        setupToolbar();
-        setupNavigationDrawer();
-        actualizarNombreHeader();
-    }
-
-    protected void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+    private void setupToolbar(Toolbar toolbar) {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
 
-            ImageButton menuButton = findViewById(R.id.toolbar_menu_button);
+            ImageButton menuButton = toolbar.findViewById(R.id.toolbar_menu_button);
             if (menuButton != null) {
                 menuButton.setOnClickListener(v -> {
                     if (drawerLayout != null) {
@@ -126,12 +128,11 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 });
             }
 
-            TextView tvUsername = findViewById(R.id.toolbar_username);
-            ImageView ivUserIcon = findViewById(R.id.toolbar_user_icon);
+            TextView tvUsername = toolbar.findViewById(R.id.toolbar_username);
+            ImageView ivUserIcon = toolbar.findViewById(R.id.toolbar_user_icon);
 
             View.OnClickListener perfilClickListener = v -> {
-                Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                startActivity(intent);
+                if (navController != null) navController.navigate(R.id.datosPersonalesFragment);
             };
 
             if (tvUsername != null) tvUsername.setOnClickListener(perfilClickListener);
@@ -139,39 +140,31 @@ public abstract class HeaderActivity extends AppCompatActivity {
         }
     }
 
-    protected void actualizarNombreHeader() {
+    public void actualizarNombreHeader() {
+        // Buscamos dentro de la actividad por si el include no está expuesto directamente
         TextView tvUsername = findViewById(R.id.toolbar_username);
         if (tvUsername != null && usuarioLogueado != null) {
             tvUsername.setText(usuarioLogueado.NombreUsuario);
         }
     }
 
-    protected void setupNavigationDrawer() {
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-
+    private void setupNavigationDrawer() {
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.Home) {
                     userRepo.eliminarRutinaSeleccionada();
-                    Intent intent = new Intent(this, RutinasActivity.class);
-                    intent.putExtra("cambiarRutina", true);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("cambiarRutina", true);
+                    navController.navigate(R.id.rutinasFragment, bundle);
                 } else if (itemId == R.id.MiPerfil) {
-                    Intent intent = new Intent(this, DatosPersonalesActivity.class);
-                    startActivity(intent);
+                    navController.navigate(R.id.datosPersonalesFragment);
                 } else if (itemId == R.id.MiProgreso) {
-                    Intent intent = new Intent(this, EstadisticasActivity.class);
-                    startActivity(intent);
+                    navController.navigate(R.id.estadisticasFragment);
                 } else if (itemId == R.id.ComparativaRendimientos) {
-                    Intent intent = new Intent(this, CompararEntrenamientosActivity.class);
-                    startActivity(intent);
+                    navController.navigate(R.id.compararEntrenamientosFragment);
                 } else if (itemId == R.id.Historial) {
-                    Intent intent = new Intent(this, HistorialPesoActivity.class);
-                    startActivity(intent);
+                    navController.navigate(R.id.historialPesoFragment);
                 } else if (itemId == R.id.Exportar) {
                     mostrarPopUpExportar();
                 } else if (itemId == R.id.Importar) {
@@ -222,7 +215,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 StringBuilder csv = new StringBuilder();
                 String sep = ";";
 
-                // Encabezados de Rutinas/Ejercicios
                 if (incluirProgreso) {
                     csv.append("Rutina").append(sep).append("Seccion").append(sep).append("Ejercicio").append(sep)
                             .append("Tipo").append(sep).append("Fecha").append(sep).append("Peso").append(sep)
@@ -297,12 +289,15 @@ public abstract class HeaderActivity extends AppCompatActivity {
     private void generarYCompartirArchivo(String contenido, boolean esCompleto) {
         try {
             File path = new File(getCacheDir(), "rutinas");
-            if (!path.exists()) path.mkdirs();
+            if (!path.exists()) {
+                boolean created = path.mkdirs();
+                if (!created) return;
+            }
             File file = new File(path, esCompleto ? "MiGymsito_Completo.csv" : "MiGymsito_Estructura.csv");
 
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(contenido.getBytes());
-            out.close();
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                out.write(contenido.getBytes());
+            }
 
             Uri uri = FileProvider.getUriForFile(this, "com.example.migymsito.fileprovider", file);
 
@@ -367,93 +362,99 @@ public abstract class HeaderActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
-                InputStream is = getContentResolver().openInputStream(uri);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                try (InputStream is = getContentResolver().openInputStream(uri);
+                     BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
-                db.runInTransaction(() -> {
-                    try {
-                        String linea = reader.readLine(); //
-                        String sep = ";";
+                    db.runInTransaction(() -> {
+                        try {
+                            String linea = reader.readLine();
+                            String sep = ";";
 
-                        while ((linea = reader.readLine()) != null) {
-                            if (importacionCancelada) throw new RuntimeException("CANCEL");
-                            
-                            if (linea.isEmpty() || linea.startsWith("-")) continue;
-                            String[] datos = linea.split(sep);
-                            if (datos.length < 4) continue;
+                            while ((linea = reader.readLine()) != null) {
+                                if (importacionCancelada) throw new RuntimeException("CANCEL");
 
-                            if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
-                                try {
-                                    String fechaStr = datos[1];
-                                    double peso = Double.parseDouble(datos[2].replace(",", "."));
-                                    double altura = Double.parseDouble(datos[3].replace(",", "."));
+                                if (linea.isEmpty() || linea.startsWith("-")) continue;
+                                String[] datos = linea.split(sep);
+                                if (datos.length < 4) continue;
 
-                                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                                    long fechaLong = sdf.parse(fechaStr).getTime();
+                                if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
+                                    try {
+                                        String fechaStr = datos[1];
+                                        double peso = Double.parseDouble(datos[2].replace(",", "."));
+                                        double altura = Double.parseDouble(datos[3].replace(",", "."));
 
-                                    Historial h = new Historial();
-                                    h.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
-                                    h.FechaHistorial = fechaLong;
-                                    h.PesoHistorial = peso;
-                                    h.AlturaHistorial = altura;
+                                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                        Date parsedDate = sdf.parse(fechaStr);
+                                        if (parsedDate != null) {
+                                            long fechaLong = parsedDate.getTime();
 
-                                    db.historialDao().insertarHistorial(h);
-                                } catch (Exception ignored) {}
-                                continue;
+                                            Historial h = new Historial();
+                                            h.IdUsuarioHistorial = usuarioLogueado.IdUsuario;
+                                            h.FechaHistorial = fechaLong;
+                                            h.PesoHistorial = peso;
+                                            h.AlturaHistorial = altura;
+
+                                            db.historialDao().insertarHistorial(h);
+                                        }
+                                    } catch (Exception ignored) {}
+                                    continue;
+                                }
+
+                                if (datos[0].equalsIgnoreCase("Rutina") || datos[0].equalsIgnoreCase("TIPO_REGISTRO")) continue;
+
+                                String nombreRutina = datos[0];
+                                String nombreSeccion = datos[1];
+                                String nombreEjercicio = datos[2];
+                                String tipoEjercicio = datos[3];
+
+                                Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
+                                Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
+                                Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
+                                SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
+
+                                if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
+                                    try {
+                                        String fechaStr = datos[4];
+                                        double peso = Double.parseDouble(datos[5].replace(",", "."));
+                                        int serie = Integer.parseInt(datos[6]);
+                                        int reps = Integer.parseInt(datos[7]);
+                                        Double pesoUsuario = null;
+                                        if (datos.length > 9 && !datos[9].equals("-")) {
+                                            pesoUsuario = Double.parseDouble(datos[9].replace(",", "."));
+                                        }
+
+                                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                        Date parsedDate = sdf.parse(fechaStr);
+                                        if (parsedDate != null) {
+                                            long fechaLong = parsedDate.getTime();
+
+                                            Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
+
+                                            Registro reg = new Registro();
+                                            reg.IdEntrenamiento = ent.IdEntrenamiento;
+                                            reg.IdSeccionXejercicio = sxe.IdSeccionXejercicio;
+                                            reg.FechaRegistro = fechaLong;
+                                            reg.PesoRegistro = peso;
+                                            reg.NumSeriesRegistro = serie;
+                                            reg.Repeticiones = reps;
+                                            reg.PesoCorporalMomento = pesoUsuario;
+
+                                            db.registroDao().insertarRegistro(reg);
+                                        }
+
+                                    } catch (Exception ignored) {}
+                                }
                             }
-
-                            if (datos[0].equalsIgnoreCase("Rutina") || datos[0].equalsIgnoreCase("TIPO_REGISTRO")) continue;
-
-                            String nombreRutina = datos[0];
-                            String nombreSeccion = datos[1];
-                            String nombreEjercicio = datos[2];
-                            String tipoEjercicio = datos[3];
-
-                            Rutina rutina = buscarOInsertarRutina(db, nombreRutina);
-                            Seccion seccion = buscarOInsertarSeccion(db, nombreSeccion, rutina.IdRutina);
-                            Ejercicio ejercicio = buscarOInsertarEjercicio(db, nombreEjercicio, tipoEjercicio);
-                            SeccionXejercicio sxe = buscarOInsertarRelacion(db, seccion.IdSeccion, ejercicio.IdEjercicio);
-
-                            if (datos.length > 4 && !datos[4].equals("Sin registros") && !datos[4].equals("Si") && !datos[4].equals("No")) {
-                                try {
-                                    String fechaStr = datos[4];
-                                    double peso = Double.parseDouble(datos[5].replace(",", "."));
-                                    int serie = Integer.parseInt(datos[6]);
-                                    int reps = Integer.parseInt(datos[7]);
-                                    Double pesoUsuario = null;
-                                    if (datos.length > 9 && !datos[9].equals("-")) {
-                                        pesoUsuario = Double.parseDouble(datos[9].replace(",", "."));
-                                    }
-
-                                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                                    long fechaLong = sdf.parse(fechaStr).getTime();
-
-                                    Entrenamiento ent = asegurarEntrenamiento(db, seccion.IdSeccion, fechaLong);
-
-                                    Registro reg = new Registro();
-                                    reg.IdEntrenamiento = ent.IdEntrenamiento;
-                                    reg.IdSeccionXejercicio = sxe.IdSeccionXejercicio;
-                                    reg.FechaRegistro = fechaLong;
-                                    reg.PesoRegistro = peso;
-                                    reg.NumSeriesRegistro = serie;
-                                    reg.Repeticiones = reps;
-                                    reg.PesoCorporalMomento = pesoUsuario;
-
-                                    db.registroDao().insertarRegistro(reg);
-
-                                } catch (Exception e) {}
-                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
-                        reader.close();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                    });
+                }
 
                 ocultarPopUpImportacion();
                 runOnUiThread(() -> {
                     Toast.makeText(this, "Importación completada", Toast.LENGTH_SHORT).show();
-                    onImportFinished();
+                    // trigger refresh in current fragment if needed
                 });
 
             } catch (Exception e) {
@@ -461,7 +462,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                 if (e.getCause() != null && "CANCEL".equals(e.getCause().getMessage()) || "CANCEL".equals(e.getMessage())) {
                     runOnUiThread(() -> {
                         Toast.makeText(this, "Importación cancelada", Toast.LENGTH_SHORT).show();
-                        onImportFinished();
                     });
                 } else {
                     runOnUiThread(() -> Toast.makeText(this, "Error al importar: " + e.getMessage(), Toast.LENGTH_LONG).show());
@@ -469,8 +469,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
             }
         }).start();
     }
-
-    protected void onImportFinished() {}
 
     private Rutina buscarOInsertarRutina(AppDatabase db, String nombre) {
         List<Rutina> existentes = db.rutinaDao().obtenerRutinasPorUsuario(usuarioLogueado.IdUsuario);
@@ -505,7 +503,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
         Ejercicio nuevo = new Ejercicio();
         nuevo.NombreEjercicio = nombre;
         nuevo.TipoEjercicio = tipo;
-        nuevo.PesoCorporalEjercicio = false; 
+        nuevo.PesoCorporalEjercicio = false;
         nuevo.IdEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevo);
         return nuevo;
     }
@@ -524,7 +522,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
     private Entrenamiento asegurarEntrenamiento(AppDatabase db, int idSeccion, long fecha) {
         List<Entrenamiento> existentes = db.entrenamientoDao().getEntrenamientosByUsuario(usuarioLogueado.IdUsuario);
         for (Entrenamiento e : existentes) {
-            if (e.IdSeccion == idSeccion && Math.abs(e.FechaInicio - fecha) < 3600000) { 
+            if (e.IdSeccion == idSeccion && Math.abs(e.FechaInicio - fecha) < 3600000) {
                 return e;
             }
         }

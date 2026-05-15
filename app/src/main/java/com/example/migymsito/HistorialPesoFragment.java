@@ -4,10 +4,15 @@ import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,49 +34,54 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class HistorialPesoActivity extends HeaderActivity {
+public class HistorialPesoFragment extends Fragment {
 
     private RecyclerView rvHistorialPeso;
     private LineChart chartPeso;
     private HistorialRepository historialRepository;
 
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.historial_peso_activity);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.historial_peso_activity, container, false);
+    }
 
-        rvHistorialPeso = findViewById(R.id.rvHistorialPeso);
-        chartPeso = findViewById(R.id.chartPeso);
-        historialRepository = new HistorialRepository(getApplication());
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            historialRepository = new HistorialRepository(getActivity().getApplication());
+        }
 
-        rvHistorialPeso.setLayoutManager(new LinearLayoutManager(this));
+        rvHistorialPeso = view.findViewById(R.id.rvHistorialPeso);
+        chartPeso = view.findViewById(R.id.chartPeso);
+
+        rvHistorialPeso.setLayoutManager(new LinearLayoutManager(getContext()));
 
         cargarDatos();
     }
 
     private void cargarDatos() {
-        if (usuarioLogueado == null) {
+        if (MainActivity.usuarioLogueado == null || historialRepository == null) {
             return;
         }
 
-        historialRepository.obtenerHistorialPorUsuario(usuarioLogueado.IdUsuario, lista -> {
+        historialRepository.obtenerHistorialPorUsuario(MainActivity.usuarioLogueado.IdUsuario, lista -> {
             if (lista != null && !lista.isEmpty()) {
                 configurarTabla(lista);
                 configurarGrafico(lista);
             } else {
                 configurarTabla(new ArrayList<>());
                 configurarGrafico(new ArrayList<>());
-                Toast.makeText(this, "No hay historial de peso registrado", Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), "No hay historial de peso registrado", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-    }
-
-    @Override
-    protected void actualizarNombreHeader() {
-        super.actualizarNombreHeader();
-        if (usuarioLogueado != null && (rvHistorialPeso != null && rvHistorialPeso.getAdapter() == null)) {
-            cargarDatos();
-        }
     }
 
     private void configurarTabla(List<Historial> lista) {
@@ -80,7 +90,7 @@ public class HistorialPesoActivity extends HeaderActivity {
     }
 
     private void mostrarPopUpConfirmacion(Historial historial) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_confirmacion_eliminar);
         
         if (dialog.getWindow() != null) {
@@ -92,7 +102,7 @@ public class HistorialPesoActivity extends HeaderActivity {
 
         btnSi.setOnClickListener(v -> {
             historialRepository.eliminarHistorial(historial);
-            Toast.makeText(this, "Registro eliminado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Registro eliminado", Toast.LENGTH_SHORT).show();
             cargarDatos();
             dialog.dismiss();
         });
@@ -117,7 +127,7 @@ public class HistorialPesoActivity extends HeaderActivity {
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Evolución de Peso (kg)");
-        int colorBlanco = getColor(R.color.blanco);
+        int colorBlanco = requireContext().getColor(R.color.blanco);
         
         dataSet.setColor(colorBlanco);
         dataSet.setCircleColor(colorBlanco);
