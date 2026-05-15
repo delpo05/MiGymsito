@@ -50,7 +50,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
     protected DrawerLayout drawerLayout;
     protected NavigationView navigationView;
-    public static Usuario usuarioLogueado; // Cambiado a static para acceso global en la sesión
+    public static Usuario usuarioLogueado; 
     protected UsuarioRepository userRepo;
     private Dialog progressDialog;
     private volatile boolean importacionCancelada = false;
@@ -174,8 +174,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     mostrarPopUpExportar();
                 } else if (itemId == R.id.Importar) {
                     importLauncher.launch("text/*");
-                } else if (itemId == R.id.CerrarSesion) {
-                    cerrarSesion();
                 }
 
                 if (drawerLayout != null) {
@@ -271,7 +269,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                     }
                 }
 
-                // Sección opcional de Historial de Peso
                 if (incluirHistorial) {
                     List<Historial> historiales = db.historialDao().obtenerHistorialPorUsuario(usuarioLogueado.IdUsuario);
                     if (historiales != null && !historiales.isEmpty()) {
@@ -350,7 +347,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
     private void importarDatosDesdeCsv(Uri uri) {
         if (uri == null || usuarioLogueado == null) return;
 
-        // Validación previa del contenido del archivo
         try (InputStream isCheck = getContentResolver().openInputStream(uri);
              BufferedReader readerCheck = new BufferedReader(new InputStreamReader(isCheck))) {
             String primeraLinea = readerCheck.readLine();
@@ -374,7 +370,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
                 db.runInTransaction(() -> {
                     try {
-                        String linea = reader.readLine(); // Saltamos la cabecera ya validada
+                        String linea = reader.readLine(); //
                         String sep = ";";
 
                         while ((linea = reader.readLine()) != null) {
@@ -384,7 +380,6 @@ public abstract class HeaderActivity extends AppCompatActivity {
                             String[] datos = linea.split(sep);
                             if (datos.length < 4) continue;
 
-                            // Manejo de registros de historial de peso
                             if (datos[0].equalsIgnoreCase("HISTORIAL_PESO")) {
                                 try {
                                     String fechaStr = datos[1];
@@ -538,17 +533,5 @@ public abstract class HeaderActivity extends AppCompatActivity {
         nuevo.NumeroEntrenamiento = existentes.size() + 1;
         nuevo.IdEntrenamiento = (int) db.entrenamientoDao().insert(nuevo);
         return nuevo;
-    }
-
-    private void cerrarSesion() {
-        usuarioLogueado = null;
-        userRepo.eliminarSesion();
-
-        Intent intent = new Intent(this, InicioSesionActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-
-        Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
     }
 }

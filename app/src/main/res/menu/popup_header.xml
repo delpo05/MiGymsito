@@ -27,11 +27,4 @@
     <item
         android:id="@+id/MiProgreso"
         android:title="@string/mi_progreso" />
-
-    <!-- Grupo para separar las acciones de cuenta de las de navegación -->
-    <group android:id="@+id/menu_footer">
-        <item
-            android:id="@+id/CerrarSesion"
-            android:title="Cerrar sesión" />
-    </group>
 </menu>

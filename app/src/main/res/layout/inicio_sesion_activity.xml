@@ -5,117 +5,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/negro"
+    android:gravity="center"
     android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="@string/logo_de_mi_gymsito"
+        android:src="@drawable/logo_gym2" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="24dp">
+    <!-- Progress Indicator -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:indicatorColor="@color/blanco" />
 
-            <!-- Logo -->
-            <ImageView
-                android:id="@+id/ivLogo"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="16dp"
-                android:contentDescription="@string/logo_de_mi_gymsito"
-                android:src="@drawable/logo_gym2" />
-
-            <!-- CARD DE INICIO DE SESIÓN -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="#111111"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="#1F1F1F"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <!-- Campo Correo -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:hint="Correo Electrónico"
-                        app:boxStrokeColor="@color/blanco"
-                        app:hintTextColor="@color/blanco"
-                        android:textColorHint="#999999">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etUsuario"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textEmailAddress"
-                            android:textColor="@color/blanco"
-                            android:textStyle="bold" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- Campo Contraseña -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Contraseña"
-                        app:boxStrokeColor="@color/blanco"
-                        app:hintTextColor="@color/blanco"
-                        android:textColorHint="#999999"
-                        app:passwordToggleEnabled="true"
-                        app:passwordToggleTint="@color/blanco">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword"
-                            android:textColor="@color/blanco"
-                            android:textStyle="bold" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Botón Continuar -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLogin"
-                android:layout_width="220dp"
-                android:layout_height="55dp"
-                android:text="Continuar"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/blanco"
-                android:backgroundTint="#403C3C"
-                app:cornerRadius="25dp"
-                android:onClick="EventoBotonContinuar"
-                android:layout_marginBottom="24dp" />
-
-            <!-- Texto de Registro fuera del contenedor -->
-            <TextView
-                android:id="@+id/tvRegistrarse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_tenes_cuenta"
-                android:textColor="@color/blanco"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:padding="12dp"
-                android:onClick="EventoRegistrarse" />
-
-        </LinearLayout>
-    </ScrollView>
 </LinearLayout>

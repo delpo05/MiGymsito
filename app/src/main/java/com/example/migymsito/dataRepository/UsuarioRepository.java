@@ -84,9 +84,9 @@ public class UsuarioRepository {
         });
     }
 
-    public void validarLogin(String correo, String password, RepositoryCallback<Usuario> callback) {
+    public void obtenerPrimerUsuario(RepositoryCallback<Usuario> callback) {
         executorService.execute(() -> {
-            Usuario usuario = usuarioDao.login(correo, password);
+            Usuario usuario = usuarioDao.obtenerPrimerUsuario();
             mainThreadHandler.post(() -> callback.onResult(usuario));
         });
     }

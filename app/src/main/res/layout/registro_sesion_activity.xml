@@ -82,27 +82,6 @@
                         android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Contraseña"
-                    app:boxStrokeColor="@color/blanco"
-                    app:hintTextColor="@color/blanco"
-                    android:textColorHint="#999999"
-                    app:passwordToggleEnabled="true"
-                    app:passwordToggleTint="@color/blanco">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etRegContrasenia"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textPassword"
-                        android:textColor="@color/blanco"
-                        android:textStyle="bold" />
-                </com.google.android.material.textfield.TextInputLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -215,15 +194,6 @@
             android:textStyle="bold"
             app:backgroundTint="@color/blanco"
             app:cornerRadius="30dp" />
-
-        <ImageButton
-            android:id="@+id/btnVolver"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@android:color/transparent"
-            android:onClick="EventoBotonVolver"
-            android:src="@drawable/ic_back_arrow"
-            app:tint="@color/blanco" />
 
     </LinearLayout>
 </ScrollView>

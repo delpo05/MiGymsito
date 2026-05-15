@@ -1,6 +1,7 @@
 package com.example.migymsito;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -27,7 +28,7 @@ import java.util.Locale;
 
 public class RegistroSesionActivity extends AppCompatActivity {
 
-    private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura, etRegContrasenia;
+    private EditText etRegNombre, etRegCorreo, etRegFechaNac, etRegPeso, etRegAltura;
     private AutoCompleteTextView etRegGenero;
     private UsuarioRepository usuarioRepository;
 
@@ -35,7 +36,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Habilitamos EdgeToEdge para consistencia con el Login
         EdgeToEdge.enable(this);
         setContentView(R.layout.registro_sesion_activity);
 
@@ -43,20 +43,17 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
         etRegNombre = findViewById(R.id.etRegNombre);
         etRegCorreo = findViewById(R.id.etRegCorreo);
-        etRegContrasenia = findViewById(R.id.etRegContrasenia);
         etRegFechaNac = findViewById(R.id.etRegFechaNac);
         etRegPeso = findViewById(R.id.etRegPeso);
         etRegAltura = findViewById(R.id.etRegAltura);
         etRegGenero = findViewById(R.id.etRegGenero);
 
         String[] opcionesGenero = {"Masculino", "Femenino", "Otro"};
-        // CAMBIO: Usamos R.layout.dropdown_item para que se vea blanco sobre fondo oscuro
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_item, opcionesGenero);
         etRegGenero.setAdapter(adapter);
 
         etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
 
-        // Configuramos los insets para el contenedor principal 'main_registro'
         configurarWindowInsets(R.id.main_registro);
     }
 
@@ -66,7 +63,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        // Sin tema forzado para que use el CustomDatePicker del styles.xml
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year1, monthOfYear, dayOfMonth) -> {
                     String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
@@ -109,7 +105,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.NombreUsuario = etRegNombre.getText().toString().trim();
         nuevoUsuario.CorreoElectronicoUsuario = etRegCorreo.getText().toString().trim();
-        nuevoUsuario.ContraseniaUsuario = etRegContrasenia.getText().toString().trim();
         nuevoUsuario.GeneroUsuario = etRegGenero.getText().toString();
 
         String fechaString = etRegFechaNac.getText().toString();
@@ -130,16 +125,21 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
         usuarioRepository.registrarUsuarioConHistorial(nuevoUsuario, nuevoHistorial, idGenerado -> {
             if (idGenerado != -1) {
-                Toast.makeText(RegistroSesionActivity.this, "Registro exitoso. Inicie sesión por primera vez.", Toast.LENGTH_LONG).show();
+                Toast.makeText(RegistroSesionActivity.this, "Registro exitoso.", Toast.LENGTH_LONG).show();
+                
+                // Auto-login tras el registro
+                usuarioRepository.guardarIdSesion(idGenerado);
+                HeaderActivity.usuarioLogueado = nuevoUsuario;
+                nuevoUsuario.IdUsuario = idGenerado;
+
+                Intent intent = new Intent(this, RutinasActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
                 finish();
             } else {
                 Toast.makeText(RegistroSesionActivity.this, "Error al registrar usuario e historial", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    public void EventoBotonVolver(View view) {
-        finish();
     }
 
     private boolean validacionesRegistrarUsuario() {
@@ -152,14 +152,6 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
         if (!Patterns.EMAIL_ADDRESS.matcher(etRegCorreo.getText().toString().trim()).matches()) {
             etRegCorreo.setError("Correo inválido");
-            estado = false;
-        }
-
-        if (etRegContrasenia.getText().toString().trim().isEmpty()) {
-            etRegContrasenia.setError("Campo requerido");
-            estado = false;
-        } else if (etRegContrasenia.getText().toString().length() < 6) {
-            etRegContrasenia.setError("Mínimo 6 caracteres");
             estado = false;
         }
 

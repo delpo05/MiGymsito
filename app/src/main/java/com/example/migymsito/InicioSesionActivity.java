@@ -2,17 +2,12 @@ package com.example.migymsito;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDataBase.AppDatabase;
@@ -20,55 +15,60 @@ import com.example.migymsito.dataRepository.UsuarioRepository;
 
 import java.util.concurrent.Executors;
 
-public class InicioSesionActivity extends AppCompatActivity implements UsuarioRepository.RepositoryCallback<Usuario> {
+public class InicioSesionActivity extends AppCompatActivity {
 
-    private EditText etUsuario, etPassword;
     private UsuarioRepository usuarioRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        usuarioRepository = new UsuarioRepository(getApplication());
-
-        // --- LÓGICA DE AUTO-LOGIN Y SALTO DIRECTO ---
-        int idSesion = usuarioRepository.obtenerIdSesion();
-        if (idSesion != -1) {
-            // Si hay sesión, verificamos si hay rutina guardada ANTES de mostrar el Login
-            int idRutina = usuarioRepository.obtenerIdRutina();
-            
-            usuarioRepository.obtenerUsuarioPorId(idSesion, usuario -> {
-                if (usuario != null) {
-                    HeaderActivity.usuarioLogueado = usuario;
-                    
-                    if (idRutina != -1) {
-                        // Si hay rutina, vamos directo a Secciones sin pasar por Rutinas visualmente
-                        saltarDirectoASecciones(idRutina);
-                    } else {
-                        // Si no hay rutina, vamos a Rutinas
-                        irARutinas();
-                    }
-                } else {
-                    // Si por algún motivo el usuario no existe, limpiamos y mostramos login
-                    usuarioRepository.eliminarSesion();
-                    cargarInterfazLogin();
-                }
-            });
-            // No llamamos a cargarInterfazLogin() todavía para evitar el parpadeo
-            return; 
-        }
-
-        cargarInterfazLogin();
-    }
-
-    private void cargarInterfazLogin() {
         EdgeToEdge.enable(this);
         setContentView(R.layout.inicio_sesion_activity);
 
-        etUsuario = findViewById(R.id.etUsuario);
-        etPassword = findViewById(R.id.etPassword);
+        usuarioRepository = new UsuarioRepository(getApplication());
+
+        // Simulamos un pequeño retraso para el splash
+        new Handler(Looper.getMainLooper()).postDelayed(this::verificarEstadoSesion, 1500);
+    }
+
+    private void verificarEstadoSesion() {
+        int idSesion = usuarioRepository.obtenerIdSesion();
         
-        configurarWindowInsets(R.id.main);
+        if (idSesion != -1) {
+            continuarComoUsuarioLogueado(idSesion);
+        } else {
+            // Si no hay sesión, verificamos si existe algún usuario en la DB
+            usuarioRepository.obtenerPrimerUsuario(usuario -> {
+                if (usuario != null) {
+                    // Si existe un usuario, auto-login
+                    usuarioRepository.guardarIdSesion(usuario.IdUsuario);
+                    continuarComoUsuarioLogueado(usuario.IdUsuario);
+                } else {
+                    // Si no hay usuarios, ir a Registro
+                    irARegistro();
+                }
+            });
+        }
+    }
+
+    private void continuarComoUsuarioLogueado(int idUsuario) {
+        int idRutina = usuarioRepository.obtenerIdRutina();
+        
+        usuarioRepository.obtenerUsuarioPorId(idUsuario, usuario -> {
+            if (usuario != null) {
+                HeaderActivity.usuarioLogueado = usuario;
+                
+                if (idRutina != -1) {
+                    saltarDirectoASecciones(idRutina);
+                } else {
+                    irARutinas();
+                }
+            } else {
+                // Si el usuario guardado no existe, limpiamos y vamos a Registro
+                usuarioRepository.eliminarSesion();
+                irARegistro();
+            }
+        });
     }
 
     private void saltarDirectoASecciones(int idRutina) {
@@ -82,7 +82,6 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
                     startActivity(intent);
                     finish();
                 } else {
-                    // Si la rutina ya no existe, limpiamos y vamos a la lista de Rutinas
                     usuarioRepository.eliminarRutinaSeleccionada();
                     irARutinas();
                 }
@@ -96,41 +95,9 @@ public class InicioSesionActivity extends AppCompatActivity implements UsuarioRe
         finish();
     }
 
-    private void configurarWindowInsets(int layoutId) {
-        View layout = findViewById(layoutId);
-        if (layout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
-    }
-
-    public void EventoBotonContinuar(View view) {
-        String usuario = etUsuario.getText().toString();
-        String password = etPassword.getText().toString();
-
-        if (usuario.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
-        } else {
-            usuarioRepository.validarLogin(usuario, password, this);
-        }
-    }
-
-    public void EventoRegistrarse(View view) {
-        Intent intent = new Intent(this, RegistroSesionActivity.class);
+    private void irARegistro() {
+        Intent intent = new Intent(InicioSesionActivity.this, RegistroSesionActivity.class);
         startActivity(intent);
-    }
-
-    @Override
-    public void onResult(Usuario result) {
-        if (result != null) {
-            usuarioRepository.guardarIdSesion(result.IdUsuario);
-            HeaderActivity.usuarioLogueado = result;
-            irARutinas();
-        } else {
-            Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-        }
+        finish();
     }
 }

@@ -29,7 +29,4 @@ public class Usuario implements Serializable {
 
     @NonNull
     public String GeneroUsuario;
-
-    @NonNull
-    public String ContraseniaUsuario;
 }

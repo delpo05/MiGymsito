@@ -26,7 +26,7 @@ import java.util.Locale;
 public class DatosPersonalesActivity extends HeaderActivity {
 
     private TextView tvHolaNombre;
-    private EditText etNombre, etCorreo, etPassword, etFecha, etAltura, etPeso;
+    private EditText etNombre, etCorreo, etFecha, etAltura, etPeso;
     private AutoCompleteTextView etGenero;
     private UsuarioRepository usuarioRepository;
 
@@ -65,7 +65,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
         tvHolaNombre = findViewById(R.id.tvHolaNombre);
         etNombre = findViewById(R.id.etDatoNombre);
         etCorreo = findViewById(R.id.etDatoCorreo);
-        etPassword = findViewById(R.id.etDatoPassword);
         etFecha = findViewById(R.id.etDatoFecha);
         etGenero = findViewById(R.id.etDatoGenero);
         etAltura = findViewById(R.id.etDatoAltura);
@@ -102,7 +101,7 @@ public class DatosPersonalesActivity extends HeaderActivity {
                 (view, year1, monthOfYear, dayOfMonth) -> {
                     String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, (monthOfYear + 1), year1);
                     etFecha.setText(fechaSeleccionada);
-                    etFecha.setError(null); // Limpiar error al seleccionar fecha
+                    etFecha.setError(null); 
                 }, year, month, day);
 
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
@@ -113,7 +112,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
         if (tvHolaNombre != null) tvHolaNombre.setText("Hola, " + usuarioLogueado.NombreUsuario + " !");
         if (etNombre != null) etNombre.setText(usuarioLogueado.NombreUsuario);
         if (etCorreo != null) etCorreo.setText(usuarioLogueado.CorreoElectronicoUsuario);
-        if (etPassword != null) etPassword.setText(usuarioLogueado.ContraseniaUsuario);
         
         if (etGenero != null) {
             etGenero.setText(usuarioLogueado.GeneroUsuario, false);
@@ -139,7 +137,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
 
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevoCorreo = etCorreo.getText().toString().trim();
-        String nuevaPass = etPassword.getText().toString().trim();
         String nuevoGenero = etGenero.getText().toString().trim();
         String fechaStr = etFecha.getText().toString().trim();
         String pesoStr = etPeso.getText().toString().trim();
@@ -148,7 +145,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
         // Limpiar errores previos
         etNombre.setError(null);
         etCorreo.setError(null);
-        etPassword.setError(null);
         etFecha.setError(null);
         etGenero.setError(null);
         etPeso.setError(null);
@@ -166,15 +162,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
             isValid = false;
         } else if (!Patterns.EMAIL_ADDRESS.matcher(nuevoCorreo).matches()) {
             etCorreo.setError("Correo inválido");
-            isValid = false;
-        }
-
-        // Validación Contraseña
-        if (nuevaPass.isEmpty()) {
-            etPassword.setError("La contraseña es obligatoria");
-            isValid = false;
-        } else if (nuevaPass.length() < 6) {
-            etPassword.setError("Mínimo 6 caracteres");
             isValid = false;
         }
 
@@ -233,7 +220,6 @@ public class DatosPersonalesActivity extends HeaderActivity {
 
         usuarioLogueado.NombreUsuario = nuevoNombre;
         usuarioLogueado.CorreoElectronicoUsuario = nuevoCorreo;
-        usuarioLogueado.ContraseniaUsuario = nuevaPass;
         usuarioLogueado.GeneroUsuario = nuevoGenero;
 
         try {
