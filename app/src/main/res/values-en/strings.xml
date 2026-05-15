@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">MiGymsito</string>
+    <string name="correoLogin">Email:</string>
+    <string name="contrasenia">Password:</string>
+    <string name="no_tenes_cuenta">Don\'t have an account? Sign up</string>
+    <string name="continuar">Continue</string>
+    <string name="logo_de_mi_gymsito">Mi Gymsito Logo</string>
+    <string name="mi_perfil">My Profile</string>
+    <string name="historial">History</string>
+    <string name="mi_progreso">My Progress</string>
+
+    <!-- Language Selection -->
+    <string name="selecciona_idioma">Select your language</string>
+    <string name="spanish">Spanish</string>
+    <string name="english">English</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_title_1">Welcome to MiGymsito!</string>
+    <string name="tutorial_desc_1">Your perfect companion to record and analyze every single workout.</string>
+    <string name="tutorial_title_2">Design Your Routines</string>
+    <string name="tutorial_desc_2">Easily create and customize routines tailored to your fitness goals.</string>
+    <string name="tutorial_title_3">Track Your Growth</string>
+    <string name="tutorial_desc_3">Visualize detailed statistics and watch your improvements day by day.</string>
+    <string name="tutorial_title_4">Compare &amp; Excel</string>
+    <string name="tutorial_desc_4">After each session, compare your performance to break your personal records.</string>
+    <string name="empezar">Start</string>
+    <string name="siguiente">Next</string>
+    <string name="omitir">Skip</string>
+</resources>

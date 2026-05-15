@@ -19,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
+import com.example.migymsito.utils.LocaleHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,7 @@ public class RegistroSesionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
         
         EdgeToEdge.enable(this);

@@ -8,4 +8,23 @@
     <string name="mi_perfil">Mi Perfil</string>
     <string name="historial">Historial</string>
     <string name="mi_progreso">Mi Progreso</string>
+
+    <!-- Language Selection -->
+    <string name="selecciona_idioma">Selecciona tu idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_title_1">¡Bienvenido a MiGymsito!</string>
+    <string name="tutorial_desc_1">Tu compañero ideal para registrar y analizar cada uno de tus entrenamientos.</string>
+    <string name="tutorial_title_2">Crea tus Rutinas</string>
+    <string name="tutorial_desc_2">Diseña y personaliza tus rutinas de forma sencilla para adaptarlas a tus metas.</string>
+    <string name="tutorial_title_3">Monitorea tu Progreso</string>
+    <string name="tutorial_desc_3">Visualiza tus estadísticas detalladas y observa cómo mejoras día tras día.</string>
+    <string name="tutorial_title_4">Compara y Progresa</string>
+    <string name="tutorial_desc_4">Al finalizar cada sesión, compara tu rendimiento para superar tus límites.</string>
+    <string name="empezar">Empezar</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="omitir">Omitir</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package com.example.migymsito;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,19 +10,27 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.migymsito.data.Rutina;
-import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
+import com.example.migymsito.utils.LocaleHelper;
 
+import java.util.Locale;
 import java.util.concurrent.Executors;
 
 public class InicioSesionActivity extends AppCompatActivity {
 
     private UsuarioRepository usuarioRepository;
+    private static final String CONFIG_PREFS = "AppConfig";
+    private static final String KEY_LANGUAGE = "selected_language";
+    private static final String KEY_TUTORIAL_DONE = "tutorial_done";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Aplicar locale antes de setContentView
+        LocaleHelper.applyLocale(this);
+        
         EdgeToEdge.enable(this);
         setContentView(R.layout.inicio_sesion_activity);
 
@@ -32,6 +41,20 @@ public class InicioSesionActivity extends AppCompatActivity {
     }
 
     private void verificarEstadoSesion() {
+        SharedPreferences prefs = getSharedPreferences(CONFIG_PREFS, MODE_PRIVATE);
+        String lang = prefs.getString(KEY_LANGUAGE, null);
+        boolean tutorialDone = prefs.getBoolean(KEY_TUTORIAL_DONE, false);
+
+        if (lang == null) {
+            irASeleccionIdioma();
+            return;
+        }
+
+        if (!tutorialDone) {
+            irATutorial();
+            return;
+        }
+
         int idSesion = usuarioRepository.obtenerIdSesion();
         
         if (idSesion != -1) {
@@ -49,6 +72,18 @@ public class InicioSesionActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void irASeleccionIdioma() {
+        Intent intent = new Intent(this, LanguageSelectionActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void irATutorial() {
+        Intent intent = new Intent(this, TutorialActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void continuarComoUsuarioLogueado(int idUsuario) {

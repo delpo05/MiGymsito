@@ -34,6 +34,7 @@ import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
+import com.example.migymsito.utils.LocaleHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.BufferedReader;
@@ -62,6 +63,7 @@ public abstract class HeaderActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
         userRepo = new UsuarioRepository(getApplication());
 
