@@ -1,0 +1,55 @@
+<resources>
+    <style name="Theme.MiGymsito" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blanco</item>
+        <item name="colorOnPrimary">@color/negro</item>
+        <item name="colorSecondary">@color/gris_pista</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="colorControlActivated">@color/blanco</item>
+        <item name="colorControlNormal">@color/gris_pista</item>
+        <item name="colorControlHighlight">#40FFFFFF</item>
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="android:textColorSecondary">@color/gris_pista</item>
+
+        <!-- Calendario global -->
+        <item name="android:datePickerDialogTheme">@style/CustomDatePicker</item>
+    </style>
+
+    <style name="PickerStyle">
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorControlNormal">@color/blanco</item>
+    </style>
+
+    <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowBackground">@drawable/bg_dialog_dark</item>
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="colorPrimary">@color/blanco</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
+    </style>
+
+    <!-- ESTILO CALENDARIO MODERNO MEJORADO -->
+    <style name="CustomDatePicker" parent="Theme.Material3.Dark.Dialog">
+        <item name="android:windowBackground">#1A1A1A</item>
+        <item name="colorSurface">#1A1A1A</item>
+
+        <!-- Color principal (Círculo de selección y botones) -->
+        <item name="colorPrimary">@color/blanco</item>
+        <item name="colorOnPrimary">@color/negro</item>
+
+        <item name="android:textColorPrimary">@color/blanco</item>
+        <item name="android:textColorSecondary">#CCCCCC</item>
+
+        <!-- Botones OK/CANCEL -->
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
+    </style>
+
+    <!-- Estilo para botones con fondo redondeado forzado -->
+    <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/blanco</item>
+        <item name="android:background">@drawable/edittext_border</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

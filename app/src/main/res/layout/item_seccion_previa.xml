@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container_item_previa"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/card_border_white"
+    android:backgroundTint="#F5F5F5"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Participa en SeccionesActivity: Nombre de la sección destacado -->
+    <TextView
+        android:id="@+id/tv_nombre_seccion_previa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Nombre Sección"
+        android:textColor="@color/negro"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Participa en SeccionesActivity: Nombre de la rutina a la que pertenece -->
+    <TextView
+        android:id="@+id/tv_nombre_rutina_previa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="Rutina: Pecho"
+        android:textColor="#666666"
+        android:textSize="12sp"
+        android:textStyle="italic" />
+
+</LinearLayout>

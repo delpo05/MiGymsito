@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_white"
+    android:padding="24dp"
+    android:layout_gravity="center">
+
+    <TextView
+        android:id="@+id/tvTituloPopUpEjercicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Añadir ejercicio"
+        android:textColor="@color/negro"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="18dp" />
+
+    <!-- Área de Imagen Centrada y Grande -->
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:id="@+id/ivSeleccionarImagen"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/cargar_imagen_default"
+            android:scaleType="centerCrop"
+            android:background="@drawable/edittext_border"
+            android:padding="2dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Seleccionar imagen" />
+
+        <!-- Pequeño indicador de cámara (Equilibrado) -->
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/ic_add"
+            android:background="@drawable/bg_circle_white"
+            android:padding="5dp"
+            android:alpha="1.0" />
+    </FrameLayout>
+
+    <!-- Sección Nombre Igualada a Pop-up Modificar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre"
+            android:textColor="@color/negro"
+            android:textStyle="bold"
+            android:layout_marginEnd="16dp" />
+
+        <EditText
+            android:id="@+id/etNombreEjercicio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Ingrese el nombre"
+            android:textColorHint="@color/gris_pista"
+            android:background="@null"
+            android:textColor="@color/negro"
+            android:textCursorDrawable="@null"
+            android:textSize="14sp"
+            android:inputType="textPersonName" />
+    </LinearLayout>
+
+    <!-- Nueva Sección: Peso Corporal -->
+    <CheckBox
+        android:id="@+id/cbPesoCorporal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="¿Es peso corporal? (Calistenia)"
+        android:textColor="@color/negro"
+        android:layout_marginBottom="24dp"
+        android:textSize="14sp"
+        android:buttonTint="@color/negro" />
+
+    <!-- Botonera -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnCancelarEjercicio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:textAllCaps="false"
+            android:backgroundTint="#C14848"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnAceptarEjercicio"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Aceptar"
+            android:textAllCaps="false"
+            android:backgroundTint="#545B61"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</LinearLayout>

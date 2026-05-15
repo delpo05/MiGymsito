@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <RelativeLayout
+        android:id="@+id/container_item"
+        android:layout_width="match_parent"
+        android:layout_height="170dp"
+        android:background="@drawable/card_border_white"
+        android:clipToOutline="true">
+
+        <!-- Imagen del Ejercicio -->
+        <ImageView
+            android:id="@+id/iv_item_imagen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <!-- Sombreado superior -->
+        <View
+            android:id="@+id/view_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/gradient_top_shadow"
+            android:visibility="gone" />
+
+        <!-- Nombre del Item - Por defecto centrado para Rutinas/Secciones -->
+        <TextView
+            android:id="@+id/tv_nombre_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:text="Nombre"
+            android:textColor="@color/blanco"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:elevation="3dp"
+            android:visibility="gone" />
+
+        <!-- Opciones (tres puntos) -->
+        <TextView
+            android:id="@+id/tv_opciones"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:text="⋮"
+            android:textColor="@color/blanco"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:elevation="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Botón + -->
+        <ImageView
+            android:id="@+id/btn_item_add"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/bg_circle_white"
+            android:backgroundTint="@color/blanco"
+            android:src="@drawable/ic_add"
+            android:padding="15dp"
+            app:tint="@color/negro"
+            android:visibility="visible" />
+
+    </RelativeLayout>
+</FrameLayout>

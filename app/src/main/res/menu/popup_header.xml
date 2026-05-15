@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/Home"
+        android:title="Rutinas" />
+
+    <item
+        android:id="@+id/MiPerfil"
+        android:title="@string/mi_perfil" />
+
+    <item
+        android:id="@+id/Exportar"
+        android:title="Exportar rutinas e historial" />
+
+    <item
+        android:id="@+id/Importar"
+        android:title="Importar rutinas e historial" />
+
+    <item
+        android:id="@+id/Historial"
+        android:title="Historial de Peso" />
+
+    <item
+        android:id="@+id/ComparativaRendimientos"
+        android:title="Comparativa de Rendimientos" />
+
+    <item
+        android:id="@+id/MiProgreso"
+        android:title="@string/mi_progreso" />
+
+    <!-- Grupo para separar las acciones de cuenta de las de navegación -->
+    <group android:id="@+id/menu_footer">
+        <item
+            android:id="@+id/CerrarSesion"
+            android:title="Cerrar sesión" />
+    </group>
+</menu>
