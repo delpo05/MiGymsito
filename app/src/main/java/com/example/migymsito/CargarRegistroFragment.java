@@ -319,8 +319,82 @@ public class CargarRegistroFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new RegistroAdapter(listaHistorial, esPesoCorporal);
+        adapter.setOnRegistroEditListener((registro, position) -> mostrarDialogoEditarRegistro(registro, position));
         rvHistorial.setLayoutManager(new LinearLayoutManager(getContext()));
         rvHistorial.setAdapter(adapter);
+    }
+
+    private void mostrarDialogoEditarRegistro(Registro registro, int position) {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_editar_registro, null);
+        NumberPicker npReps = dialogView.findViewById(R.id.npRepeticionesEdit);
+        NumberPicker npEntero = dialogView.findViewById(R.id.npPesoEnteroEdit);
+        NumberPicker npDecimal = dialogView.findViewById(R.id.npPesoDecimalEdit);
+        Button btnCancelar = dialogView.findViewById(R.id.btnCancelarEdit);
+        Button btnAceptar = dialogView.findViewById(R.id.btnAceptarEdit);
+
+        // Setup Pickers
+        npReps.setMinValue(1);
+        npReps.setMaxValue(100);
+        npReps.setValue(registro.Repeticiones);
+
+        npEntero.setMinValue(0);
+        npEntero.setMaxValue(500);
+        int entero = (int) Math.floor(registro.PesoRegistro);
+        npEntero.setValue(entero);
+
+        String[] valoresDecimales = {"00", "25", "50", "75"};
+        npDecimal.setMinValue(0);
+        npDecimal.setMaxValue(valoresDecimales.length - 1);
+        npDecimal.setDisplayedValues(valoresDecimales);
+        
+        double decimal = registro.PesoRegistro - entero;
+        if (decimal < 0.125) npDecimal.setValue(0);
+        else if (decimal < 0.375) npDecimal.setValue(1);
+        else if (decimal < 0.625) npDecimal.setValue(2);
+        else npDecimal.setValue(3);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+                .setView(dialogView)
+                .create();
+
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        btnAceptar.setOnClickListener(v -> {
+            int newReps = npReps.getValue();
+            int newEntero = npEntero.getValue();
+            double newDecimal = Double.parseDouble("0." + valoresDecimales[npDecimal.getValue()]);
+            double newPeso = newEntero + newDecimal;
+
+            registro.Repeticiones = newReps;
+            registro.PesoRegistro = newPeso;
+
+            registroRepository.actualizarRegistro(registro);
+            adapter.notifyItemChanged(position);
+            
+            // Si editamos el último registro cargado (el primero en la lista visual),
+            // actualizamos los pickers de la pantalla principal para que la siguiente serie
+            // use los nuevos valores como base.
+            if (position == 0) {
+                actualizarPickersConRegistro(registro);
+            }
+
+            dialog.dismiss();
+            Toast.makeText(getContext(), "Serie actualizada", Toast.LENGTH_SHORT).show();
+        });
+
+        dialog.show();
+    }
+
+    private void actualizarPickersConRegistro(Registro registro) {
+        npRepeticiones.setValue(registro.Repeticiones);
+        double peso = registro.PesoRegistro;
+        int entero = (int) peso;
+        double decimal = peso - entero;
+        npPesoEntero.setValue(entero);
+        if (decimal < 0.125) npPesoDecimal.setValue(0);
+        else if (decimal < 0.375) npPesoDecimal.setValue(1);
+        else if (decimal < 0.625) npPesoDecimal.setValue(2);
+        else npPesoDecimal.setValue(3);
     }
 
     private void cargarSeriesDelDia() {
@@ -341,15 +415,7 @@ public class CargarRegistroFragment extends Fragment {
                 if (r.NumSeriesRegistro > maxSerie) maxSerie = r.NumSeriesRegistro;
             }
             serieActual = maxSerie + 1;
-            npRepeticiones.setValue(ultimoRegistro.Repeticiones);
-            double peso = ultimoRegistro.PesoRegistro;
-            int entero = (int) peso;
-            double decimal = peso - entero;
-            npPesoEntero.setValue(entero);
-            if (decimal < 0.125) npPesoDecimal.setValue(0);
-            else if (decimal < 0.375) npPesoDecimal.setValue(1);
-            else if (decimal < 0.625) npPesoDecimal.setValue(2);
-            else npPesoDecimal.setValue(3);
+            actualizarPickersConRegistro(ultimoRegistro);
         } else {
             serieActual = 1;
         }
