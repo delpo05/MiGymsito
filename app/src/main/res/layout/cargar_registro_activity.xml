@@ -301,6 +301,17 @@
                     android:text="Peso"
                     android:textColor="@color/blanco"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvColumnaEditar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text=""
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold" />
             </TableRow>
         </TableLayout>
 
