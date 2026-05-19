@@ -68,6 +68,7 @@ public class EjerciciosFragment extends Fragment {
     private ImageView ivPreviewImagen;
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<Uri> cameraLauncher;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
     private Uri uriFotoCamara;
 
     @Nullable
@@ -135,6 +136,17 @@ public class EjerciciosFragment extends Fragment {
                         if (ivPreviewImagen != null) {
                             ivPreviewImagen.setImageURI(uriFotoCamara);
                         }
+                    }
+                }
+        );
+
+        requestCameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        abrirCamara();
+                    } else {
+                        Toast.makeText(requireContext(), "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -301,6 +313,10 @@ public class EjerciciosFragment extends Fragment {
     }
 
     private void abrirCamara() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+            return;
+        }
         File photoFile = null;
         try { photoFile = crearArchivoImagen(); } catch (IOException ignored) {}
         if (photoFile != null) {
