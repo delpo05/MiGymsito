@@ -24,8 +24,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.migymsito.adapter.HistorialEjercicioAdapter;
 import com.example.migymsito.adapter.RegistroAdapter;
 import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Seccion;
@@ -44,7 +46,7 @@ public class CargarRegistroFragment extends Fragment {
     private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso;
     private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
     private ImageButton btnEliminarUltimo;
-    private Button btnCargar;
+    private Button btnCargar, btnVerHistorialPrevio;
     private RecyclerView rvHistorial;
     private RegistroAdapter adapter;
     private final List<Registro> listaHistorial = new ArrayList<>();
@@ -160,6 +162,7 @@ public class CargarRegistroFragment extends Fragment {
         
         btnCargar = view.findViewById(R.id.btnCargar);
         btnEliminarUltimo = view.findViewById(R.id.btnEliminarUltimo);
+        btnVerHistorialPrevio = view.findViewById(R.id.btnVerHistorialPrevio);
         rvHistorial = view.findViewById(R.id.rvHistorial);
 
         tvTimerValue = view.findViewById(R.id.tvTimerValue);
@@ -200,6 +203,7 @@ public class CargarRegistroFragment extends Fragment {
     private void setupListeners() {
         btnCargar.setOnClickListener(v -> guardarRegistro());
         btnEliminarUltimo.setOnClickListener(v -> eliminarUltimoRegistro());
+        btnVerHistorialPrevio.setOnClickListener(v -> mostrarHistorialCompleto());
 
         btnStartTimer.setOnClickListener(v -> {
             if (timerRunning) {
@@ -470,6 +474,45 @@ public class CargarRegistroFragment extends Fragment {
         listaHistorial.remove(0);
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
+    }
+
+    private void mostrarHistorialCompleto() {
+        executorService.execute(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getContext());
+            Entrenamiento activo = db.entrenamientoDao().getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            int idEntActual = (activo != null) ? activo.IdEntrenamiento : Integer.MAX_VALUE;
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    registroRepository.obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntActual, registros -> {
+                        if (registros == null || registros.isEmpty()) {
+                            Toast.makeText(getContext(), "No hay registros previos para este ejercicio", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_historial_ejercicio, null);
+                        RecyclerView rvHistorialDialog = dialogView.findViewById(R.id.rvHistorialEjercicio);
+                        Button btnCerrar = dialogView.findViewById(R.id.btnCerrarHistorial);
+
+                        HistorialEjercicioAdapter dialogAdapter = new HistorialEjercicioAdapter(registros, esPesoCorporal);
+                        rvHistorialDialog.setLayoutManager(new LinearLayoutManager(getContext()));
+                        rvHistorialDialog.setAdapter(dialogAdapter);
+
+                        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+                                .setView(dialogView)
+                                .create();
+
+                        btnCerrar.setOnClickListener(v -> dialog.dismiss());
+                        dialog.show();
+
+                        if (dialog.getWindow() != null) {
+                            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.95);
+                            dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        }
+                    });
+                });
+            }
+        });
     }
 
     @Override

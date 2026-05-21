@@ -61,6 +61,20 @@ public interface RegistroDao {
            "ORDER BY Registro.FechaRegistro DESC")
     List<Registro> obtenerTodosLosRegistrosDelUsuario(int idUsuario);
 
+    @Query("SELECT r.* FROM Registro r " +
+           "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "WHERE sxe.IdEjercicio = :idEjercicio " +
+           "AND r.IdEntrenamiento = (" +
+           "    SELECT MAX(r2.IdEntrenamiento) FROM Registro r2 " +
+           "    JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
+           "    JOIN Entrenamiento e2 ON r2.IdEntrenamiento = e2.IdEntrenamiento " +
+           "    WHERE sxe2.IdEjercicio = :idEjercicio " +
+           "    AND e2.IdUsuario = :idUsuario " +
+           "    AND r2.IdEntrenamiento < :idEntrenamientoActual" +
+           ") " +
+           "ORDER BY r.NumSeriesRegistro ASC")
+    List<Registro> obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual);
+
     @Query("DELETE FROM Registro")
     void borrarTodo();
 }

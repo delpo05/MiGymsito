@@ -142,6 +142,13 @@ public class RegistroRepository {
         });
     }
 
+    public void obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntrenamientoActual);
+            notificar(callback, lista);
+        });
+    }
+
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
         if (callback != null) {
             new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));
