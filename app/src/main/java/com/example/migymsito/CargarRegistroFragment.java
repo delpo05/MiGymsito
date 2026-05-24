@@ -1,7 +1,11 @@
 package com.example.migymsito;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -17,6 +21,8 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -70,6 +76,20 @@ public class CargarRegistroFragment extends Fragment {
     private boolean timerRunning;
     private long timeLeftInMillis = startTimeInMillis;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    private static final String PREFS_TIMER = "TimerPrefs";
+    private static final String KEY_END_TIME = "endTime";
+    private static final String KEY_TIMER_RUNNING = "timerRunning";
+    private static final String KEY_START_TIME = "startTime";
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    Toast.makeText(getContext(), "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "El permiso de notificaciones es necesario para avisarte cuando termine el descanso", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Nullable
     @Override
@@ -256,9 +276,105 @@ public class CargarRegistroFragment extends Fragment {
         dialog.show();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        checkPermissions();
+        restoreTimerState();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+    }
+
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (requireContext().checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
+    private void restoreTimerState() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_TIMER, Context.MODE_PRIVATE);
+        startTimeInMillis = prefs.getLong(KEY_START_TIME, 60000);
+        long endTime = prefs.getLong(KEY_END_TIME, 0);
+        timerRunning = prefs.getBoolean(KEY_TIMER_RUNNING, false);
+
+        if (timerRunning) {
+            timeLeftInMillis = endTime - System.currentTimeMillis();
+            if (timeLeftInMillis < 0) {
+                timeLeftInMillis = startTimeInMillis;
+                timerRunning = false;
+                updateCountDownText();
+                updateTimerUI();
+                clearTimerState();
+            } else {
+                startTimer();
+            }
+        } else {
+            timeLeftInMillis = startTimeInMillis;
+            updateCountDownText();
+        }
+    }
+
+    private void saveTimerState() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_TIMER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(KEY_START_TIME, startTimeInMillis);
+        editor.putLong(KEY_END_TIME, System.currentTimeMillis() + timeLeftInMillis);
+        editor.putBoolean(KEY_TIMER_RUNNING, timerRunning);
+        editor.apply();
+    }
+
+    private void clearTimerState() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_TIMER, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_END_TIME).putBoolean(KEY_TIMER_RUNNING, false).apply();
+    }
+
+    private void updateTimerUI() {
+        if (timerRunning) {
+            btnStartTimer.setImageResource(android.R.drawable.ic_media_pause);
+        } else {
+            btnStartTimer.setImageResource(android.R.drawable.ic_media_play);
+        }
+    }
+
+    private void scheduleAlarm() {
+        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(requireContext(), TimerReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        long triggerTime = System.currentTimeMillis() + timeLeftInMillis;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            } else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            }
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        }
+    }
+
+    private void cancelAlarm() {
+        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(requireContext(), TimerReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        alarmManager.cancel(pendingIntent);
+    }
+
     private void startTimer() {
         if (timeLeftInMillis <= 0) {
             resetTimer();
+        }
+
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
         }
 
         countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
@@ -271,9 +387,10 @@ public class CargarRegistroFragment extends Fragment {
             @Override
             public void onFinish() {
                 timerRunning = false;
-                btnStartTimer.setImageResource(android.R.drawable.ic_media_play);
                 timeLeftInMillis = startTimeInMillis;
                 updateCountDownText();
+                updateTimerUI();
+                clearTimerState();
                 vibrarAlFinalizar();
                 if (isAdded()) {
                     Toast.makeText(getContext(), "¡Descanso terminado!", Toast.LENGTH_SHORT).show();
@@ -282,7 +399,9 @@ public class CargarRegistroFragment extends Fragment {
         }.start();
 
         timerRunning = true;
-        btnStartTimer.setImageResource(android.R.drawable.ic_media_pause);
+        updateTimerUI();
+        saveTimerState();
+        scheduleAlarm();
     }
 
     private void pauseTimer() {
@@ -290,13 +409,16 @@ public class CargarRegistroFragment extends Fragment {
             countDownTimer.cancel();
         }
         timerRunning = false;
-        btnStartTimer.setImageResource(android.R.drawable.ic_media_play);
+        updateTimerUI();
+        saveTimerState();
+        cancelAlarm();
     }
 
     private void resetTimer() {
         pauseTimer();
         timeLeftInMillis = startTimeInMillis;
         updateCountDownText();
+        clearTimerState();
     }
 
     private void updateCountDownText() {

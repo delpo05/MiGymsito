@@ -37,6 +37,7 @@ import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.example.migymsito.utils.LocaleHelper;
+import com.example.migymsito.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.BufferedReader;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private UsuarioRepository userRepo;
     private Dialog progressDialog;
     private volatile boolean importacionCancelada = false;
+    public static boolean isAppInForeground = false;
 
     private final ActivityResultLauncher<String> importLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -73,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         userRepo = new UsuarioRepository(getApplication());
+
+        NotificationHelper.createNotificationChannel(this);
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -113,6 +117,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isAppInForeground = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isAppInForeground = false;
     }
 
     private void setupToolbar(Toolbar toolbar) {
