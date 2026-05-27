@@ -55,7 +55,7 @@ public class NotificationHelper {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_fitness_center)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_black))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
                 .setContentTitle("¡Descanso terminado!")
                 .setContentText("Es hora de tu siguiente serie.")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
