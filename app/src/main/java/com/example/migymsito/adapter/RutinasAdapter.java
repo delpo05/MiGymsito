@@ -17,6 +17,7 @@ public class RutinasAdapter extends BaseAdapter {
 
     private List<Rutina> rutinas;
     private OnRutinaClickListener listener;
+    private int lastPosition = -1;
 
     public interface OnRutinaClickListener {
         void onAddClick();
@@ -31,6 +32,7 @@ public class RutinasAdapter extends BaseAdapter {
 
     public void setRutinas(List<Rutina> rutinas) {
         this.rutinas = rutinas;
+        this.lastPosition = -1;
         notifyDataSetChanged();
     }
 
@@ -124,6 +126,14 @@ public class RutinasAdapter extends BaseAdapter {
 
             tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, rutina); });
             convertView.setOnClickListener(v -> { if (listener != null) listener.onRutinaClick(rutina); });
+        }
+
+        // Animación de entrada escalonada
+        if (position > lastPosition) {
+            android.view.animation.Animation animation = android.view.animation.AnimationUtils.loadAnimation(parent.getContext(), R.anim.item_entrance);
+            animation.setStartOffset(position * 50L);
+            convertView.startAnimation(animation);
+            lastPosition = position;
         }
 
         return convertView;

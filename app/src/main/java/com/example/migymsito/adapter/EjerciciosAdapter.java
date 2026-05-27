@@ -23,6 +23,7 @@ public class EjerciciosAdapter extends BaseAdapter {
 
     private List<Ejercicio> ejercicios;
     private OnEjercicioClickListener listener;
+    private int lastPosition = -1;
 
     public interface OnEjercicioClickListener {
         void onAddClick();
@@ -37,6 +38,7 @@ public class EjerciciosAdapter extends BaseAdapter {
 
     public void setEjercicios(List<Ejercicio> ejercicios) {
         this.ejercicios = ejercicios;
+        this.lastPosition = -1;
         notifyDataSetChanged();
     }
 
@@ -151,6 +153,14 @@ public class EjerciciosAdapter extends BaseAdapter {
             convertView.setOnClickListener(v -> {
                 if (listener != null) listener.onEjercicioClick(ejercicio);
             });
+        }
+
+        // Animación de entrada escalonada
+        if (position > lastPosition) {
+            android.view.animation.Animation animation = android.view.animation.AnimationUtils.loadAnimation(parent.getContext(), R.anim.item_entrance);
+            animation.setStartOffset(position * 50L);
+            convertView.startAnimation(animation);
+            lastPosition = position;
         }
 
         return convertView;

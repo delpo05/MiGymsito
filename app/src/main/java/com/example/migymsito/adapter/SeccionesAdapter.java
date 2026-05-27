@@ -21,6 +21,7 @@ public class SeccionesAdapter extends BaseAdapter {
     private OnSeccionClickListener listener;
     private boolean mostrarBotonAdd = true;
     private boolean isModoPopup = false;
+    private int lastPosition = -1;
 
     public interface OnSeccionClickListener {
         void onAddClick();
@@ -43,6 +44,7 @@ public class SeccionesAdapter extends BaseAdapter {
 
     public void setSecciones(List<Seccion> secciones) {
         this.secciones = secciones;
+        this.lastPosition = -1;
         notifyDataSetChanged();
     }
 
@@ -126,6 +128,14 @@ public class SeccionesAdapter extends BaseAdapter {
 
             tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, seccion); });
             convertView.setOnClickListener(v -> { if (listener != null) listener.onSeccionClick(seccion); });
+        }
+
+        // Animación de entrada escalonada
+        if (position > lastPosition) {
+            android.view.animation.Animation animation = android.view.animation.AnimationUtils.loadAnimation(parent.getContext(), R.anim.item_entrance);
+            animation.setStartOffset(position * 50L);
+            convertView.startAnimation(animation);
+            lastPosition = position;
         }
 
         return convertView;
