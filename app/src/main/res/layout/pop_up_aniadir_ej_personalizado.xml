@@ -85,7 +85,17 @@
         android:id="@+id/cbPesoCorporal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="¿Es peso corporal? (Calistenia)"
+        android:text="¿Es peso corporal?"
+        android:textColor="@color/negro"
+        android:layout_marginBottom="8dp"
+        android:textSize="14sp"
+        android:buttonTint="@color/negro" />
+
+    <CheckBox
+        android:id="@+id/cbPesoPorLado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Peso por lado"
         android:textColor="@color/negro"
         android:layout_marginBottom="24dp"
         android:textSize="14sp"

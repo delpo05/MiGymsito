@@ -67,6 +67,7 @@ public class CargarRegistroFragment extends Fragment {
     private int idSeccion;
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
+    private boolean esPesoPorLado = false;
 
     private long startTimeInMillis = 60000; 
     private TextView tvTimerValue;
@@ -153,6 +154,7 @@ public class CargarRegistroFragment extends Fragment {
                 idEjercicio = ejercicio.IdEjercicio;
                 nombreEjercicio = ejercicio.NombreEjercicio;
                 esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
+                esPesoPorLado = (ejercicio.PesoPorLado != null && ejercicio.PesoPorLado);
             }
             
             if (seccion != null) {
@@ -195,6 +197,9 @@ public class CargarRegistroFragment extends Fragment {
         if (esPesoCorporal) {
             tvPesoLabel.setText("Lastre (kg)");
             tvColumnaPeso.setText("Lastre");
+        } else if (esPesoPorLado) {
+            tvPesoLabel.setText("Peso x lado (kg)");
+            tvColumnaPeso.setText("Peso (x2)");
         }
     }
 
@@ -555,13 +560,19 @@ public class CargarRegistroFragment extends Fragment {
         int entero = npPesoEntero.getValue();
         String[] valoresDecimales = npPesoDecimal.getDisplayedValues();
         double decimal = Double.parseDouble("0." + valoresDecimales[npPesoDecimal.getValue()]);
-        double peso = entero + decimal;
+        double pesoFinal = entero + decimal;
+
+        if (esPesoPorLado) {
+            pesoFinal *= 2;
+        }
+
         if (reps <= 0) {
             Toast.makeText(getContext(), "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
             return;
         }
         btnCargar.setEnabled(false);
 
+        double finalPesoFinal = pesoFinal;
         executorService.execute(() -> {
             AppDatabase db = AppDatabase.getDatabase(getContext());
             Historial ultimoPeso = db.historialDao().obtenerUltimoHistorial(idUsuario);
@@ -569,7 +580,7 @@ public class CargarRegistroFragment extends Fragment {
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, peso, serieActual, reps, pesoCorporal, nuevo -> {
+                    registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, finalPesoFinal, serieActual, reps, pesoCorporal, nuevo -> {
                         if (nuevo != null) {
                             listaHistorial.add(0, nuevo);
                             adapter.notifyItemInserted(0);

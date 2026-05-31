@@ -226,6 +226,7 @@ public class EjerciciosFragment extends Fragment {
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
         CheckBox cbPesoCorporal = dialog.findViewById(R.id.cbPesoCorporal);
+        CheckBox cbPesoPorLado = dialog.findViewById(R.id.cbPesoPorLado);
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
@@ -236,6 +237,7 @@ public class EjerciciosFragment extends Fragment {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
             cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
+            cbPesoPorLado.setChecked(ejercicioExistente.PesoPorLado != null && ejercicioExistente.PesoPorLado);
             btnAceptar.setText("Guardar");
             if (ejercicioExistente.ImagenEjercicio != null) {
                 uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
@@ -262,6 +264,7 @@ public class EjerciciosFragment extends Fragment {
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
                 nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                nuevo.PesoPorLado = cbPesoPorLado.isChecked();
                 if (uriImagenSeleccionada != null) nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
 
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
@@ -275,6 +278,7 @@ public class EjerciciosFragment extends Fragment {
                 editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 editado.TipoEjercicio = "Personalizado";
                 editado.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                editado.PesoPorLado = cbPesoPorLado.isChecked();
 
                 ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, success -> {
                     dialog.dismiss();
