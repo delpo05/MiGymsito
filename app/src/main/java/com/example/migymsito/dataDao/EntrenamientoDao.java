@@ -27,10 +27,10 @@ public interface EntrenamientoDao {
     @Query("SELECT * FROM Entrenamiento WHERE IdEntrenamiento = :id")
     Entrenamiento getEntrenamientoById(int id);
 
-    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND FechaFin IS NULL LIMIT 1")
+    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND FechaFin IS NULL ORDER BY FechaInicio DESC LIMIT 1")
     Entrenamiento getEntrenamientoActivo(int idUsuario);
 
-    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NULL LIMIT 1")
+    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NULL ORDER BY FechaInicio DESC LIMIT 1")
     Entrenamiento getEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion);
 
     @Query("SELECT Entrenamiento.* FROM Entrenamiento " +
@@ -38,6 +38,6 @@ public interface EntrenamientoDao {
            "WHERE Entrenamiento.IdUsuario = :idUsuario AND Seccion.IdRutinaSeccion = :idRutina AND Entrenamiento.FechaFin IS NULL")
     List<Entrenamiento> getEntrenamientosActivosPorRutina(int idUsuario, int idRutina);
 
-    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NOT NULL ORDER BY FechaFin ASC")
+    @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NOT NULL ORDER BY FechaFin DESC")
     List<Entrenamiento> getEntrenamientosFinalizadosPorSeccion(int idUsuario, int idSeccion);
 }

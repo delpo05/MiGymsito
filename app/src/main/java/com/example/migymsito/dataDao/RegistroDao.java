@@ -65,14 +65,15 @@ public interface RegistroDao {
            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
            "WHERE sxe.IdEjercicio = :idEjercicio " +
            "AND r.IdEntrenamiento = (" +
-           "    SELECT MAX(r2.IdEntrenamiento) FROM Registro r2 " +
+           "    SELECT e2.IdEntrenamiento FROM Entrenamiento e2 " +
+           "    JOIN Registro r2 ON e2.IdEntrenamiento = r2.IdEntrenamiento " +
            "    JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
-           "    JOIN Entrenamiento e2 ON r2.IdEntrenamiento = e2.IdEntrenamiento " +
            "    WHERE sxe2.IdEjercicio = :idEjercicio " +
            "    AND e2.IdUsuario = :idUsuario " +
-           "    AND r2.IdEntrenamiento < :idEntrenamientoActual" +
+           "    AND e2.FechaInicio < IFNULL((SELECT e3.FechaInicio FROM Entrenamiento e3 WHERE e3.IdEntrenamiento = :idEntrenamientoActual), 9223372036854775807) " +
+           "    ORDER BY e2.FechaInicio DESC LIMIT 1" +
            ") " +
-           "ORDER BY r.NumSeriesRegistro ASC")
+           "ORDER BY r.NumSeriesRegistro DESC")
     List<Registro> obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual);
 
     @Query("DELETE FROM Registro")
