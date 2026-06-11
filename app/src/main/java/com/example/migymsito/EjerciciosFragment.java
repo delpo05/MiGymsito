@@ -272,15 +272,13 @@ public class EjerciciosFragment extends Fragment {
                     new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
                 });
             } else {
-                Ejercicio editado = new Ejercicio();
-                editado.IdEjercicio = ejercicioExistente.IdEjercicio; 
-                editado.NombreEjercicio = nombre;
-                editado.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
-                editado.TipoEjercicio = "Personalizado";
-                editado.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
-                editado.PesoPorLado = cbPesoPorLado.isChecked();
+                ejercicioExistente.NombreEjercicio = nombre;
+                ejercicioExistente.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
+                ejercicioExistente.TipoEjercicio = "Personalizado";
+                ejercicioExistente.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                ejercicioExistente.PesoPorLado = cbPesoPorLado.isChecked();
 
-                ejercicioRepository.actualizarEjercicioIndependiente(editado, seccionActual.IdSeccion, success -> {
+                ejercicioRepository.actualizarEjercicioIndependiente(ejercicioExistente, seccionActual.IdSeccion, success -> {
                     dialog.dismiss();
                     new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
                 });

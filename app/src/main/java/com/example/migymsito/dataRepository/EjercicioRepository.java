@@ -90,6 +90,9 @@ public class EjercicioRepository {
                 nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
                 nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
                 nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
+                nuevoEj.PesoPorLado = ejercicioEditado.PesoPorLado;
+                nuevoEj.TipoDeBarra = ejercicioEditado.TipoDeBarra;
+                nuevoEj.PesoBarra = ejercicioEditado.PesoBarra;
 
                 long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
                 SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
