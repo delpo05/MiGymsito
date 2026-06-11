@@ -549,6 +549,7 @@ public class MainActivity extends AppCompatActivity {
         nuevo.IdUsuario = usuarioLogueado.IdUsuario;
         nuevo.IdSeccion = idSeccion;
         nuevo.FechaInicio = fecha;
+        nuevo.FechaFin = fecha; // Marcar como finalizado para importaciones
         nuevo.NumeroEntrenamiento = existentes.size() + 1;
         nuevo.IdEntrenamiento = (int) db.entrenamientoDao().insert(nuevo);
         return nuevo;
