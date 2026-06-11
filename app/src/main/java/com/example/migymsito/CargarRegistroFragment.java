@@ -49,7 +49,7 @@ import java.util.concurrent.Executors;
 
 public class CargarRegistroFragment extends Fragment {
 
-    private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso;
+    private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso, tvInfoBarra;
     private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
     private ImageButton btnEliminarUltimo;
     private Button btnCargar, btnVerHistorialPrevio;
@@ -68,6 +68,8 @@ public class CargarRegistroFragment extends Fragment {
     private String nombreEjercicio;
     private boolean esPesoCorporal = false;
     private boolean esPesoPorLado = false;
+    private String tipoDeBarra;
+    private float pesoBarra = 0.0f;
 
     private long startTimeInMillis = 60000; 
     private TextView tvTimerValue;
@@ -155,6 +157,8 @@ public class CargarRegistroFragment extends Fragment {
                 nombreEjercicio = ejercicio.NombreEjercicio;
                 esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
                 esPesoPorLado = (ejercicio.PesoPorLado != null && ejercicio.PesoPorLado);
+                tipoDeBarra = ejercicio.TipoDeBarra;
+                pesoBarra = ejercicio.PesoBarra != null ? ejercicio.PesoBarra : 0.0f;
             }
             
             if (seccion != null) {
@@ -174,6 +178,7 @@ public class CargarRegistroFragment extends Fragment {
 
     private void initViews(View view) {
         tvNombreEjercicio = view.findViewById(R.id.tvNombreEjercicio);
+        tvInfoBarra = view.findViewById(R.id.tvInfoBarra);
         tvSerieValue = view.findViewById(R.id.tvSerieValue);
         tvPesoLabel = view.findViewById(R.id.tvPesoLabel);
         tvColumnaPeso = view.findViewById(R.id.tvColumnaPeso);
@@ -193,6 +198,13 @@ public class CargarRegistroFragment extends Fragment {
         ivEditTimer = view.findViewById(R.id.ivEditTimer);
 
         tvNombreEjercicio.setText(nombreEjercicio);
+
+        if (tipoDeBarra != null && !tipoDeBarra.equals("Ninguna") && !tipoDeBarra.equals("None")) {
+            tvInfoBarra.setText(getString(R.string.info_barra_format, tipoDeBarra, pesoBarra));
+            tvInfoBarra.setVisibility(View.VISIBLE);
+        } else {
+            tvInfoBarra.setVisibility(View.GONE);
+        }
 
         if (esPesoCorporal) {
             tvPesoLabel.setText("Lastre (kg)");
@@ -563,7 +575,7 @@ public class CargarRegistroFragment extends Fragment {
         double pesoFinal = entero + decimal;
 
         if (esPesoPorLado) {
-            pesoFinal *= 2;
+            pesoFinal = (pesoFinal * 2) + pesoBarra;
         }
 
         if (reps <= 0) {

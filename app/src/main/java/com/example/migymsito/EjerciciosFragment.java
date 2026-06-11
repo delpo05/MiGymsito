@@ -16,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -23,6 +25,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -227,9 +230,38 @@ public class EjerciciosFragment extends Fragment {
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
         CheckBox cbPesoCorporal = dialog.findViewById(R.id.cbPesoCorporal);
         CheckBox cbPesoPorLado = dialog.findViewById(R.id.cbPesoPorLado);
+        View llContenedorBarra = dialog.findViewById(R.id.llContenedorBarra);
+        Spinner spTipoDeBarra = dialog.findViewById(R.id.spTipoDeBarra);
+        EditText etPesoBarra = dialog.findViewById(R.id.etPesoBarra);
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
+
+        ArrayAdapter<CharSequence> barAdapter = ArrayAdapter.createFromResource(requireContext(),
+                R.array.tipos_de_barra, android.R.layout.simple_spinner_item);
+        barAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spTipoDeBarra.setAdapter(barAdapter);
+
+        cbPesoPorLado.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            llContenedorBarra.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
+
+        spTipoDeBarra.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = parent.getItemAtPosition(position).toString();
+                if (selection.contains("(") && selection.contains("kg)")) {
+                    String weightStr = selection.substring(selection.lastIndexOf("(") + 1, selection.lastIndexOf(" kg)"));
+                    try {
+                        etPesoBarra.setText(weightStr);
+                    } catch (Exception ignored) {}
+                } else if (position == 0) { // Ninguna / None
+                    etPesoBarra.setText("0");
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         uriImagenSeleccionada = null; 
 
@@ -238,6 +270,20 @@ public class EjerciciosFragment extends Fragment {
             etNombre.setText(ejercicioExistente.NombreEjercicio);
             cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
             cbPesoPorLado.setChecked(ejercicioExistente.PesoPorLado != null && ejercicioExistente.PesoPorLado);
+            llContenedorBarra.setVisibility(cbPesoPorLado.isChecked() ? View.VISIBLE : View.GONE);
+            
+            if (ejercicioExistente.TipoDeBarra != null) {
+                for (int i = 0; i < spTipoDeBarra.getCount(); i++) {
+                    if (spTipoDeBarra.getItemAtPosition(i).toString().equals(ejercicioExistente.TipoDeBarra)) {
+                        spTipoDeBarra.setSelection(i);
+                        break;
+                    }
+                }
+            }
+            if (ejercicioExistente.PesoBarra != null) {
+                etPesoBarra.setText(String.valueOf(ejercicioExistente.PesoBarra));
+            }
+
             btnAceptar.setText("Guardar");
             if (ejercicioExistente.ImagenEjercicio != null) {
                 uriImagenSeleccionada = Uri.parse(ejercicioExistente.ImagenEjercicio);
@@ -259,12 +305,27 @@ public class EjerciciosFragment extends Fragment {
                 return;
             }
 
+            String pesoBarraStr = etPesoBarra.getText().toString().trim();
+            float pesoBarra = 0.0f;
+            if (!pesoBarraStr.isEmpty()) {
+                try {
+                    pesoBarra = Float.parseFloat(pesoBarraStr);
+                } catch (NumberFormatException ignored) {}
+            }
+
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
                 nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
                 nuevo.PesoPorLado = cbPesoPorLado.isChecked();
+                if (nuevo.PesoPorLado) {
+                    nuevo.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
+                    nuevo.PesoBarra = pesoBarra;
+                } else {
+                    nuevo.TipoDeBarra = "Ninguna";
+                    nuevo.PesoBarra = 0.0f;
+                }
                 if (uriImagenSeleccionada != null) nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
 
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
@@ -277,6 +338,13 @@ public class EjerciciosFragment extends Fragment {
                 ejercicioExistente.TipoEjercicio = "Personalizado";
                 ejercicioExistente.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
                 ejercicioExistente.PesoPorLado = cbPesoPorLado.isChecked();
+                if (ejercicioExistente.PesoPorLado) {
+                    ejercicioExistente.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
+                    ejercicioExistente.PesoBarra = pesoBarra;
+                } else {
+                    ejercicioExistente.TipoDeBarra = "Ninguna";
+                    ejercicioExistente.PesoBarra = 0.0f;
+                }
 
                 ejercicioRepository.actualizarEjercicioIndependiente(ejercicioExistente, seccionActual.IdSeccion, success -> {
                     dialog.dismiss();

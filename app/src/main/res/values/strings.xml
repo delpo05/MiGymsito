@@ -26,5 +26,29 @@
     <string name="empezar">Empezar</string>
     <string name="siguiente">Siguiente</string>
     <string name="omitir">Omitir</string>
+    <string name="tipo_de_barra">Tipo de Barra</string>
+    <string name="peso_de_barra_kg">Peso de Barra (kg)</string>
+    <string name="hint_peso_barra">0.0</string>
+    <string name="info_barra_format">Barra: %1$s (%2$.1f kg)</string>
+
+    <string-array name="tipos_de_barra">
+        <item>Ninguna</item>
+        <item>Barra olímpica masculina (20 kg)</item>
+        <item>Barra olímpica femenina (15 kg)</item>
+        <item>Barra olímpica juvenil (10 kg)</item>
+        <item>Barra estándar (10 kg)</item>
+        <item>Barra EZ (barra curva) (10 kg)</item>
+        <item>Barra recta corta para bíceps (10 kg)</item>
+        <item>Barra trapecio / hexagonal (25 kg)</item>
+        <item>Barra de sentadillas de seguridad (SSB) (30 kg)</item>
+        <item>Barra de powerlifting (20 kg)</item>
+        <item>Barra para peso muerto (20 kg)</item>
+        <item>Barra para sentadilla (25 kg)</item>
+        <item>Barra técnica (5 kg)</item>
+        <item>Barra corta olímpica (10 kg)</item>
+        <item>Barra para tríceps (10 kg)</item>
+        <item>Barra suiza / multipresa (15 kg)</item>
+        <item>Barra camber (25 kg)</item>
+    </string-array>
 
 </resources>

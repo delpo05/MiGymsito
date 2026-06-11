@@ -6,4 +6,5 @@
     <color name="rojo">#FFC14848</color>
     <color name="blanco">#fefefe</color>
     <color name="gris_pista">#cccccc</color>
+    <color name="gris_oscuro_texto">#333333</color>
 </resources>

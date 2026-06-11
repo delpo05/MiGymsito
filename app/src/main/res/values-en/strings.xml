@@ -26,4 +26,28 @@
     <string name="empezar">Start</string>
     <string name="siguiente">Next</string>
     <string name="omitir">Skip</string>
+    <string name="tipo_de_barra">Barbell Type</string>
+    <string name="peso_de_barra_kg">Barbell Weight (kg)</string>
+    <string name="hint_peso_barra">0.0</string>
+    <string name="info_barra_format">Barbell: %1$s (%2$.1f kg)</string>
+
+    <string-array name="tipos_de_barra">
+        <item>None</item>
+        <item>Men\'s Olympic Barbell (20 kg)</item>
+        <item>Women\'s Olympic Barbell (15 kg)</item>
+        <item>Youth Olympic Barbell (10 kg)</item>
+        <item>Standard Barbell (10 kg)</item>
+        <item>EZ Curl Bar (10 kg)</item>
+        <item>Straight Curl Bar (10 kg)</item>
+        <item>Trap Bar / Hex Bar (25 kg)</item>
+        <item>Safety Squat Bar (SSB) (30 kg)</item>
+        <item>Power Bar (20 kg)</item>
+        <item>Deadlift Bar (20 kg)</item>
+        <item>Squat Bar (25 kg)</item>
+        <item>Technique Bar (5 kg)</item>
+        <item>Short Olympic Bar (10 kg)</item>
+        <item>Tricep Bar (10 kg)</item>
+        <item>Swiss Bar / Football Bar (15 kg)</item>
+        <item>Cambered Bar (25 kg)</item>
+    </string-array>
 </resources>
