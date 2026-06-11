@@ -238,8 +238,8 @@ public class EjerciciosFragment extends Fragment {
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
 
         ArrayAdapter<CharSequence> barAdapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.tipos_de_barra, android.R.layout.simple_spinner_item);
-        barAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.tipos_de_barra, R.layout.spinner_item_dark);
+        barAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark);
         spTipoDeBarra.setAdapter(barAdapter);
 
         cbPesoPorLado.setOnCheckedChangeListener((buttonView, isChecked) -> {
