@@ -77,4 +77,10 @@
         android:label="Datos Personales"
         tools:layout="@layout/datos_personales" />
 
+    <fragment
+        android:id="@+id/misRegistrosFragment"
+        android:name="com.example.migymsito.MisRegistrosFragment"
+        android:label="Mis registros"
+        tools:layout="@layout/fragment_mis_registros" />
+
 </navigation>

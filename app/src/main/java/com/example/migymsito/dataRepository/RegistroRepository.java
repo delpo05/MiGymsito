@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroDetallado;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.RegistroDao;
@@ -145,6 +146,13 @@ public class RegistroRepository {
     public void obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntrenamientoActual);
+            notificar(callback, lista);
+        });
+    }
+
+    public void buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, RepositoryCallback<List<RegistroDetallado>> callback) {
+        executorService.execute(() -> {
+            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio);
             notificar(callback, lista);
         });
     }

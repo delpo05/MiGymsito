@@ -7,6 +7,7 @@ import androidx.room.Delete;
 import androidx.room.Update;
 
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroDetallado;
 
 import java.util.List;
 
@@ -75,6 +76,22 @@ public interface RegistroDao {
            ") " +
            "ORDER BY r.NumSeriesRegistro DESC")
     List<Registro> obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual);
+
+    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+           "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
+           "r.Repeticiones as repeticiones, r.PesoRegistro as peso, " +
+           "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
+           "FROM Registro r " +
+           "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+           "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
+           "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
+           "WHERE rut.IdUsuarioRutina = :idUsuario " +
+           "AND (:idRutina = -1 OR rut.IdRutina = :idRutina) " +
+           "AND (:idSeccion = -1 OR s.IdSeccion = :idSeccion) " +
+           "AND (:idEjercicio = -1 OR ej.IdEjercicio = :idEjercicio) " +
+           "ORDER BY r.FechaRegistro DESC")
+    List<RegistroDetallado> buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio);
 
     @Query("DELETE FROM Registro")
     void borrarTodo();

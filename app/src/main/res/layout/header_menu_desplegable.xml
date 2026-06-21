@@ -12,6 +12,6 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:src="@drawable/logo_app_header" />
-    
+
 
 </LinearLayout>

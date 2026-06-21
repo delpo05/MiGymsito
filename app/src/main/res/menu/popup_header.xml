@@ -9,12 +9,8 @@
         android:title="@string/mi_perfil" />
 
     <item
-        android:id="@+id/Exportar"
-        android:title="Exportar rutinas e historial" />
-
-    <item
-        android:id="@+id/Importar"
-        android:title="Importar rutinas e historial" />
+        android:id="@+id/MisRegistros"
+        android:title="Mis registros" />
 
     <item
         android:id="@+id/Historial"
