@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_white"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_gravity="center">
+
+    <TextView
+        android:id="@+id/tvTituloCopia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Copia de Seguridad"
+        android:textColor="@color/negro"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_export"
+        app:tint="@color/negro" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="Exporta todos tus datos a un archivo o importa una copia previa. La importación reemplazará los datos actuales."
+        android:textColor="@color/negro"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btnExportarCopia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="#2E7D32"
+        android:text="Exportar Copia"
+        android:textAllCaps="false"
+        android:textColor="@color/blanco"
+        app:cornerRadius="20dp" />
+
+    <Button
+        android:id="@+id/btnImportarCopia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/negro"
+        android:text="Importar Copia"
+        android:textAllCaps="false"
+        android:textColor="@color/blanco"
+        app:cornerRadius="20dp" />
+
+    <Button
+        android:id="@+id/btnCerrarCopia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/rojo"
+        android:text="Cerrar"
+        android:textAllCaps="false"
+        android:textColor="@color/blanco"
+        app:cornerRadius="20dp" />
+
+</LinearLayout>

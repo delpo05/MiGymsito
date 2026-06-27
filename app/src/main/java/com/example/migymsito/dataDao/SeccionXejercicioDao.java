@@ -26,4 +26,10 @@ public interface SeccionXejercicioDao {
 
     @Query("SELECT * FROM SeccionXejercicio WHERE IdSeccion = :idSeccion AND IdEjercicio = :idEjercicio LIMIT 1")
     SeccionXejercicio getRelacion(int idSeccion, int idEjercicio);
+
+    @Query("SELECT * FROM SeccionXejercicio")
+    List<SeccionXejercicio> obtenerTodasLasRelaciones();
+
+    @Query("DELETE FROM SeccionXejercicio")
+    void borrarTodo();
 }

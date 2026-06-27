@@ -186,13 +186,37 @@
             android:layout_height="60dp"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
-            android:layout_marginBottom="40dp"
+            android:layout_marginBottom="16dp"
             android:text="REGISTRAR"
             android:textColor="@color/negro"
             android:textSize="18sp"
             android:textStyle="bold"
             app:backgroundTint="@color/blanco"
             app:cornerRadius="30dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="¿Ya tienes una copia de seguridad?"
+            android:textColor="#999999"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnImportarBackupRegistro"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginBottom="40dp"
+            android:text="IMPORTAR COPIA"
+            android:textColor="@color/blanco"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#1A1A1A"
+            app:cornerRadius="30dp"
+            app:strokeColor="#1F1F1F"
+            app:strokeWidth="1dp" />
 
     </LinearLayout>
 </ScrollView>

@@ -40,4 +40,10 @@ public interface EntrenamientoDao {
 
     @Query("SELECT * FROM Entrenamiento WHERE IdUsuario = :idUsuario AND IdSeccion = :idSeccion AND FechaFin IS NOT NULL ORDER BY FechaFin DESC")
     List<Entrenamiento> getEntrenamientosFinalizadosPorSeccion(int idUsuario, int idSeccion);
+
+    @Query("SELECT * FROM Entrenamiento")
+    List<Entrenamiento> obtenerTodosLosEntrenamientos();
+
+    @Query("DELETE FROM Entrenamiento")
+    void borrarTodo();
 }

@@ -61,6 +61,12 @@ public class RegistroSesionFragment extends Fragment {
         etRegFechaNac.setOnClickListener(v -> mostrarDatePicker());
 
         view.findViewById(R.id.btnRegistrar).setOnClickListener(this::EventoBotonRegistrar);
+
+        view.findViewById(R.id.btnImportarBackupRegistro).setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).lanzarSelectorDeArchivo();
+            }
+        });
     }
 
     private void mostrarDatePicker() {

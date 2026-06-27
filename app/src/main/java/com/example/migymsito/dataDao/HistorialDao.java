@@ -29,6 +29,9 @@ public interface HistorialDao {
     @Query("SELECT * FROM Historial WHERE IdUsuarioHistorial = :idUsuario ORDER BY FechaHistorial DESC LIMIT 1")
     Historial obtenerUltimoHistorial(int idUsuario);
 
+    @Query("SELECT * FROM Historial")
+    List<Historial> obtenerTodoElHistorial();
+
     @Query("DELETE FROM Historial")
     void borrarTodo();
 }

@@ -93,6 +93,9 @@ public interface RegistroDao {
            "ORDER BY r.FechaRegistro DESC")
     List<RegistroDetallado> buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio);
 
+    @Query("SELECT * FROM Registro")
+    List<Registro> obtenerTodosLosRegistros();
+
     @Query("DELETE FROM Registro")
     void borrarTodo();
 }
