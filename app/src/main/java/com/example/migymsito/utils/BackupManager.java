@@ -202,15 +202,16 @@ public class BackupManager {
                     return;
                 }
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = is.read(buffer)) != -1) {
+                    result.write(buffer, 0, length);
                 }
+                String jsonString = result.toString("UTF-8");
                 is.close();
 
-                JSONObject backup = new JSONObject(sb.toString());
+                JSONObject backup = new JSONObject(jsonString);
                 AppDatabase db = AppDatabase.getDatabase(context);
 
                 // Borrar e Importar en una sola transacción para seguridad y velocidad
@@ -235,120 +236,137 @@ public class BackupManager {
                         }
 
                         // Importar Usuarios
-                        JSONArray usersArray = backup.getJSONArray("usuarios");
-                        for (int i = 0; i < usersArray.length(); i++) {
-                            JSONObject ju = usersArray.getJSONObject(i);
-                            Usuario u = new Usuario();
-                            u.IdUsuario = ju.getInt("IdUsuario");
-                            u.NombreUsuario = ju.getString("NombreUsuario");
-                            u.FechaNacimientoUsuario = ju.getLong("FechaNacimientoUsuario");
-                            u.CorreoElectronicoUsuario = ju.getString("CorreoElectronicoUsuario");
-                            u.GeneroUsuario = ju.getString("GeneroUsuario");
-                            db.usuarioDao().registrarUsuario(u);
+                        if (backup.has("usuarios")) {
+                            JSONArray usersArray = backup.getJSONArray("usuarios");
+                            for (int i = 0; i < usersArray.length(); i++) {
+                                JSONObject ju = usersArray.getJSONObject(i);
+                                Usuario u = new Usuario();
+                                u.IdUsuario = ju.getInt("IdUsuario");
+                                u.NombreUsuario = ju.getString("NombreUsuario");
+                                u.FechaNacimientoUsuario = ju.getLong("FechaNacimientoUsuario");
+                                u.CorreoElectronicoUsuario = ju.getString("CorreoElectronicoUsuario");
+                                u.GeneroUsuario = ju.getString("GeneroUsuario");
+                                db.usuarioDao().registrarUsuario(u);
+                            }
                         }
 
                         // Importar Ejercicios
-                        JSONArray ejArray = backup.getJSONArray("ejercicios");
-                        for (int i = 0; i < ejArray.length(); i++) {
-                            JSONObject je = ejArray.getJSONObject(i);
-                            Ejercicio e = new Ejercicio();
-                            e.IdEjercicio = je.getInt("IdEjercicio");
-                            e.TipoEjercicio = je.getString("TipoEjercicio");
-                            e.NombreEjercicio = je.getString("NombreEjercicio");
-                            e.PesoCorporalEjercicio = je.getBoolean("PesoCorporalEjercicio");
-                            e.PesoPorLado = je.optBoolean("PesoPorLado", false);
-                            e.TipoDeBarra = je.getString("TipoDeBarra");
-                            e.PesoBarra = (float) je.optDouble("PesoBarra", 0.0);
-                            
-                            if (je.has("imagenData")) {
-                                e.ImagenEjercicio = guardarImagenDesdeBase64(je.getString("imagenData"));
+                        if (backup.has("ejercicios")) {
+                            JSONArray ejArray = backup.getJSONArray("ejercicios");
+                            for (int i = 0; i < ejArray.length(); i++) {
+                                JSONObject je = ejArray.getJSONObject(i);
+                                Ejercicio e = new Ejercicio();
+                                e.IdEjercicio = je.getInt("IdEjercicio");
+                                e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
+                                e.NombreEjercicio = je.getString("NombreEjercicio");
+                                e.PesoCorporalEjercicio = je.optBoolean("PesoCorporalEjercicio", false);
+                                e.PesoPorLado = je.optBoolean("PesoPorLado", false);
+                                e.TipoDeBarra = je.optString("TipoDeBarra", "");
+                                e.PesoBarra = (float) je.optDouble("PesoBarra", 0.0);
+
+                                if (je.has("imagenData")) {
+                                    e.ImagenEjercicio = guardarImagenDesdeBase64(je.getString("imagenData"));
+                                }
+                                db.ejercicioDao().insertarEjercicio(e);
                             }
-                            db.ejercicioDao().insertarEjercicio(e);
                         }
 
                         // Importar Rutinas
-                        JSONArray rutinasArray = backup.getJSONArray("rutinas");
-                        for (int i = 0; i < rutinasArray.length(); i++) {
-                            JSONObject jr = rutinasArray.getJSONObject(i);
-                            Rutina r = new Rutina();
-                            r.IdRutina = jr.getInt("IdRutina");
-                            r.NombreRutina = jr.getString("NombreRutina");
-                            r.IdUsuarioRutina = jr.getInt("IdUsuarioRutina");
-                            db.rutinaDao().insertarRutina(r);
+                        if (backup.has("rutinas")) {
+                            JSONArray rutinasArray = backup.getJSONArray("rutinas");
+                            for (int i = 0; i < rutinasArray.length(); i++) {
+                                JSONObject jr = rutinasArray.getJSONObject(i);
+                                Rutina r = new Rutina();
+                                r.IdRutina = jr.getInt("IdRutina");
+                                r.NombreRutina = jr.getString("NombreRutina");
+                                r.IdUsuarioRutina = jr.getInt("IdUsuarioRutina");
+                                db.rutinaDao().insertarRutina(r);
+                            }
                         }
 
                         // Importar Secciones
-                        JSONArray seccionesArray = backup.getJSONArray("secciones");
-                        for (int i = 0; i < seccionesArray.length(); i++) {
-                            JSONObject js = seccionesArray.getJSONObject(i);
-                            Seccion s = new Seccion();
-                            s.IdSeccion = js.getInt("IdSeccion");
-                            s.NombreSeccion = js.getString("NombreSeccion");
-                            s.TipoSeccion = js.getString("TipoSeccion");
-                            if (!js.isNull("IdRutinaSeccion")) {
-                                s.IdRutinaSeccion = js.getInt("IdRutinaSeccion");
+                        if (backup.has("secciones")) {
+                            JSONArray seccionesArray = backup.getJSONArray("secciones");
+                            for (int i = 0; i < seccionesArray.length(); i++) {
+                                JSONObject js = seccionesArray.getJSONObject(i);
+                                Seccion s = new Seccion();
+                                s.IdSeccion = js.getInt("IdSeccion");
+                                s.NombreSeccion = js.getString("NombreSeccion");
+                                s.TipoSeccion = js.optString("TipoSeccion", "Personalizado");
+                                if (!js.isNull("IdRutinaSeccion")) {
+                                    s.IdRutinaSeccion = js.getInt("IdRutinaSeccion");
+                                }
+                                db.seccionDao().insertarSeccion(s);
                             }
-                            db.seccionDao().insertarSeccion(s);
                         }
 
                         // Importar Relaciones
-                        JSONArray sxeArray = backup.getJSONArray("relaciones");
-                        for (int i = 0; i < sxeArray.length(); i++) {
-                            JSONObject jsxe = sxeArray.getJSONObject(i);
-                            SeccionXejercicio sxe = new SeccionXejercicio();
-                            sxe.IdSeccionXejercicio = jsxe.getInt("IdSeccionXejercicio");
-                            sxe.IdSeccion = jsxe.getInt("IdSeccion");
-                            sxe.IdEjercicio = jsxe.getInt("IdEjercicio");
-                            db.seccionXejercicioDao().insert(sxe);
+                        if (backup.has("relaciones")) {
+                            JSONArray sxeArray = backup.getJSONArray("relaciones");
+                            for (int i = 0; i < sxeArray.length(); i++) {
+                                JSONObject jsxe = sxeArray.getJSONObject(i);
+                                SeccionXejercicio sxe = new SeccionXejercicio();
+                                sxe.IdSeccionXejercicio = jsxe.getInt("IdSeccionXejercicio");
+                                sxe.IdSeccion = jsxe.getInt("IdSeccion");
+                                sxe.IdEjercicio = jsxe.getInt("IdEjercicio");
+                                db.seccionXejercicioDao().insert(sxe);
+                            }
                         }
 
                         // Importar Entrenamientos
-                        JSONArray entArray = backup.getJSONArray("entrenamientos");
-                        for (int i = 0; i < entArray.length(); i++) {
-                            JSONObject jent = entArray.getJSONObject(i);
-                            Entrenamiento ent = new Entrenamiento();
-                            ent.IdEntrenamiento = jent.getInt("IdEntrenamiento");
-                            ent.IdUsuario = jent.getInt("IdUsuario");
-                            ent.IdSeccion = jent.getInt("IdSeccion");
-                            ent.NumeroEntrenamiento = jent.getInt("NumeroEntrenamiento");
-                            ent.FechaInicio = jent.getLong("FechaInicio");
-                            if (!jent.isNull("FechaFin")) {
-                                ent.FechaFin = jent.getLong("FechaFin");
+                        if (backup.has("entrenamientos")) {
+                            JSONArray entArray = backup.getJSONArray("entrenamientos");
+                            for (int i = 0; i < entArray.length(); i++) {
+                                JSONObject jent = entArray.getJSONObject(i);
+                                Entrenamiento ent = new Entrenamiento();
+                                ent.IdEntrenamiento = jent.getInt("IdEntrenamiento");
+                                ent.IdUsuario = jent.getInt("IdUsuario");
+                                ent.IdSeccion = jent.getInt("IdSeccion");
+                                ent.NumeroEntrenamiento = jent.getInt("NumeroEntrenamiento");
+                                ent.FechaInicio = jent.getLong("FechaInicio");
+                                if (!jent.isNull("FechaFin")) {
+                                    ent.FechaFin = jent.getLong("FechaFin");
+                                }
+                                db.entrenamientoDao().insert(ent);
                             }
-                            db.entrenamientoDao().insert(ent);
                         }
 
                         // Importar Registros
-                        JSONArray regArray = backup.getJSONArray("registros");
-                        for (int i = 0; i < regArray.length(); i++) {
-                            JSONObject jr = regArray.getJSONObject(i);
-                            Registro r = new Registro();
-                            r.IdRegistro = jr.getInt("IdRegistro");
-                            r.IdEntrenamiento = jr.getInt("IdEntrenamiento");
-                            r.IdSeccionXejercicio = jr.getInt("IdSeccionXejercicio");
-                            r.PesoRegistro = jr.getDouble("PesoRegistro");
-                            r.NumSeriesRegistro = jr.getInt("NumSeriesRegistro");
-                            r.Repeticiones = jr.getInt("Repeticiones");
-                            r.FechaRegistro = jr.getLong("FechaRegistro");
-                            if (!jr.isNull("PesoCorporalMomento")) {
-                                r.PesoCorporalMomento = jr.getDouble("PesoCorporalMomento");
+                        if (backup.has("registros")) {
+                            JSONArray regArray = backup.getJSONArray("registros");
+                            for (int i = 0; i < regArray.length(); i++) {
+                                JSONObject jr = regArray.getJSONObject(i);
+                                Registro r = new Registro();
+                                r.IdRegistro = jr.getInt("IdRegistro");
+                                r.IdEntrenamiento = jr.getInt("IdEntrenamiento");
+                                r.IdSeccionXejercicio = jr.getInt("IdSeccionXejercicio");
+                                r.PesoRegistro = jr.getDouble("PesoRegistro");
+                                r.NumSeriesRegistro = jr.getInt("NumSeriesRegistro");
+                                r.Repeticiones = jr.getInt("Repeticiones");
+                                r.FechaRegistro = jr.getLong("FechaRegistro");
+                                if (!jr.isNull("PesoCorporalMomento")) {
+                                    r.PesoCorporalMomento = jr.getDouble("PesoCorporalMomento");
+                                }
+                                db.registroDao().insertarRegistro(r);
                             }
-                            db.registroDao().insertarRegistro(r);
                         }
 
                         // Importar Historial
-                        JSONArray histArray = backup.getJSONArray("historial");
-                        for (int i = 0; i < histArray.length(); i++) {
-                            JSONObject jh = histArray.getJSONObject(i);
-                            Historial h = new Historial();
-                            h.IdHistorial = jh.getInt("IdHistorial");
-                            h.IdUsuarioHistorial = jh.getInt("IdUsuarioHistorial");
-                            h.PesoHistorial = jh.getDouble("PesoHistorial");
-                            h.AlturaHistorial = jh.getDouble("AlturaHistorial");
-                            h.FechaHistorial = jh.getLong("FechaHistorial");
-                            db.historialDao().insertarHistorial(h);
+                        if (backup.has("historial")) {
+                            JSONArray histArray = backup.getJSONArray("historial");
+                            for (int i = 0; i < histArray.length(); i++) {
+                                JSONObject jh = histArray.getJSONObject(i);
+                                Historial h = new Historial();
+                                h.IdHistorial = jh.getInt("IdHistorial");
+                                h.IdUsuarioHistorial = jh.getInt("IdUsuarioHistorial");
+                                h.PesoHistorial = jh.getDouble("PesoHistorial");
+                                h.AlturaHistorial = jh.getDouble("AlturaHistorial");
+                                h.FechaHistorial = jh.getLong("FechaHistorial");
+                                db.historialDao().insertarHistorial(h);
+                            }
                         }
                     } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing JSON data during transaction", e);
                         throw new RuntimeException(e);
                     }
                 });
@@ -363,15 +381,28 @@ public class BackupManager {
     }
 
     private String uriToBase64(Uri uri) {
-        try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
-             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[1024];
-            int len;
-            while (inputStream != null && (len = inputStream.read(buffer)) != -1) {
-                byteBuffer.write(buffer, 0, len);
+        try {
+            // Manejar esquemas de archivo si es necesario
+            if (uri.getScheme() == null || uri.getScheme().equals("file")) {
+                String path = uri.getPath();
+                if (path == null) return null;
+                File file = new File(path);
+                if (!file.exists()) return null;
             }
-            return Base64.encodeToString(byteBuffer.toByteArray(), Base64.NO_WRAP);
+
+            try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+                 ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream()) {
+                if (inputStream == null) return null;
+                
+                byte[] buffer = new byte[8192]; // Buffer más grande
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    byteBuffer.write(buffer, 0, len);
+                }
+                return Base64.encodeToString(byteBuffer.toByteArray(), Base64.NO_WRAP);
+            }
         } catch (Exception e) {
+            Log.e(TAG, "Error convirtiendo URI a Base64: " + uri, e);
             return null;
         }
     }

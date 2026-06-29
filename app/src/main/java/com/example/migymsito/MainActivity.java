@@ -249,12 +249,18 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(boolean success) {
                 runOnUiThread(() -> {
                     ocultarLoading();
-                    Toast.makeText(MainActivity.this, "Importación exitosa. Reinicia la aplicación.", Toast.LENGTH_LONG).show();
                     // Reiniciar sesión del usuario actual
                     userRepo.obtenerPrimerUsuario(user -> {
-                        usuarioLogueado = user;
-                        actualizarNombreHeader();
-                        navController.navigate(R.id.Home);
+                        if (user != null) {
+                            usuarioLogueado = user;
+                            userRepo.guardarIdSesion(user.IdUsuario); // Actualizar ID en SharedPreferences
+                            actualizarNombreHeader();
+                            Toast.makeText(MainActivity.this, "Importación exitosa.", Toast.LENGTH_LONG).show();
+                            navController.navigate(R.id.Home);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Importación exitosa. Crea un usuario para comenzar.", Toast.LENGTH_LONG).show();
+                            navController.navigate(R.id.Home);
+                        }
                     });
                 });
             }
