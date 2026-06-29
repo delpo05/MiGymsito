@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +50,7 @@ public class EstadisticasFragment extends Fragment {
     private AutoCompleteTextView autoCompleteRutinas, autoCompleteSecciones, autoCompleteEjercicios, autoCompleteConsulta;
     private TextView tvFormulaEstadistica;
     private BarChart barChart;
+    private Button btnCargarMas;
     private SharedViewModel sharedViewModel;
 
     private TextInputEditText etFechaDesde, etFechaHasta;
@@ -64,6 +67,10 @@ public class EstadisticasFragment extends Fragment {
     private List<Seccion> listaSecciones = new ArrayList<>();
     private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
     private Ejercicio ejercicioSeleccionado;
+
+    private int currentOffset = 0;
+    private static final int PAGE_SIZE = 25;
+    private final List<Registro> registrosAcumulados = new ArrayList<>();
 
     @Nullable
     @Override
@@ -100,6 +107,7 @@ public class EstadisticasFragment extends Fragment {
         MaterialButton btnConsultarProgreso = view.findViewById(R.id.btnConsultarProgreso);
         tvFormulaEstadistica = view.findViewById(R.id.tvFormulaEstadistica);
         barChart = view.findViewById(R.id.barChart);
+        btnCargarMas = view.findViewById(R.id.btnCargarMas);
 
         etFechaDesde = view.findViewById(R.id.etFechaDesde);
         etFechaHasta = view.findViewById(R.id.etFechaHasta);
@@ -111,7 +119,14 @@ public class EstadisticasFragment extends Fragment {
         configurarGrafico();
         configurarFiltrosFecha(); 
 
-        btnConsultarProgreso.setOnClickListener(v -> consultarProgreso());
+        btnConsultarProgreso.setOnClickListener(v -> {
+            currentOffset = 0;
+            registrosAcumulados.clear();
+            consultarProgreso();
+        });
+        
+        btnCargarMas.setOnClickListener(v -> consultarProgreso());
+        
         btnLimpiarFiltros.setOnClickListener(v -> limpiarFiltrosYCampos());
     }
 
@@ -310,50 +325,59 @@ public class EstadisticasFragment extends Fragment {
         }
 
         if (consulta.equals("Peso Máximo")) {
-            registroRepository.obtenerProgresoCargas(ejercicioSeleccionado.IdEjercicio, registros -> {
-                if (registros == null || registros.isEmpty()) {
-                    Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
-                    barChart.clear();
-                    tvFormulaEstadistica.setVisibility(View.GONE);
-                    return;
-                }
-                List<Registro> registrosFiltrados = filtrarPorFecha(registros, tieneDesde, calendarDesde, calendarHasta);
-                
-                if (registrosFiltrados.isEmpty()) {
-                    Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
-                    barChart.clear();
-                    tvFormulaEstadistica.setVisibility(View.GONE);
-                    return;
-                }
-
-                tvFormulaEstadistica.setText("Peso Máximo registrado por día");
-                tvFormulaEstadistica.setVisibility(View.VISIBLE);
-                mostrarGraficoBarras(registrosFiltrados, "Peso Máximo (kg)", false);
+            registroRepository.obtenerProgresoCargasPaginado(ejercicioSeleccionado.IdEjercicio, PAGE_SIZE, currentOffset, registros -> {
+                procesarRegistros(registros, tieneDesde, false);
             });
         } else if (consulta.equals("Volumen de Entrenamiento")) {
-            registroRepository.obtenerVolumenEntrenamiento(ejercicioSeleccionado.IdEjercicio, registros -> {
-                if (registros == null || registros.isEmpty()) {
-                    Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
-                    barChart.clear();
-                    tvFormulaEstadistica.setVisibility(View.GONE);
-                    return;
-                }
-                List<Registro> registrosFiltrados = filtrarPorFecha(registros, tieneDesde, calendarDesde, calendarHasta);
-
-                if (registrosFiltrados.isEmpty()) {
-                    Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
-                    barChart.clear();
-                    tvFormulaEstadistica.setVisibility(View.GONE);
-                    return;
-                }
-
-                tvFormulaEstadistica.setText("Fórmula:  (Peso × Repeticiones × Series)");
-                tvFormulaEstadistica.setVisibility(View.VISIBLE);
-                mostrarGraficoBarras(registrosFiltrados, "Volumen Total (kg)", true);
+            registroRepository.obtenerVolumenEntrenamientoPaginado(ejercicioSeleccionado.IdEjercicio, PAGE_SIZE, currentOffset, registros -> {
+                procesarRegistros(registros, tieneDesde, true);
             });
         } else {
             tvFormulaEstadistica.setVisibility(View.GONE);
             Toast.makeText(getContext(), "Consulta no implementada aún", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void procesarRegistros(List<Registro> registros, boolean filtrar, boolean calcularVolumen) {
+        if (registros.isEmpty() && currentOffset == 0) {
+            Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
+            barChart.clear();
+            tvFormulaEstadistica.setVisibility(View.GONE);
+            btnCargarMas.setVisibility(View.GONE);
+            return;
+        }
+
+        List<Registro> filtrados = filtrarPorFecha(registros, filtrar, calendarDesde, calendarHasta);
+        this.registrosAcumulados.addAll(filtrados);
+
+        if (this.registrosAcumulados.isEmpty()) {
+            Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
+            barChart.clear();
+            tvFormulaEstadistica.setVisibility(View.GONE);
+            
+            if (registros.size() == PAGE_SIZE) {
+                btnCargarMas.setVisibility(View.VISIBLE);
+                currentOffset += PAGE_SIZE;
+            } else {
+                btnCargarMas.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        if (calcularVolumen) {
+            tvFormulaEstadistica.setText("Fórmula:  (Peso × Repeticiones × Series)");
+        } else {
+            tvFormulaEstadistica.setText("Peso Máximo registrado por día");
+        }
+        tvFormulaEstadistica.setVisibility(View.VISIBLE);
+        
+        mostrarGraficoBarras(this.registrosAcumulados, calcularVolumen ? "Volumen Total (kg)" : "Peso Máximo (kg)", calcularVolumen);
+
+        if (registros.size() == PAGE_SIZE) {
+            btnCargarMas.setVisibility(View.VISIBLE);
+            currentOffset += PAGE_SIZE;
+        } else {
+            btnCargarMas.setVisibility(View.GONE);
         }
     }
 
@@ -377,9 +401,13 @@ public class EstadisticasFragment extends Fragment {
         final List<String> fechas = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
 
+        // Ordenar por fecha ASC para el gráfico
+        List<Registro> sortedRegistros = new ArrayList<>(registros);
+        Collections.sort(sortedRegistros, (r1, r2) -> Long.compare(r1.FechaRegistro, r2.FechaRegistro));
+
         Map<String, Float> datosConsolidados = new LinkedHashMap<>();
 
-        for (Registro r : registros) {
+        for (Registro r : sortedRegistros) {
             String fechaStr = sdf.format(new Date(r.FechaRegistro));
             float valorRegistro;
 

@@ -90,8 +90,32 @@ public interface RegistroDao {
            "AND (:idRutina = -1 OR rut.IdRutina = :idRutina) " +
            "AND (:idSeccion = -1 OR s.IdSeccion = :idSeccion) " +
            "AND (:idEjercicio = -1 OR ej.IdEjercicio = :idEjercicio) " +
-           "ORDER BY r.FechaRegistro DESC")
-    List<RegistroDetallado> buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio);
+           "AND (:fechaDesde = -1 OR r.FechaRegistro >= :fechaDesde) " +
+           "AND (:fechaHasta = -1 OR r.FechaRegistro <= :fechaHasta) " +
+           "ORDER BY r.FechaRegistro DESC " +
+           "LIMIT :limit OFFSET :offset")
+    List<RegistroDetallado> buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset);
+
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "AND r.PesoRegistro = (" +
+            "   SELECT MAX(r2.PesoRegistro) " +
+            "   FROM Registro r2 " +
+            "   JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
+            "   WHERE sxe2.IdEjercicio = :idEjercicio " +
+            "   AND (r2.FechaRegistro / 86400000) = (r.FechaRegistro / 86400000) " +
+            ") " +
+            "ORDER BY r.FechaRegistro DESC " +
+            "LIMIT :limit OFFSET :offset")
+    List<Registro> obtenerProgresoCargasPaginado(int idEjercicio, int limit, int offset);
+
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "ORDER BY r.FechaRegistro DESC " +
+            "LIMIT :limit OFFSET :offset")
+    List<Registro> obtenerRegistrosParaVolumenPaginado(int idEjercicio, int limit, int offset);
 
     @Query("SELECT * FROM Registro")
     List<Registro> obtenerTodosLosRegistros();

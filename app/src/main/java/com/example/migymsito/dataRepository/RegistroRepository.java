@@ -150,9 +150,23 @@ public class RegistroRepository {
         });
     }
 
-    public void buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, RepositoryCallback<List<RegistroDetallado>> callback) {
+    public void buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset, RepositoryCallback<List<RegistroDetallado>> callback) {
         executorService.execute(() -> {
-            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio);
+            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetalladosPaginado(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta, limit, offset);
+            notificar(callback, lista);
+        });
+    }
+
+    public void obtenerProgresoCargasPaginado(int idEjercicio, int limit, int offset, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerProgresoCargasPaginado(idEjercicio, limit, offset);
+            notificar(callback, lista);
+        });
+    }
+
+    public void obtenerVolumenEntrenamientoPaginado(int idEjercicio, int limit, int offset, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerRegistrosParaVolumenPaginado(idEjercicio, limit, offset);
             notificar(callback, lista);
         });
     }

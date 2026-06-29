@@ -229,5 +229,17 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCargarMas"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cargar más registros"
+            android:textAllCaps="false"
+            android:textColor="@color/blanco"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
     </LinearLayout>
 </ScrollView>
