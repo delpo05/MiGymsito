@@ -14,10 +14,12 @@ import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +51,7 @@ import java.util.concurrent.Executors;
 
 public class CargarRegistroFragment extends Fragment {
 
-    private TextView tvNombreEjercicio, tvSerieValue, tvPesoLabel, tvColumnaPeso, tvInfoBarra;
+    private TextView tvNombreEjercicio, tvSerieValue, tvColumnaPeso, tvInfoBarra, tvUnidadPeso;
     private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
     private ImageButton btnEliminarUltimo;
     private Button btnCargar, btnVerHistorialPrevio;
@@ -180,7 +182,7 @@ public class CargarRegistroFragment extends Fragment {
         tvNombreEjercicio = view.findViewById(R.id.tvNombreEjercicio);
         tvInfoBarra = view.findViewById(R.id.tvInfoBarra);
         tvSerieValue = view.findViewById(R.id.tvSerieValue);
-        tvPesoLabel = view.findViewById(R.id.tvPesoLabel);
+        tvUnidadPeso = view.findViewById(R.id.tvUnidadPeso);
         tvColumnaPeso = view.findViewById(R.id.tvColumnaPeso);
         
         npRepeticiones = view.findViewById(R.id.npRepeticiones);
@@ -207,11 +209,13 @@ public class CargarRegistroFragment extends Fragment {
         }
 
         if (esPesoCorporal) {
-            tvPesoLabel.setText("Lastre (kg)");
+            tvUnidadPeso.setText("Lastre (kg)");
             tvColumnaPeso.setText("Lastre");
         } else if (esPesoPorLado) {
-            tvPesoLabel.setText("Peso x lado (kg)");
+            tvUnidadPeso.setText("Peso x lado (kg)");
             tvColumnaPeso.setText("Peso (x2)");
+        } else {
+            tvUnidadPeso.setText("kg");
         }
     }
 
@@ -255,6 +259,14 @@ public class CargarRegistroFragment extends Fragment {
         if (ivEditTimer != null) {
             ivEditTimer.setOnClickListener(v -> mostrarDialogoAjustarTiempo());
         }
+        tvUnidadPeso.setOnClickListener(v -> {
+            String current = tvUnidadPeso.getText().toString();
+            if (current.contains("kg")) {
+                tvUnidadPeso.setText(current.replace("kg", "lb"));
+            } else if (current.contains("lb")) {
+                tvUnidadPeso.setText(current.replace("lb", "kg"));
+            }
+        });
     }
 
     private void mostrarDialogoAjustarTiempo() {
@@ -472,6 +484,7 @@ public class CargarRegistroFragment extends Fragment {
         NumberPicker npReps = dialogView.findViewById(R.id.npRepeticionesEdit);
         NumberPicker npEntero = dialogView.findViewById(R.id.npPesoEnteroEdit);
         NumberPicker npDecimal = dialogView.findViewById(R.id.npPesoDecimalEdit);
+        TextView tvUnidad = dialogView.findViewById(R.id.tvUnidadPesoEdit);
         Button btnCancelar = dialogView.findViewById(R.id.btnCancelarEdit);
         Button btnAceptar = dialogView.findViewById(R.id.btnAceptarEdit);
 
@@ -496,6 +509,19 @@ public class CargarRegistroFragment extends Fragment {
         else if (decimal < 0.625) npDecimal.setValue(2);
         else npDecimal.setValue(3);
 
+        if (registro.UnidadPeso != null) {
+            tvUnidad.setText(registro.UnidadPeso);
+        }
+
+        tvUnidad.setOnClickListener(v -> {
+            String current = tvUnidad.getText().toString();
+            if (current.equalsIgnoreCase("kg")) {
+                tvUnidad.setText("lb");
+            } else {
+                tvUnidad.setText("kg");
+            }
+        });
+
         AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
                 .setView(dialogView)
                 .create();
@@ -505,11 +531,13 @@ public class CargarRegistroFragment extends Fragment {
         btnAceptar.setOnClickListener(v -> {
             int newReps = npReps.getValue();
             int newEntero = npEntero.getValue();
+            String newUnidad = tvUnidad.getText().toString();
             double newDecimal = Double.parseDouble("0." + valoresDecimales[npDecimal.getValue()]);
             double newPeso = newEntero + newDecimal;
 
             registro.Repeticiones = newReps;
             registro.PesoRegistro = newPeso;
+            registro.UnidadPeso = newUnidad;
 
             registroRepository.actualizarRegistro(registro);
             adapter.notifyItemChanged(position);
@@ -533,6 +561,19 @@ public class CargarRegistroFragment extends Fragment {
         double peso = registro.PesoRegistro;
         int entero = (int) peso;
         double decimal = peso - entero;
+
+        if (registro.UnidadPeso != null) {
+            String current = tvUnidadPeso.getText().toString();
+            if (current.contains("kg") || current.contains("lb")) {
+                String base = current.contains("(") ? current.substring(0, current.indexOf("(")) : "";
+                if (!base.isEmpty()) {
+                    tvUnidadPeso.setText(base + "(" + registro.UnidadPeso + ")");
+                } else {
+                    tvUnidadPeso.setText(registro.UnidadPeso);
+                }
+            }
+        }
+
         npPesoEntero.setValue(entero);
         if (decimal < 0.125) npPesoDecimal.setValue(0);
         else if (decimal < 0.375) npPesoDecimal.setValue(1);
@@ -570,6 +611,10 @@ public class CargarRegistroFragment extends Fragment {
         npPesoEntero.clearFocus();
         int reps = npRepeticiones.getValue();
         int entero = npPesoEntero.getValue();
+        
+        String unidadFull = tvUnidadPeso.getText().toString();
+        String unidadPeso = unidadFull.contains("lb") ? "lb" : "kg";
+
         String[] valoresDecimales = npPesoDecimal.getDisplayedValues();
         double decimal = Double.parseDouble("0." + valoresDecimales[npPesoDecimal.getValue()]);
         double pesoFinal = entero + decimal;
@@ -592,7 +637,7 @@ public class CargarRegistroFragment extends Fragment {
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, finalPesoFinal, serieActual, reps, pesoCorporal, nuevo -> {
+                    registroRepository.guardarRegistroCompleto(idUsuario, idSeccion, idEjercicio, finalPesoFinal, unidadPeso, serieActual, reps, pesoCorporal, nuevo -> {
                         if (nuevo != null) {
                             listaHistorial.add(0, nuevo);
                             adapter.notifyItemInserted(0);

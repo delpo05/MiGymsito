@@ -51,4 +51,9 @@
         <item>Barra camber (25 kg)</item>
     </string-array>
 
+    <string-array name="unidades_peso">
+        <item>kg</item>
+        <item>lb</item>
+    </string-array>
+
 </resources>

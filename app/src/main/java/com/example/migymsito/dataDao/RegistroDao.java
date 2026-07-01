@@ -79,7 +79,7 @@ public interface RegistroDao {
 
     @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
            "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
-           "r.Repeticiones as repeticiones, r.PesoRegistro as peso, " +
+           "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
            "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
            "FROM Registro r " +
            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +

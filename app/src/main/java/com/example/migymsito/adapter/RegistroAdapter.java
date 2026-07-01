@@ -50,10 +50,10 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
             if (registro.PesoRegistro == 0) {
                 holder.tvPeso.setText("Peso Corp.");
             } else {
-                holder.tvPeso.setText("PC + " + registro.PesoRegistro + " kg");
+                holder.tvPeso.setText("PC + " + registro.PesoRegistro + " " + (registro.UnidadPeso != null ? registro.UnidadPeso : "kg"));
             }
         } else {
-            holder.tvPeso.setText(registro.PesoRegistro + " kg");
+            holder.tvPeso.setText(registro.PesoRegistro + " " + (registro.UnidadPeso != null ? registro.UnidadPeso : "kg"));
         }
 
         holder.btnEdit.setOnClickListener(v -> {

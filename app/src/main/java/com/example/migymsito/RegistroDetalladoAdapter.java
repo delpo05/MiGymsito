@@ -43,7 +43,7 @@ public class RegistroDetalladoAdapter extends RecyclerView.Adapter<RegistroDetal
         holder.tvNombres.setText(String.format("%s > %s > %s", reg.nombreRutina, reg.nombreSeccion, reg.nombreEjercicio));
         holder.tvSerieReps.setText(String.format("Serie: %d | Reps: %d", reg.numSerie, reg.repeticiones));
         
-        String pesoStr = reg.esPesoCorporal ? "Peso Corp." : String.format("%.1f kg", reg.peso);
+        String pesoStr = reg.esPesoCorporal ? "Peso Corp." : String.format("%.1f %s", reg.peso, (reg.unidadPeso != null ? reg.unidadPeso : "kg"));
         holder.tvPeso.setText(String.format("Peso: %s", pesoStr));
 
         if (reg.tipoBarra != null && !reg.tipoBarra.isEmpty() && reg.pesoBarra != null) {

@@ -7,13 +7,14 @@ public class RegistroDetallado {
     public int numSerie;
     public int repeticiones;
     public double peso;
+    public String unidadPeso;
     public boolean esPesoCorporal;
     public String tipoBarra;
     public Float pesoBarra;
     public long fecha;
 
     public RegistroDetallado(String nombreRutina, String nombreSeccion, String nombreEjercicio, 
-                            int numSerie, int repeticiones, double peso, boolean esPesoCorporal, 
+                            int numSerie, int repeticiones, double peso, String unidadPeso, boolean esPesoCorporal, 
                             String tipoBarra, Float pesoBarra, long fecha) {
         this.nombreRutina = nombreRutina;
         this.nombreSeccion = nombreSeccion;
@@ -21,6 +22,7 @@ public class RegistroDetallado {
         this.numSerie = numSerie;
         this.repeticiones = repeticiones;
         this.peso = peso;
+        this.unidadPeso = unidadPeso;
         this.esPesoCorporal = esPesoCorporal;
         this.tipoBarra = tipoBarra;
         this.pesoBarra = pesoBarra;

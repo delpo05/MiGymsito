@@ -39,7 +39,7 @@ public class RegistroRepository {
     /**
      * Guarda un registro vinculándolo a un entrenamiento activo o creando uno nuevo.
      */
-    public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, int series, int reps, Double pesoCorporal, RepositoryCallback<Registro> callback) {
+    public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, String unidadPeso, int series, int reps, Double pesoCorporal, RepositoryCallback<Registro> callback) {
         executorService.execute(() -> {
             // 1. Obtener Entrenamiento activo específicamente para esta sección
             Entrenamiento entrenamientoActivo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
@@ -73,6 +73,7 @@ public class RegistroRepository {
             nuevo.IdEntrenamiento = entrenamientoActivo.IdEntrenamiento;
             nuevo.IdSeccionXejercicio = relacion.IdSeccionXejercicio;
             nuevo.PesoRegistro = peso;
+            nuevo.UnidadPeso = unidadPeso;
             nuevo.NumSeriesRegistro = series;
             nuevo.Repeticiones = reps;
             nuevo.FechaRegistro = System.currentTimeMillis();
