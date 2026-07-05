@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container_item"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/gris_oscuro_texto"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/blanco"
+    app:strokeWidth="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Image (Full Bleed) -->
+        <ImageView
+            android:id="@+id/iv_item_imagen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="Imagen del ejercicio" />
+
+        <!-- Placeholder (Visible when no image) -->
+        <RelativeLayout
+            android:id="@+id/layout_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/gris_oscuro_texto"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerInParent="true"
+                android:alpha="0.2"
+                android:src="@drawable/baseline_fitness_center"
+                app:tint="@color/blanco" />
+        </RelativeLayout>
+
+        <!-- Gradient Overlay -->
+        <View
+            android:id="@+id/view_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/shadow_bottom" />
+
+        <!-- Exercise Name -->
+        <TextView
+            android:id="@+id/tv_nombre_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="12dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Nombre del Ejercicio"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:shadowColor="#CC000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Options Menu -->
+        <TextView
+            android:id="@+id/tv_opciones"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:text="⋮"
+            android:textColor="@color/blanco"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <!-- Add Button Placeholder (Centred) -->
+        <ImageView
+            android:id="@+id/btn_item_add"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/bg_circle_white"
+            android:padding="15dp"
+            android:src="@drawable/ic_add"
+            android:visibility="gone"
+            app:tint="@color/negro" />
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

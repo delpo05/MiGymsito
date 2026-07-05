@@ -60,39 +60,18 @@ public class EjerciciosAdapter extends BaseAdapter {
         return position;
     }
 
-    private int dpToPx(int dp, View v) {
-        return (int) (dp * v.getContext().getResources().getDisplayMetrics().density);
-    }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gv, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ejercicio, parent, false);
         }
 
-        View container = convertView.findViewById(R.id.container_item);
         ImageView btnAdd = convertView.findViewById(R.id.btn_item_add);
         TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
         ImageView ivImagen = convertView.findViewById(R.id.iv_item_imagen);
         View overlay = convertView.findViewById(R.id.view_overlay);
-
-        if (container != null) {
-            ViewGroup.LayoutParams layoutParams = container.getLayoutParams();
-            layoutParams.height = dpToPx(220, convertView);
-            container.setLayoutParams(layoutParams);
-            container.setElevation(0);
-        }
-
-        // RESETEAR DISEÑO
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT, 
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-        );
-        
-        txtNombre.setMaxLines(2);
-        txtNombre.setEllipsize(TextUtils.TruncateAt.END);
-        txtNombre.setGravity(android.view.Gravity.CENTER);
+        View layoutPlaceholder = convertView.findViewById(R.id.layout_placeholder);
 
         if (ejercicios == null || position == ejercicios.size()) {
             btnAdd.setVisibility(View.VISIBLE);
@@ -100,8 +79,8 @@ public class EjerciciosAdapter extends BaseAdapter {
             tvOpciones.setVisibility(View.GONE);
             ivImagen.setVisibility(View.GONE);
             if (overlay != null) overlay.setVisibility(View.GONE);
-            if (container != null) container.setBackgroundResource(R.drawable.card_border_white);
-
+            if (layoutPlaceholder != null) layoutPlaceholder.setVisibility(View.VISIBLE);
+            
             convertView.setOnClickListener(v -> {
                 if (listener != null) listener.onAddClick();
             });
@@ -110,11 +89,13 @@ public class EjerciciosAdapter extends BaseAdapter {
             btnAdd.setVisibility(View.GONE);
             txtNombre.setVisibility(View.VISIBLE);
             tvOpciones.setVisibility(View.VISIBLE);
-            ivImagen.setVisibility(View.VISIBLE);
-
             txtNombre.setText(ejercicio.NombreEjercicio);
 
             if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
+                ivImagen.setVisibility(View.VISIBLE);
+                if (layoutPlaceholder != null) layoutPlaceholder.setVisibility(View.GONE);
+                if (overlay != null) overlay.setVisibility(View.VISIBLE);
+
                 Glide.with(convertView.getContext())
                         .load(Uri.parse(ejercicio.ImagenEjercicio))
                         .placeholder(R.drawable.cargar_imagen_default)
@@ -122,29 +103,12 @@ public class EjerciciosAdapter extends BaseAdapter {
                         .centerCrop()
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(ivImagen);
-                
-                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                params.topMargin = dpToPx(14, convertView);
-                // Márgenes laterales de 48dp para que NUNCA toque los tres puntitos
-                params.leftMargin = dpToPx(48, convertView);
-                params.rightMargin = dpToPx(48, convertView);
-                
-                txtNombre.setTextSize(18f);
-                txtNombre.setShadowLayer(4, 2, 2, Color.parseColor("#CC000000"));
-                if (overlay != null) overlay.setVisibility(View.VISIBLE);
             } else {
-                Glide.with(convertView.getContext()).clear(ivImagen);
-                ivImagen.setImageResource(android.R.color.transparent);
+                ivImagen.setVisibility(View.GONE);
+                if (layoutPlaceholder != null) layoutPlaceholder.setVisibility(View.VISIBLE);
                 if (overlay != null) overlay.setVisibility(View.GONE);
-                
-                params.addRule(RelativeLayout.CENTER_IN_PARENT);
-                params.leftMargin = dpToPx(15, convertView);
-                params.rightMargin = dpToPx(15, convertView);
-                
-                txtNombre.setTextSize(16f);
-                txtNombre.setShadowLayer(0, 0, 0, 0);
+                Glide.with(convertView.getContext()).clear(ivImagen);
             }
-            txtNombre.setLayoutParams(params);
 
             tvOpciones.setOnClickListener(v -> {
                 if (listener != null) listener.onOptionsClick(v, ejercicio);
