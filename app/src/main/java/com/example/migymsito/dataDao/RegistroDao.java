@@ -96,6 +96,24 @@ public interface RegistroDao {
            "LIMIT :limit OFFSET :offset")
     List<RegistroDetallado> buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset);
 
+    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+            "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
+            "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
+            "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
+            "FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+            "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
+            "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
+            "WHERE rut.IdUsuarioRutina = :idUsuario " +
+            "AND (:idRutina = -1 OR rut.IdRutina = :idRutina) " +
+            "AND (:idSeccion = -1 OR s.IdSeccion = :idSeccion) " +
+            "AND (:idEjercicio = -1 OR ej.IdEjercicio = :idEjercicio) " +
+            "AND (:fechaDesde = -1 OR r.FechaRegistro >= :fechaDesde) " +
+            "AND (:fechaHasta = -1 OR r.FechaRegistro <= :fechaHasta) " +
+            "ORDER BY r.FechaRegistro DESC")
+    List<RegistroDetallado> buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta);
+
     @Query("SELECT r.* FROM Registro r " +
             "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
             "WHERE sxe.IdEjercicio = :idEjercicio " +

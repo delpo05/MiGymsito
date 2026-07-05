@@ -158,6 +158,13 @@ public class RegistroRepository {
         });
     }
 
+    public void buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, RepositoryCallback<List<RegistroDetallado>> callback) {
+        executorService.execute(() -> {
+            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+            notificar(callback, lista);
+        });
+    }
+
     public void obtenerProgresoCargasPaginado(int idEjercicio, int limit, int offset, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerProgresoCargasPaginado(idEjercicio, limit, offset);

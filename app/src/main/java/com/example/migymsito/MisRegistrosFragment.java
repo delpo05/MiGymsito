@@ -292,43 +292,67 @@ public class MisRegistrosFragment extends Fragment {
     }
 
     private void exportarCSV() {
-        if (registrosActuales.isEmpty()) {
-            Toast.makeText(getContext(), "Primero realiza una búsqueda con resultados", Toast.LENGTH_SHORT).show();
+        if (MainActivity.usuarioLogueado == null) return;
+
+        long fechaDesde = -1;
+        long fechaHasta = -1;
+
+        String desdeStr = etFechaDesde != null ? etFechaDesde.getText().toString() : "";
+        String hastaStr = etFechaHasta != null ? etFechaHasta.getText().toString() : "";
+
+        if (!desdeStr.isEmpty() && !hastaStr.isEmpty()) {
+            fechaDesde = calendarDesde.getTimeInMillis();
+            fechaHasta = calendarHasta.getTimeInMillis();
+            if (fechaHasta < fechaDesde) {
+                Toast.makeText(getContext(), "La fecha 'Hasta' no puede ser anterior a 'Desde'", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else if (!desdeStr.isEmpty() || !hastaStr.isEmpty()) {
+            Toast.makeText(getContext(), "Debes completar ambos campos de fecha o ninguno", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        StringBuilder csv = new StringBuilder();
-        String sep = ";";
-        csv.append("Rutina").append(sep)
-           .append("Seccion").append(sep)
-           .append("Ejercicio").append(sep)
-           .append("Numero de Serie").append(sep)
-           .append("Cantidad de repeticiones").append(sep)
-           .append("Peso").append(sep)
-           .append("Unidad").append(sep)
-           .append("Es Peso Corporal").append(sep)
-           .append("Barra").append(sep)
-           .append("Peso Barra").append(sep)
-           .append("Hora y Fecha\n");
+        registroRepository.buscarRegistrosDetallados(MainActivity.usuarioLogueado.IdUsuario,
+                idRutinaSeleccionada, idSeccionSeleccionada, idEjercicioSeleccionado,
+                fechaDesde, fechaHasta, registros -> {
+                    if (registros == null || registros.isEmpty()) {
+                        Toast.makeText(getContext(), "No hay registros para exportar con los filtros seleccionados", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                    StringBuilder csv = new StringBuilder();
+                    String sep = ";";
+                    csv.append("Rutina").append(sep)
+                            .append("Seccion").append(sep)
+                            .append("Ejercicio").append(sep)
+                            .append("Numero de Serie").append(sep)
+                            .append("Cantidad de repeticiones").append(sep)
+                            .append("Peso").append(sep)
+                            .append("Unidad").append(sep)
+                            .append("Es Peso Corporal").append(sep)
+                            .append("Barra").append(sep)
+                            .append("Peso Barra").append(sep)
+                            .append("Hora y Fecha\n");
 
-        for (RegistroDetallado reg : registrosActuales) {
-            csv.append(reg.nombreRutina).append(sep)
-               .append(reg.nombreSeccion).append(sep)
-               .append(reg.nombreEjercicio).append(sep)
-               .append(reg.numSerie).append(sep)
-               .append(reg.repeticiones).append(sep)
-               .append(String.valueOf(reg.peso).replace(".", ",")).append(sep)
-               .append(reg.unidadPeso != null ? reg.unidadPeso : "kg").append(sep)
-               .append(reg.esPesoCorporal ? "Si" : "No").append(sep)
-               .append(reg.tipoBarra != null ? reg.tipoBarra : "-").append(sep)
-               .append(reg.pesoBarra != null ? String.valueOf(reg.pesoBarra).replace(".", ",") : "-").append(sep)
-               .append(sdf.format(new Date(reg.fecha)))
-               .append("\n");
-        }
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-        generarYCompartirArchivo(csv.toString());
+                    for (RegistroDetallado reg : registros) {
+                        csv.append(reg.nombreRutina).append(sep)
+                                .append(reg.nombreSeccion).append(sep)
+                                .append(reg.nombreEjercicio).append(sep)
+                                .append(reg.numSerie).append(sep)
+                                .append(reg.repeticiones).append(sep)
+                                .append(String.valueOf(reg.peso).replace(".", ",")).append(sep)
+                                .append(reg.unidadPeso != null ? reg.unidadPeso : "kg").append(sep)
+                                .append(reg.esPesoCorporal ? "Si" : "No").append(sep)
+                                .append(reg.tipoBarra != null ? reg.tipoBarra : "-").append(sep)
+                                .append(reg.pesoBarra != null ? String.valueOf(reg.pesoBarra).replace(".", ",") : "-").append(sep)
+                                .append(sdf.format(new Date(reg.fecha)))
+                                .append("\n");
+                    }
+
+                    generarYCompartirArchivo(csv.toString());
+                });
     }
 
     private void generarYCompartirArchivo(String contenido) {
