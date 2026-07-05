@@ -11,12 +11,14 @@
         android:id="@+id/tvTituloGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="Título"
         android:textColor="@color/blanco"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
 
     <GridView
         android:id="@+id/gvGenerico"
@@ -24,11 +26,11 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:horizontalSpacing="10dp"
+        android:horizontalSpacing="12dp"
         android:numColumns="2"
-        android:padding="8dp"
+        android:padding="12dp"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        android:verticalSpacing="12dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFinalizarEntrenamiento"

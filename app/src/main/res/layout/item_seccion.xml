@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container_item"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/blanco"
+    app:strokeWidth="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp">
+
+        <!-- Background Icon -->
+        <ImageView
+            android:id="@+id/iv_background_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="-10dp"
+            android:layout_marginEnd="-10dp"
+            android:alpha="0.15"
+            android:rotation="-15"
+            android:src="@drawable/baseline_fitness_center"
+            app:tint="@color/blanco" />
+
+        <!-- Section Name -->
+        <TextView
+            android:id="@+id/tv_nombre_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/tv_opciones"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Nombre de la Sección"
+            android:textColor="@color/blanco"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Exercise Count -->
+        <TextView
+            android:id="@+id/tv_exercise_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_nombre_item"
+            android:layout_marginTop="4dp"
+            android:text="0 ejercicios"
+            android:textColor="@color/gris_pista"
+            android:textSize="14sp" />
+
+        <!-- Options Menu -->
+        <TextView
+            android:id="@+id/tv_opciones"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center"
+            android:text="⋮"
+            android:textColor="@color/blanco"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Add Button (Overlayed or Centered if in Add Mode) -->
+        <ImageView
+            android:id="@+id/btn_item_add"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/bg_circle_white"
+            android:padding="15dp"
+            android:src="@drawable/ic_add"
+            android:visibility="gone"
+            app:tint="@color/negro" />
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

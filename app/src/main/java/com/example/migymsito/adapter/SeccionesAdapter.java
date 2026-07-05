@@ -73,30 +73,22 @@ public class SeccionesAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gv, parent, false);
+            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion, parent, false);
         }
 
         View container = convertView.findViewById(R.id.container_item);
         ImageView btnAdd = convertView.findViewById(R.id.btn_item_add);
         TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
         TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
-        View ivImagen = convertView.findViewById(R.id.iv_item_imagen);
-
-        if (ivImagen != null) ivImagen.setVisibility(View.GONE);
-
-        // --- RESETEAR DISEÑO PARA SECCIONES (Centrado perfecto) ---
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
-        params.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-        // Quitar márgenes que podrían venir de EjerciciosAdapter
-        params.setMargins(0, 0, 0, 0); 
-        txtNombre.setLayoutParams(params);
-        txtNombre.setTextSize(16f);
-        txtNombre.setShadowLayer(0, 0, 0, 0);
+        TextView tvExerciseCount = convertView.findViewById(R.id.tv_exercise_count);
+        ImageView ivBackgroundIcon = convertView.findViewById(R.id.iv_background_icon);
 
         if (isModoPopup) {
             txtNombre.setTextColor(Color.BLACK);
             tvOpciones.setTextColor(Color.BLACK);
+            if (tvExerciseCount != null) tvExerciseCount.setTextColor(Color.DKGRAY);
+            if (ivBackgroundIcon != null) ivBackgroundIcon.setColorFilter(Color.BLACK);
+            
             GradientDrawable shape = new GradientDrawable();
             shape.setShape(GradientDrawable.RECTANGLE);
             shape.setCornerRadius(12 * parent.getContext().getResources().getDisplayMetrics().density);
@@ -106,19 +98,28 @@ public class SeccionesAdapter extends BaseAdapter {
         } else {
             txtNombre.setTextColor(Color.WHITE);
             tvOpciones.setTextColor(Color.WHITE);
-            container.setBackgroundResource(R.drawable.card_border_white);
+            if (tvExerciseCount != null) tvExerciseCount.setTextColor(Color.parseColor("#CCCCCC"));
+            if (ivBackgroundIcon != null) ivBackgroundIcon.setColorFilter(Color.WHITE);
+            container.setBackgroundColor(Color.TRANSPARENT); // MaterialCardView handles background
         }
 
         if (mostrarBotonAdd && (secciones == null || position == secciones.size())) {
             btnAdd.setVisibility(View.VISIBLE);
             txtNombre.setVisibility(View.GONE);
             tvOpciones.setVisibility(View.GONE);
+            if (tvExerciseCount != null) tvExerciseCount.setVisibility(View.GONE);
+            if (ivBackgroundIcon != null) ivBackgroundIcon.setVisibility(View.GONE);
             convertView.setOnClickListener(v -> { if (listener != null) listener.onAddClick(); });
         } else {
             Seccion seccion = secciones.get(position);
             btnAdd.setVisibility(View.GONE);
             txtNombre.setVisibility(View.VISIBLE);
             tvOpciones.setVisibility(mostrarBotonAdd ? View.VISIBLE : View.GONE);
+            if (tvExerciseCount != null) {
+                tvExerciseCount.setVisibility(View.VISIBLE);
+                tvExerciseCount.setText(seccion.ejercicioCount + " ejercicios");
+            }
+            if (ivBackgroundIcon != null) ivBackgroundIcon.setVisibility(View.VISIBLE);
 
             if (seccion.nombreRutina != null && !seccion.nombreRutina.isEmpty()) {
                 txtNombre.setText(seccion.NombreSeccion + "\n(" + seccion.nombreRutina + ")");

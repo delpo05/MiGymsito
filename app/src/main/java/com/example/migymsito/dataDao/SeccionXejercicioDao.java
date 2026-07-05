@@ -24,6 +24,9 @@ public interface SeccionXejercicioDao {
     @Query("SELECT * FROM SeccionXejercicio WHERE IdSeccion = :idSeccion")
     List<SeccionXejercicio> getEjerciciosBySeccion(int idSeccion);
 
+    @Query("SELECT COUNT(*) FROM SeccionXejercicio WHERE IdSeccion = :idSeccion")
+    int countEjerciciosBySeccion(int idSeccion);
+
     @Query("SELECT * FROM SeccionXejercicio WHERE IdSeccion = :idSeccion AND IdEjercicio = :idEjercicio LIMIT 1")
     SeccionXejercicio getRelacion(int idSeccion, int idEjercicio);
 
