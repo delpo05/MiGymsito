@@ -5,26 +5,27 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.R;
 import com.example.migymsito.data.Seccion;
 
 import java.util.List;
 
-public class SeccionesAdapter extends BaseAdapter {
+public class SeccionesAdapter extends RecyclerView.Adapter<SeccionesAdapter.SeccionViewHolder> {
 
     private List<Seccion> secciones;
-    private OnSeccionClickListener listener;
-    private boolean mostrarBotonAdd = true;
+    private final OnSeccionClickListener listener;
     private boolean isModoPopup = false;
     private int lastPosition = -1;
 
     public interface OnSeccionClickListener {
-        void onAddClick();
         void onSeccionClick(Seccion seccion);
         void onOptionsClick(View view, Seccion seccion);
     }
@@ -32,10 +33,6 @@ public class SeccionesAdapter extends BaseAdapter {
     public SeccionesAdapter(List<Seccion> secciones, OnSeccionClickListener listener) {
         this.secciones = secciones;
         this.listener = listener;
-    }
-
-    public void setMostrarBotonAdd(boolean mostrar) {
-        this.mostrarBotonAdd = mostrar;
     }
 
     public void setModoPopup(boolean modoPopup) {
@@ -48,97 +45,88 @@ public class SeccionesAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        if (mostrarBotonAdd) {
-            return secciones != null ? secciones.size() + 1 : 1;
-        } else {
-            return secciones != null ? secciones.size() : 0;
-        }
+    public SeccionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion, parent, false);
+        return new SeccionViewHolder(view);
     }
 
     @Override
-    public Object getItem(int position) {
-        if (secciones != null && position < secciones.size()) {
-            return secciones.get(position);
-        }
-        return null;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion, parent, false);
-        }
-
-        View container = convertView.findViewById(R.id.container_item);
-        ImageView btnAdd = convertView.findViewById(R.id.btn_item_add);
-        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
-        TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
-        TextView tvExerciseCount = convertView.findViewById(R.id.tv_exercise_count);
-        ImageView ivBackgroundIcon = convertView.findViewById(R.id.iv_background_icon);
+    public void onBindViewHolder(@NonNull SeccionViewHolder holder, int position) {
+        Seccion seccion = secciones.get(position);
 
         if (isModoPopup) {
-            txtNombre.setTextColor(Color.BLACK);
-            tvOpciones.setTextColor(Color.BLACK);
-            if (tvExerciseCount != null) tvExerciseCount.setTextColor(Color.DKGRAY);
-            if (ivBackgroundIcon != null) ivBackgroundIcon.setColorFilter(Color.BLACK);
+            holder.txtNombre.setTextColor(Color.BLACK);
+            holder.tvOpciones.setTextColor(Color.BLACK);
+            if (holder.tvExerciseCount != null) holder.tvExerciseCount.setTextColor(Color.DKGRAY);
+            if (holder.ivBackgroundIcon != null) holder.ivBackgroundIcon.setColorFilter(Color.BLACK);
             
             GradientDrawable shape = new GradientDrawable();
             shape.setShape(GradientDrawable.RECTANGLE);
-            shape.setCornerRadius(12 * parent.getContext().getResources().getDisplayMetrics().density);
+            shape.setCornerRadius(12 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
             shape.setStroke(3, Color.BLACK);
             shape.setColor(Color.TRANSPARENT);
-            container.setBackground(shape);
+            holder.container.setBackground(shape);
+            holder.tvOpciones.setVisibility(View.GONE);
         } else {
-            txtNombre.setTextColor(Color.WHITE);
-            tvOpciones.setTextColor(Color.WHITE);
-            if (tvExerciseCount != null) tvExerciseCount.setTextColor(Color.parseColor("#CCCCCC"));
-            if (ivBackgroundIcon != null) ivBackgroundIcon.setColorFilter(Color.WHITE);
-            container.setBackgroundColor(Color.TRANSPARENT); // MaterialCardView handles background
+            holder.txtNombre.setTextColor(Color.WHITE);
+            holder.tvOpciones.setTextColor(Color.WHITE);
+            if (holder.tvExerciseCount != null) holder.tvExerciseCount.setTextColor(Color.parseColor("#CCCCCC"));
+            if (holder.ivBackgroundIcon != null) holder.ivBackgroundIcon.setColorFilter(Color.WHITE);
+            holder.container.setBackgroundResource(0); // Let MaterialCardView handle it
+            holder.tvOpciones.setVisibility(View.VISIBLE);
         }
 
-        if (mostrarBotonAdd && (secciones == null || position == secciones.size())) {
-            btnAdd.setVisibility(View.VISIBLE);
-            txtNombre.setVisibility(View.GONE);
-            tvOpciones.setVisibility(View.GONE);
-            if (tvExerciseCount != null) tvExerciseCount.setVisibility(View.GONE);
-            if (ivBackgroundIcon != null) ivBackgroundIcon.setVisibility(View.GONE);
-            convertView.setOnClickListener(v -> { if (listener != null) listener.onAddClick(); });
+        if (seccion.nombreRutina != null && !seccion.nombreRutina.isEmpty()) {
+            holder.txtNombre.setText(String.format("%s\n(%s)", seccion.NombreSeccion, seccion.nombreRutina));
         } else {
-            Seccion seccion = secciones.get(position);
-            btnAdd.setVisibility(View.GONE);
-            txtNombre.setVisibility(View.VISIBLE);
-            tvOpciones.setVisibility(mostrarBotonAdd ? View.VISIBLE : View.GONE);
-            if (tvExerciseCount != null) {
-                tvExerciseCount.setVisibility(View.VISIBLE);
-                tvExerciseCount.setText(seccion.ejercicioCount + " ejercicios");
-            }
-            if (ivBackgroundIcon != null) ivBackgroundIcon.setVisibility(View.VISIBLE);
-
-            if (seccion.nombreRutina != null && !seccion.nombreRutina.isEmpty()) {
-                txtNombre.setText(seccion.NombreSeccion + "\n(" + seccion.nombreRutina + ")");
-            } else {
-                txtNombre.setText(seccion.NombreSeccion);
-            }
-
-            tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, seccion); });
-            convertView.setOnClickListener(v -> { if (listener != null) listener.onSeccionClick(seccion); });
+            holder.txtNombre.setText(seccion.NombreSeccion);
         }
 
-        // Animación de entrada escalonada
+        if (holder.tvExerciseCount != null) {
+            holder.tvExerciseCount.setText(String.format("%d ejercicios", seccion.ejercicioCount));
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onSeccionClick(seccion);
+        });
+
+        holder.tvOpciones.setOnClickListener(v -> {
+            if (listener != null) listener.onOptionsClick(v, seccion);
+        });
+
+        setAnimation(holder.itemView, position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return secciones != null ? secciones.size() : 0;
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
         if (position > lastPosition) {
-            android.view.animation.Animation animation = android.view.animation.AnimationUtils.loadAnimation(parent.getContext(), R.anim.item_entrance);
+            Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(), R.anim.item_entrance);
             animation.setStartOffset(position * 50L);
-            convertView.startAnimation(animation);
+            viewToAnimate.startAnimation(animation);
             lastPosition = position;
         }
+    }
 
-        return convertView;
+    public static class SeccionViewHolder extends RecyclerView.ViewHolder {
+        View container;
+        TextView txtNombre;
+        TextView tvOpciones;
+        TextView tvExerciseCount;
+        ImageView ivBackgroundIcon;
+
+        public SeccionViewHolder(@NonNull View itemView) {
+            super(itemView);
+            container = itemView.findViewById(R.id.container_item);
+            txtNombre = itemView.findViewById(R.id.tv_nombre_item);
+            tvOpciones = itemView.findViewById(R.id.tv_opciones);
+            tvExerciseCount = itemView.findViewById(R.id.tv_exercise_count);
+            ivBackgroundIcon = itemView.findViewById(R.id.iv_background_icon);
+        }
     }
 }

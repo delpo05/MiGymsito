@@ -37,6 +37,8 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.EjerciciosAdapter;
 import com.example.migymsito.data.Ejercicio;
@@ -46,6 +48,7 @@ import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,13 +62,14 @@ public class EjerciciosFragment extends Fragment {
 
     private Seccion seccionActual;
     private TextView tvTituloGrid;
-    private GridView gvEjercicios;
+    private RecyclerView rvEjercicios;
     private EjercicioRepository ejercicioRepository;
     private SeccionRepository seccionRepository;
     private EntrenamientoRepository entrenamientoRepository;
     private SharedViewModel sharedViewModel;
     private EjerciciosAdapter adapter;
     private Button btnFinalizarEntrenamiento;
+    private FloatingActionButton fabAdd;
 
     private Uri uriImagenSeleccionada;
     private ImageView ivPreviewImagen;
@@ -105,12 +109,17 @@ public class EjerciciosFragment extends Fragment {
             }
         }
 
-        gvEjercicios = view.findViewById(R.id.gvGenerico);
+        rvEjercicios = view.findViewById(R.id.rvGenerico);
         tvTituloGrid = view.findViewById(R.id.tvTituloGrid);
         btnFinalizarEntrenamiento = view.findViewById(R.id.btnFinalizarEntrenamiento);
+        fabAdd = view.findViewById(R.id.fabAdd);
 
-        if (gvEjercicios != null) {
-            gvEjercicios.setNumColumns(2);
+        if (rvEjercicios != null) {
+            rvEjercicios.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        }
+
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> mostrarPopUpAnadirEjercicio());
         }
 
         configurarGridView(view);
@@ -363,7 +372,6 @@ public class EjerciciosFragment extends Fragment {
             entrenamientoRepository = new EntrenamientoRepository(getActivity().getApplication());
         }
         adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
-            @Override public void onAddClick() { mostrarPopUpAnadirEjercicio(); }
             @Override public void onEjercicioClick(Ejercicio ej) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("ejercicio", ej);
@@ -372,7 +380,7 @@ public class EjerciciosFragment extends Fragment {
             }
             @Override public void onOptionsClick(View v, Ejercicio ej) { mostrarMenuOpciones(v, ej); }
         });
-        gvEjercicios.setAdapter(adapter);
+        rvEjercicios.setAdapter(adapter);
         cargarEjerciciosDesdeDB();
     }
 

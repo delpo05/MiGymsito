@@ -26,6 +26,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.migymsito.adapter.RutinasAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Rutina;
@@ -34,6 +37,7 @@ import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,12 +56,13 @@ import java.util.concurrent.Executors;
 
 public class RutinasFragment extends Fragment {
 
-    private GridView gvRutinas;
+    private RecyclerView rvRutinas;
     private RutinaRepository rutinaRepository;
     private UsuarioRepository usuarioRepository;
     private RutinasAdapter adapter;
     private SharedViewModel sharedViewModel;
     private Dialog progressDialog;
+    private FloatingActionButton fabAdd;
     private volatile boolean importacionCancelada = false;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -103,13 +108,15 @@ public class RutinasFragment extends Fragment {
             }
         }
 
-        gvRutinas = view.findViewById(R.id.gvGenerico);
+        rvRutinas = view.findViewById(R.id.rvGenerico);
+        fabAdd = view.findViewById(R.id.fabAdd);
 
-        if (gvRutinas != null) {
-            gvRutinas.setNumColumns(1);
-            float density = getResources().getDisplayMetrics().density;
-            gvRutinas.setVerticalSpacing(0);
-            gvRutinas.setPadding((int) (8 * density), 0, (int) (8 * density), (int) (8 * density));
+        if (rvRutinas != null) {
+            rvRutinas.setLayoutManager(new LinearLayoutManager(requireContext()));
+        }
+
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> mostrarPopUpOpcionesCrear());
         }
         
         View btnFinalizar = view.findViewById(R.id.btnFinalizarEntrenamiento);
@@ -140,11 +147,6 @@ public class RutinasFragment extends Fragment {
 
         adapter = new RutinasAdapter(new ArrayList<>(), new RutinasAdapter.OnRutinaClickListener() {
             @Override
-            public void onAddClick() {
-                mostrarPopUpOpcionesCrear();
-            }
-
-            @Override
             public void onRutinaClick(Rutina rutina) {
                 usuarioRepository.guardarIdRutina(rutina.IdRutina);
                 Bundle bundle = new Bundle();
@@ -158,7 +160,7 @@ public class RutinasFragment extends Fragment {
             }
         });
         
-        gvRutinas.setAdapter(adapter);
+        rvRutinas.setAdapter(adapter);
         cargarRutinasDesdeDB();
     }
 

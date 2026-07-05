@@ -23,22 +23,26 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.SeccionesAdapter;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SeccionesFragment extends Fragment {
 
-    private GridView gvSecciones;
+    private RecyclerView rvSecciones;
     private Rutina rutinaActual;
     private SeccionRepository seccionRepository;
     private SharedViewModel sharedViewModel;
     private SeccionesAdapter adapter;
+    private FloatingActionButton fabAdd;
 
     @Nullable
     @Override
@@ -71,7 +75,16 @@ public class SeccionesFragment extends Fragment {
             }
         }
 
-        gvSecciones = view.findViewById(R.id.gvGenerico);
+        rvSecciones = view.findViewById(R.id.rvGenerico);
+        fabAdd = view.findViewById(R.id.fabAdd);
+
+        if (rvSecciones != null) {
+            rvSecciones.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        }
+
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> mostrarPopUpAnadirSeccion());
+        }
 
         View btnFinalizar = view.findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
@@ -97,11 +110,6 @@ public class SeccionesFragment extends Fragment {
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
-            public void onAddClick() {
-                mostrarPopUpAnadirSeccion();
-            }
-
-            @Override
             public void onSeccionClick(Seccion seccion) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("seccion", seccion);
@@ -114,7 +122,7 @@ public class SeccionesFragment extends Fragment {
             }
         });
         
-        gvSecciones.setAdapter(adapter);
+        rvSecciones.setAdapter(adapter);
         cargarSeccionesDesdeDB();
     }
 
