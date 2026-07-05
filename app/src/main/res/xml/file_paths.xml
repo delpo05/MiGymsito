@@ -2,4 +2,6 @@
 <paths>
     <external-files-path name="my_images" path="Pictures" />
     <cache-path name="export_rutinas" path="rutinas/" />
+    <cache-path name="export_registros" path="registros/" />
+    <cache-path name="export_backups" path="backups/" />
 </paths>

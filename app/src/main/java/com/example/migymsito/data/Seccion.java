@@ -37,6 +37,9 @@ public class Seccion implements Serializable {
     @Ignore
     public String nombreRutina;
 
+    @Ignore
+    public int ejercicioCount;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

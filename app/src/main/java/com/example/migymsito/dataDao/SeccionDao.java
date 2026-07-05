@@ -42,6 +42,9 @@ public interface SeccionDao {
            "WHERE Rutina.IdUsuarioRutina = :idUsuario")
     List<Seccion> obtenerSeccionesPorUsuario(int idUsuario);
 
+    @Query("SELECT * FROM Seccion")
+    List<Seccion> obtenerTodasLasSecciones();
+
     @Query("DELETE FROM Seccion")
     void borrarTodo();
 }

@@ -9,12 +9,8 @@
         android:title="@string/mi_perfil" />
 
     <item
-        android:id="@+id/Exportar"
-        android:title="Exportar rutinas e historial" />
-
-    <item
-        android:id="@+id/Importar"
-        android:title="Importar rutinas e historial" />
+        android:id="@+id/MisRegistros"
+        android:title="Mis registros" />
 
     <item
         android:id="@+id/Historial"
@@ -28,10 +24,7 @@
         android:id="@+id/MiProgreso"
         android:title="@string/mi_progreso" />
 
-    <!-- Grupo para separar las acciones de cuenta de las de navegación -->
-    <group android:id="@+id/menu_footer">
-        <item
-            android:id="@+id/CerrarSesion"
-            android:title="Cerrar sesión" />
-    </group>
+    <item
+        android:id="@+id/CopiaSeguridad"
+        android:title="Copia de Seguridad" />
 </menu>

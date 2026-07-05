@@ -8,4 +8,52 @@
     <string name="mi_perfil">Mi Perfil</string>
     <string name="historial">Historial</string>
     <string name="mi_progreso">Mi Progreso</string>
+
+    <!-- Language Selection -->
+    <string name="selecciona_idioma">Selecciona tu idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_title_1">¡Bienvenido a MiGymsito!</string>
+    <string name="tutorial_desc_1">Tu compañero ideal para registrar y analizar cada uno de tus entrenamientos.</string>
+    <string name="tutorial_title_2">Crea tus Rutinas</string>
+    <string name="tutorial_desc_2">Diseña y personaliza tus rutinas de forma sencilla para adaptarlas a tus metas.</string>
+    <string name="tutorial_title_3">Monitorea tu Progreso</string>
+    <string name="tutorial_desc_3">Visualiza tus estadísticas detalladas y observa cómo mejoras día tras día.</string>
+    <string name="tutorial_title_4">Compara y Progresa</string>
+    <string name="tutorial_desc_4">Al finalizar cada sesión, compara tu rendimiento para superar tus límites.</string>
+    <string name="empezar">Empezar</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="omitir">Omitir</string>
+    <string name="tipo_de_barra">Tipo de Barra</string>
+    <string name="peso_de_barra_kg">Peso de Barra (kg)</string>
+    <string name="hint_peso_barra">0.0</string>
+    <string name="info_barra_format">Barra: %1$s (%2$.1f kg)</string>
+
+    <string-array name="tipos_de_barra">
+        <item>Ninguna</item>
+        <item>Barra olímpica masculina (20 kg)</item>
+        <item>Barra olímpica femenina (15 kg)</item>
+        <item>Barra olímpica juvenil (10 kg)</item>
+        <item>Barra estándar (10 kg)</item>
+        <item>Barra EZ (barra curva) (10 kg)</item>
+        <item>Barra recta corta para bíceps (10 kg)</item>
+        <item>Barra trapecio / hexagonal (25 kg)</item>
+        <item>Barra de sentadillas de seguridad (SSB) (30 kg)</item>
+        <item>Barra de powerlifting (20 kg)</item>
+        <item>Barra para peso muerto (20 kg)</item>
+        <item>Barra para sentadilla (25 kg)</item>
+        <item>Barra técnica (5 kg)</item>
+        <item>Barra corta olímpica (10 kg)</item>
+        <item>Barra para tríceps (10 kg)</item>
+        <item>Barra suiza / multipresa (15 kg)</item>
+        <item>Barra camber (25 kg)</item>
+    </string-array>
+
+    <string-array name="unidades_peso">
+        <item>kg</item>
+        <item>lb</item>
+    </string-array>
+
 </resources>

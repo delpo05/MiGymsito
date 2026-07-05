@@ -17,8 +17,8 @@ public interface UsuarioDao {
     @Update
     void actualizarUsuario(Usuario usuario);
 
-    @Query("SELECT * FROM Usuario WHERE correoElectronicoUsuario = :correo AND contraseniaUsuario = :password LIMIT 1")
-    Usuario login(String correo, String password);
+    @Query("SELECT * FROM Usuario LIMIT 1")
+    Usuario obtenerPrimerUsuario();
 
     @Query("SELECT * FROM Usuario WHERE correoElectronicoUsuario = :correo LIMIT 1")
     Usuario validarCorreoUsuario(String correo);

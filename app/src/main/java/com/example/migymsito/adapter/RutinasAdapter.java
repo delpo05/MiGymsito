@@ -3,23 +3,25 @@ package com.example.migymsito.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.R;
 import com.example.migymsito.data.Rutina;
 
 import java.util.List;
 
-public class RutinasAdapter extends BaseAdapter {
+public class RutinasAdapter extends RecyclerView.Adapter<RutinasAdapter.RutinaViewHolder> {
 
     private List<Rutina> rutinas;
-    private OnRutinaClickListener listener;
+    private final OnRutinaClickListener listener;
+    private int lastPosition = -1;
 
     public interface OnRutinaClickListener {
-        void onAddClick();
         void onRutinaClick(Rutina rutina);
         void onOptionsClick(View view, Rutina rutina);
     }
@@ -31,101 +33,55 @@ public class RutinasAdapter extends BaseAdapter {
 
     public void setRutinas(List<Rutina> rutinas) {
         this.rutinas = rutinas;
+        this.lastPosition = -1;
         notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return rutinas != null ? rutinas.size() + 1 : 1;
+    public RutinaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_rutina, parent, false);
+        return new RutinaViewHolder(view);
     }
 
     @Override
-    public Object getItem(int position) {
-        if (rutinas != null && position < rutinas.size()) {
-            return rutinas.get(position);
-        }
-        return null;
+    public void onBindViewHolder(@NonNull RutinaViewHolder holder, int position) {
+        Rutina rutina = rutinas.get(position);
+        holder.txtNombre.setText(rutina.NombreRutina);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onRutinaClick(rutina);
+        });
+
+        holder.tvOpciones.setOnClickListener(v -> {
+            if (listener != null) listener.onOptionsClick(v, rutina);
+        });
+
+        setAnimation(holder.itemView, position);
     }
 
     @Override
-    public long getItemId(int position) {
-        return position;
+    public int getItemCount() {
+        return rutinas != null ? rutinas.size() : 0;
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_gv, parent, false);
+    private void setAnimation(View viewToAnimate, int position) {
+        if (position > lastPosition) {
+            Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(), R.anim.item_entrance);
+            animation.setStartOffset(position * 50L);
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
         }
+    }
 
-        View container = convertView.findViewById(R.id.container_item);
-        ImageView btnAdd = convertView.findViewById(R.id.btn_item_add);
-        TextView txtNombre = convertView.findViewById(R.id.tv_nombre_item);
-        TextView tvOpciones = convertView.findViewById(R.id.tv_opciones);
-        View ivImagen = convertView.findViewById(R.id.iv_item_imagen);
+    public static class RutinaViewHolder extends RecyclerView.ViewHolder {
+        TextView txtNombre;
+        TextView tvOpciones;
 
-        if (ivImagen != null) ivImagen.setVisibility(View.GONE);
-
-        float density = parent.getContext().getResources().getDisplayMetrics().density;
-
-        // Ajustar altura del contenedor (75dp)
-        if (container != null) {
-            ViewGroup.LayoutParams lp = container.getLayoutParams();
-            lp.height = (int) (75 * density);
-            container.setLayoutParams(lp);
-            container.setBackgroundResource(R.drawable.card_border_white);
+        public RutinaViewHolder(@NonNull View itemView) {
+            super(itemView);
+            txtNombre = itemView.findViewById(R.id.tv_nombre_item);
+            tvOpciones = itemView.findViewById(R.id.tv_opciones);
         }
-
-        // --- DISEÑO PARA RUTINAS ---
-        
-        // Ajustar Nombre (Izquierda y Centrado vertical)
-        RelativeLayout.LayoutParams paramsNombre = (RelativeLayout.LayoutParams) txtNombre.getLayoutParams();
-        paramsNombre.removeRule(RelativeLayout.CENTER_IN_PARENT);
-        paramsNombre.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-        paramsNombre.addRule(RelativeLayout.CENTER_VERTICAL);
-        paramsNombre.addRule(RelativeLayout.ALIGN_PARENT_START);
-        paramsNombre.setMarginStart((int) (20 * density));
-        txtNombre.setLayoutParams(paramsNombre);
-        txtNombre.setTextSize(18f);
-
-        // Ajustar Opciones (Derecha y Centrado vertical)
-        RelativeLayout.LayoutParams paramsOpciones = (RelativeLayout.LayoutParams) tvOpciones.getLayoutParams();
-        paramsOpciones.removeRule(RelativeLayout.ALIGN_PARENT_TOP);
-        paramsOpciones.addRule(RelativeLayout.CENTER_VERTICAL);
-        paramsOpciones.addRule(RelativeLayout.ALIGN_PARENT_END);
-        tvOpciones.setLayoutParams(paramsOpciones);
-
-        // Achicar el botón "+" (45dp)
-        if (btnAdd != null) {
-            ViewGroup.LayoutParams lpAdd = btnAdd.getLayoutParams();
-            lpAdd.width = (int) (45 * density);
-            lpAdd.height = (int) (45 * density);
-            btnAdd.setLayoutParams(lpAdd);
-            btnAdd.setPadding((int) (10 * density), (int) (10 * density), (int) (10 * density), (int) (10 * density));
-        }
-
-        if (rutinas == null || position == rutinas.size()) {
-            btnAdd.setVisibility(View.VISIBLE);
-            txtNombre.setVisibility(View.GONE);
-            tvOpciones.setVisibility(View.GONE);
-            
-            // Centrar el botón "+"
-            RelativeLayout.LayoutParams paramsAdd = (RelativeLayout.LayoutParams) btnAdd.getLayoutParams();
-            paramsAdd.addRule(RelativeLayout.CENTER_IN_PARENT);
-            btnAdd.setLayoutParams(paramsAdd);
-            
-            convertView.setOnClickListener(v -> { if (listener != null) listener.onAddClick(); });
-        } else {
-            Rutina rutina = rutinas.get(position);
-            btnAdd.setVisibility(View.GONE);
-            txtNombre.setVisibility(View.VISIBLE);
-            tvOpciones.setVisibility(View.VISIBLE);
-            txtNombre.setText(rutina.NombreRutina);
-
-            tvOpciones.setOnClickListener(v -> { if (listener != null) listener.onOptionsClick(v, rutina); });
-            convertView.setOnClickListener(v -> { if (listener != null) listener.onRutinaClick(rutina); });
-        }
-
-        return convertView;
     }
 }

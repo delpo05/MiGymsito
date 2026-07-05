@@ -25,4 +25,10 @@ public class Ejercicio implements Serializable {
 
     @NonNull
     public Boolean PesoCorporalEjercicio;
+
+    public Boolean PesoPorLado;
+
+    public String TipoDeBarra;
+
+    public Float PesoBarra;
 }

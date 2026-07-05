@@ -31,6 +31,9 @@
     <style name="CustomDatePicker" parent="Theme.Material3.Dark.Dialog">
         <item name="android:windowBackground">#1A1A1A</item>
         <item name="colorSurface">#1A1A1A</item>
+        <item name="colorOnSurface">@color/blanco</item>
+        <item name="colorOnSurfaceVariant">#CCCCCC</item>
+        <item name="colorSurfaceVariant">#2D2D2D</item>
 
         <!-- Color principal (Círculo de selección y botones) -->
         <item name="colorPrimary">@color/blanco</item>
@@ -40,14 +43,13 @@
         <item name="android:textColorSecondary">#CCCCCC</item>
 
         <!-- Botones OK/CANCEL -->
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/DialogButtonTextStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/DialogButtonTextStyle</item>
     </style>
 
     <!-- Estilo para botones con fondo redondeado forzado -->
     <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
         <item name="android:textColor">@color/blanco</item>
-        <item name="android:background">@drawable/edittext_border</item>
         <item name="android:layout_margin">4dp</item>
         <item name="android:paddingHorizontal">16dp</item>
         <item name="android:textStyle">bold</item>

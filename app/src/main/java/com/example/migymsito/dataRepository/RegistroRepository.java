@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroDetallado;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.RegistroDao;
@@ -38,7 +39,7 @@ public class RegistroRepository {
     /**
      * Guarda un registro vinculándolo a un entrenamiento activo o creando uno nuevo.
      */
-    public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, int series, int reps, Double pesoCorporal, RepositoryCallback<Registro> callback) {
+    public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, String unidadPeso, int series, int reps, Double pesoCorporal, RepositoryCallback<Registro> callback) {
         executorService.execute(() -> {
             // 1. Obtener Entrenamiento activo específicamente para esta sección
             Entrenamiento entrenamientoActivo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
@@ -72,6 +73,7 @@ public class RegistroRepository {
             nuevo.IdEntrenamiento = entrenamientoActivo.IdEntrenamiento;
             nuevo.IdSeccionXejercicio = relacion.IdSeccionXejercicio;
             nuevo.PesoRegistro = peso;
+            nuevo.UnidadPeso = unidadPeso;
             nuevo.NumSeriesRegistro = series;
             nuevo.Repeticiones = reps;
             nuevo.FechaRegistro = System.currentTimeMillis();
@@ -138,6 +140,41 @@ public class RegistroRepository {
     public void obtenerTodosLosRegistrosDelUsuario(int idUsuario, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
             List<Registro> lista = registroDao.obtenerTodosLosRegistrosDelUsuario(idUsuario);
+            notificar(callback, lista);
+        });
+    }
+
+    public void obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntrenamientoActual);
+            notificar(callback, lista);
+        });
+    }
+
+    public void buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset, RepositoryCallback<List<RegistroDetallado>> callback) {
+        executorService.execute(() -> {
+            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetalladosPaginado(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta, limit, offset);
+            notificar(callback, lista);
+        });
+    }
+
+    public void buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, RepositoryCallback<List<RegistroDetallado>> callback) {
+        executorService.execute(() -> {
+            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+            notificar(callback, lista);
+        });
+    }
+
+    public void obtenerProgresoCargasPaginado(int idEjercicio, int limit, int offset, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerProgresoCargasPaginado(idEjercicio, limit, offset);
+            notificar(callback, lista);
+        });
+    }
+
+    public void obtenerVolumenEntrenamientoPaginado(int idEjercicio, int limit, int offset, RepositoryCallback<List<Registro>> callback) {
+        executorService.execute(() -> {
+            List<Registro> lista = registroDao.obtenerRegistrosParaVolumenPaginado(idEjercicio, limit, offset);
             notificar(callback, lista);
         });
     }

@@ -52,5 +52,7 @@ public class Registro implements Serializable {
     @NonNull
     public Long FechaRegistro;
 
+    public String UnidadPeso;
+
     public Double PesoCorporalMomento;
 }

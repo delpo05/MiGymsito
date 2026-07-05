@@ -7,6 +7,7 @@ import androidx.room.Delete;
 import androidx.room.Update;
 
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroDetallado;
 
 import java.util.List;
 
@@ -60,6 +61,82 @@ public interface RegistroDao {
            "WHERE Entrenamiento.IdUsuario = :idUsuario " +
            "ORDER BY Registro.FechaRegistro DESC")
     List<Registro> obtenerTodosLosRegistrosDelUsuario(int idUsuario);
+
+    @Query("SELECT r.* FROM Registro r " +
+           "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "WHERE sxe.IdEjercicio = :idEjercicio " +
+           "AND r.IdEntrenamiento = (" +
+           "    SELECT e2.IdEntrenamiento FROM Entrenamiento e2 " +
+           "    JOIN Registro r2 ON e2.IdEntrenamiento = r2.IdEntrenamiento " +
+           "    JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
+           "    WHERE sxe2.IdEjercicio = :idEjercicio " +
+           "    AND e2.IdUsuario = :idUsuario " +
+           "    AND e2.FechaInicio < IFNULL((SELECT e3.FechaInicio FROM Entrenamiento e3 WHERE e3.IdEntrenamiento = :idEntrenamientoActual), 9223372036854775807) " +
+           "    ORDER BY e2.FechaInicio DESC LIMIT 1" +
+           ") " +
+           "ORDER BY r.NumSeriesRegistro DESC")
+    List<Registro> obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual);
+
+    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+           "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
+           "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
+           "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
+           "FROM Registro r " +
+           "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+           "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
+           "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
+           "WHERE rut.IdUsuarioRutina = :idUsuario " +
+           "AND (:idRutina = -1 OR rut.IdRutina = :idRutina) " +
+           "AND (:idSeccion = -1 OR s.IdSeccion = :idSeccion) " +
+           "AND (:idEjercicio = -1 OR ej.IdEjercicio = :idEjercicio) " +
+           "AND (:fechaDesde = -1 OR r.FechaRegistro >= :fechaDesde) " +
+           "AND (:fechaHasta = -1 OR r.FechaRegistro <= :fechaHasta) " +
+           "ORDER BY r.FechaRegistro DESC " +
+           "LIMIT :limit OFFSET :offset")
+    List<RegistroDetallado> buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset);
+
+    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+            "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
+            "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
+            "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
+            "FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+            "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
+            "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
+            "WHERE rut.IdUsuarioRutina = :idUsuario " +
+            "AND (:idRutina = -1 OR rut.IdRutina = :idRutina) " +
+            "AND (:idSeccion = -1 OR s.IdSeccion = :idSeccion) " +
+            "AND (:idEjercicio = -1 OR ej.IdEjercicio = :idEjercicio) " +
+            "AND (:fechaDesde = -1 OR r.FechaRegistro >= :fechaDesde) " +
+            "AND (:fechaHasta = -1 OR r.FechaRegistro <= :fechaHasta) " +
+            "ORDER BY r.FechaRegistro DESC")
+    List<RegistroDetallado> buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta);
+
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "AND r.PesoRegistro = (" +
+            "   SELECT MAX(r2.PesoRegistro) " +
+            "   FROM Registro r2 " +
+            "   JOIN SeccionXejercicio sxe2 ON r2.IdSeccionXejercicio = sxe2.IdSeccionXejercicio " +
+            "   WHERE sxe2.IdEjercicio = :idEjercicio " +
+            "   AND (r2.FechaRegistro / 86400000) = (r.FechaRegistro / 86400000) " +
+            ") " +
+            "ORDER BY r.FechaRegistro DESC " +
+            "LIMIT :limit OFFSET :offset")
+    List<Registro> obtenerProgresoCargasPaginado(int idEjercicio, int limit, int offset);
+
+    @Query("SELECT r.* FROM Registro r " +
+            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+            "WHERE sxe.IdEjercicio = :idEjercicio " +
+            "ORDER BY r.FechaRegistro DESC " +
+            "LIMIT :limit OFFSET :offset")
+    List<Registro> obtenerRegistrosParaVolumenPaginado(int idEjercicio, int limit, int offset);
+
+    @Query("SELECT * FROM Registro")
+    List<Registro> obtenerTodosLosRegistros();
 
     @Query("DELETE FROM Registro")
     void borrarTodo();

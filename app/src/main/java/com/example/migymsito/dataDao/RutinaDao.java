@@ -28,6 +28,9 @@ public interface RutinaDao {
     @Query("SELECT * FROM Rutina WHERE IdRutina = :idRutina LIMIT 1")
     Rutina obtenerRutinaPorId(int idRutina);
 
+    @Query("SELECT * FROM Rutina")
+    List<Rutina> obtenerTodasLasRutinas();
+
     @Query("DELETE FROM Rutina")
     void borrarTodo();
 }

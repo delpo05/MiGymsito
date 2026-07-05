@@ -73,6 +73,9 @@ public class SeccionRepository {
     public void obtenerSeccionesDeRutina(int idRutina, RepositoryCallback<List<Seccion>> callback) {
         executorService.execute(() -> {
             List<Seccion> lista = seccionDao.obtenerSeccionesPorRutina(idRutina);
+            for (Seccion s : lista) {
+                s.ejercicioCount = seccionXejercicioDao.countEjerciciosBySeccion(s.IdSeccion);
+            }
             notificar(callback, lista);
         });
     }
@@ -88,6 +91,7 @@ public class SeccionRepository {
                     if (rutina != null) {
                         seccion.nombreRutina = rutina.NombreRutina;
                     }
+                    seccion.ejercicioCount = seccionXejercicioDao.countEjerciciosBySeccion(seccion.IdSeccion);
                     listaCompleta.add(seccion);
                 }
             }

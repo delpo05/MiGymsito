@@ -1,6 +1,8 @@
 package com.example.migymsito.dataDataBase;
 
 import android.content.Context;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
@@ -35,7 +37,7 @@ import java.util.concurrent.Executors;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 12, exportSchema = false)
+}, version = 15, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -49,12 +51,20 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
 
+    public static final Migration MIGRATION_14_15 = new Migration(14, 15) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE Registro ADD COLUMN UnidadPeso TEXT DEFAULT 'kg'");
+        }
+    };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "migymsito_db")
+                            .addMigrations(MIGRATION_14_15)
                             .addCallback(sRoomDatabaseCallback)
                             .fallbackToDestructiveMigration()
                             .build();

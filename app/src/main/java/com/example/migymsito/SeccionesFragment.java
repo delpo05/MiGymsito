@@ -1,13 +1,13 @@
 package com.example.migymsito;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,84 +18,102 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.SeccionesAdapter;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeccionesActivity extends HeaderActivity {
+public class SeccionesFragment extends Fragment {
 
-    private GridView gvSecciones;
+    private RecyclerView rvSecciones;
     private Rutina rutinaActual;
     private SeccionRepository seccionRepository;
+    private SharedViewModel sharedViewModel;
     private SeccionesAdapter adapter;
+    private FloatingActionButton fabAdd;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.secciones_rutinas_activity, container, false);
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.secciones_rutinas_activity);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        if (getActivity() != null) {
+            View toolbarInclude = getActivity().findViewById(R.id.include_toolbar);
+            if (toolbarInclude != null) toolbarInclude.setVisibility(View.VISIBLE);
+            
+            sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+            sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
+                if (finished != null && finished) {
+                    cargarSeccionesDesdeDB();
+                    sharedViewModel.resetImportFinishedTrigger();
+                }
+            });
+        }
 
-        if (getIntent() != null) {
+        if (getArguments() != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                rutinaActual = getIntent().getSerializableExtra("rutina", Rutina.class);
+                rutinaActual = getArguments().getSerializable("rutina", Rutina.class);
             } else {
-                rutinaActual = (Rutina) getIntent().getSerializableExtra("rutina");
+                rutinaActual = (Rutina) getArguments().getSerializable("rutina");
             }
         }
 
-        gvSecciones = findViewById(R.id.gvGenerico);
+        rvSecciones = view.findViewById(R.id.rvGenerico);
+        fabAdd = view.findViewById(R.id.fabAdd);
 
-        View btnFinalizar = findViewById(R.id.btnFinalizarEntrenamiento);
+        if (rvSecciones != null) {
+            rvSecciones.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        }
+
+        if (fabAdd != null) {
+            fabAdd.setOnClickListener(v -> mostrarPopUpAnadirSeccion());
+        }
+
+        View btnFinalizar = view.findViewById(R.id.btnFinalizarEntrenamiento);
         if (btnFinalizar != null) {
             btnFinalizar.setVisibility(View.GONE);
         }
 
-        configurarGridView();
-        configurarWindowInsets(R.id.layout_contenedor_grid);
-
-        // Volver a RutinasActivity al presionar atrás
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                Intent intent = new Intent(SeccionesActivity.this, RutinasActivity.class);
-                intent.putExtra("cambiarRutina", true);
-                startActivity(intent);
-                finish();
-            }
-        });
+        configurarGridView(view);
     }
 
-    private void configurarGridView() {
-        TextView tituloGv = findViewById(R.id.tvTituloGrid);
+    private void configurarGridView(View view) {
+        TextView tituloGv = view.findViewById(R.id.tvTituloGrid);
         if (tituloGv != null) {
             if (rutinaActual != null) {
-                tituloGv.setText("Secciones de " + rutinaActual.NombreRutina);
+                tituloGv.setText(String.format("Secciones de %s", rutinaActual.NombreRutina));
             } else {
                 tituloGv.setText("Mis Secciones");
             }
         }
         
-        seccionRepository = new SeccionRepository(getApplication());
+        if (getActivity() != null) {
+            seccionRepository = new SeccionRepository(getActivity().getApplication());
+        }
         
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
-            public void onAddClick() {
-                mostrarPopUpAnadirSeccion();
-            }
-
-            @Override
             public void onSeccionClick(Seccion seccion) {
-                Intent intent = new Intent(SeccionesActivity.this, EjerciciosActivity.class);
-                intent.putExtra("seccion", seccion);
-                startActivity(intent);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("seccion", seccion);
+                Navigation.findNavController(requireView()).navigate(R.id.ejerciciosFragment, bundle);
             }
 
             @Override
@@ -104,12 +122,12 @@ public class SeccionesActivity extends HeaderActivity {
             }
         });
         
-        gvSecciones.setAdapter(adapter);
+        rvSecciones.setAdapter(adapter);
         cargarSeccionesDesdeDB();
     }
 
     private void mostrarMenuOpciones(View view, Seccion seccion) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_modificar_eliminar);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -125,7 +143,7 @@ public class SeccionesActivity extends HeaderActivity {
             btnEliminar.setOnClickListener(v -> {
                 seccionRepository.eliminarSeccion(seccion);
                 dialog.dismiss();
-                new Handler().postDelayed(this::cargarSeccionesDesdeDB, 200);
+                new Handler(Looper.getMainLooper()).postDelayed(this::cargarSeccionesDesdeDB, 200);
             });
         }
 
@@ -146,20 +164,13 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void cargarSeccionesDesdeDB() {
-        if (rutinaActual != null) {
-            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
-                adapter.setSecciones(secciones);
-            });
+        if (rutinaActual != null && seccionRepository != null) {
+            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> adapter.setSecciones(secciones));
         }
     }
 
-    @Override
-    protected void onImportFinished() {
-        cargarSeccionesDesdeDB();
-    }
-
     private void mostrarPopUpAnadirSeccion() {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_dos_opciones);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -170,8 +181,8 @@ public class SeccionesActivity extends HeaderActivity {
         TextView tvOpcionDer = dialog.findViewById(R.id.tvTextoDerecha);
 
         tvTitulo.setText("Añadir Sección");
-        tvOpcionIzq.setText("Sección\nPrevia");
-        tvOpcionDer.setText("Nueva\nSección");
+        if (tvOpcionIzq != null) tvOpcionIzq.setText("Sección\nPrevia");
+        if (tvOpcionDer != null) tvOpcionDer.setText("Nueva\nSección");
 
         dialog.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
         
@@ -189,7 +200,7 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void mostrarPopUpSeccionesPrevias() {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_listado_generico);
         
@@ -209,7 +220,6 @@ public class SeccionesActivity extends HeaderActivity {
         });
 
         seccionRepository.obtenerTodasLasSecciones(secciones -> {
-             // Filtrar: NO mostrar las secciones que vienen cargadas por sistema
              List<Seccion> filtradas = new ArrayList<>();
              for (Seccion s : secciones) {
                  if ("Personalizado".equals(s.TipoSeccion)) filtradas.add(s);
@@ -220,13 +230,14 @@ public class SeccionesActivity extends HeaderActivity {
                  @Override public Object getItem(int i) { return filtradas.get(i); }
                  @Override public long getItemId(int i) { return i; }
                  @Override public View getView(int position, View convertView, ViewGroup parent) {
-                     if (convertView == null) {
-                         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
+                     View row = convertView;
+                     if (row == null) {
+                         row = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_seccion_previa, parent, false);
                      }
                      Seccion s = filtradas.get(position);
-                     TextView tvNombre = convertView.findViewById(R.id.tv_nombre_seccion_previa);
-                     TextView tvRutina = convertView.findViewById(R.id.tv_nombre_rutina_previa);
-                     View container = convertView.findViewById(R.id.container_item_previa);
+                     TextView tvNombre = row.findViewById(R.id.tv_nombre_seccion_previa);
+                     TextView tvRutina = row.findViewById(R.id.tv_nombre_rutina_previa);
+                     View container = row.findViewById(R.id.container_item_previa);
                      
                      tvNombre.setText(s.NombreSeccion);
                      tvRutina.setText(s.nombreRutina != null ? "Rutina: " + s.nombreRutina : "Sistema");
@@ -237,11 +248,11 @@ public class SeccionesActivity extends HeaderActivity {
                      shape.setColor(Color.WHITE);
                      container.setBackground(shape);
                      
-                     convertView.setOnClickListener(v -> {
+                     row.setOnClickListener(v -> {
                          dialog.dismiss();
                          mostrarPopUpCrearSeccion(s, true);
                      });
-                     return convertView;
+                     return row;
                  }
              });
         });
@@ -250,7 +261,7 @@ public class SeccionesActivity extends HeaderActivity {
     }
 
     private void mostrarPopUpCrearSeccion(Seccion seccionBase, boolean esClonacion) {
-        Dialog dialog = new Dialog(this);
+        Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.secciones_rutinas_pop_up_add);
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -292,31 +303,18 @@ public class SeccionesActivity extends HeaderActivity {
                     nueva.IdRutinaSeccion = rutinaActual.IdRutina;
                     seccionRepository.insertarSeccion(nueva);
                     dialog.dismiss();
-                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
+                    new Handler(Looper.getMainLooper()).postDelayed(this::cargarSeccionesDesdeDB, 300);
                 } else if (esClonacion) {
-                    seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> {
-                        cargarSeccionesDesdeDB();
-                    });
+                    seccionRepository.clonarSeccionConNombre(seccionBase, rutinaActual.IdRutina, nombre, result -> cargarSeccionesDesdeDB());
                     dialog.dismiss();
                 } else {
                     seccionBase.NombreSeccion = nombre;
                     seccionRepository.actualizarSeccion(seccionBase);
                     dialog.dismiss();
-                    new Handler().postDelayed(this::cargarSeccionesDesdeDB, 300);
+                    new Handler(Looper.getMainLooper()).postDelayed(this::cargarSeccionesDesdeDB, 300);
                 }
             }
         });
         dialog.show();
-    }
-
-    private void configurarWindowInsets(int layoutId) {
-        View layout = findViewById(layoutId);
-        if (layout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(layout, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
     }
 }

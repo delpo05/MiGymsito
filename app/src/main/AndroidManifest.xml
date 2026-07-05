@@ -3,6 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +23,7 @@
         android:theme="@style/Theme.MiGymsito">
 
         <activity
-            android:name=".InicioSesionActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,38 +31,8 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".RegistroSesionActivity"
-            android:exported="false" />
+        <receiver android:name=".TimerReceiver" android:exported="false" />
 
-        <activity
-            android:name=".RutinasActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".SeccionesActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".EjerciciosActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CargarRegistroActivity"
-            android:exported="true" />
-
-        <activity
-            android:name=".EstadisticasActivity"
-            android:exported="false" />
-
-        <activity android:name=".HistorialPesoActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CompararEntrenamientosActivity"
-            android:exported="false" />
-
-        <!-- Configuración para la cámara y compartir archivos -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.migymsito.fileprovider"
@@ -64,9 +42,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity android:name=".DatosPersonalesActivity"
-            android:exported="false" />
 
     </application>
 
