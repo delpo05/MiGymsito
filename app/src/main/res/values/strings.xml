@@ -24,12 +24,33 @@
     <string name="tutorial_title_4">Compara y Progresa</string>
     <string name="tutorial_desc_4">Al finalizar cada sesión, compara tu rendimiento para superar tus límites.</string>
     <string name="empezar">Empezar</string>
+    <string name="finalizar">Finalizar</string>
+    <string name="atras">Atrás</string>
     <string name="siguiente">Siguiente</string>
     <string name="omitir">Omitir</string>
     <string name="tipo_de_barra">Tipo de Barra</string>
     <string name="peso_de_barra_kg">Peso de Barra (kg)</string>
     <string name="hint_peso_barra">0.0</string>
-    <string name="info_barra_format">Barra: %1$s (%2$.1f kg)</string>
+    <string name="pregunta_nombre">¿Cómo te llamas?</string>
+    <string name="pregunta_correo">¿Cuál es tu correo?</string>
+    <string name="pregunta_fecha">¿Cuándo naciste?</string>
+    <string name="pregunta_genero">¿Cuál es tu género?</string>
+    <string name="pregunta_peso">¿Cuánto pesas? (kg)</string>
+    <string name="pregunta_altura">¿Cuánto mides? (cm)</string>
+    <string name="hint_nombre">Nombre completo</string>
+    <string name="hint_correo">Correo electrónico</string>
+    <string name="hint_fecha">Fecha de nacimiento</string>
+    <string name="hint_peso">Peso</string>
+    <string name="hint_altura">Altura</string>
+    <string name="error_nombre">Por favor, introduce tu nombre</string>
+    <string name="error_correo">Introduce un correo válido</string>
+    <string name="error_fecha">Selecciona tu fecha de nacimiento</string>
+    <string name="error_genero">Selecciona tu género</string>
+    <string name="error_peso">Introduce un peso válido</string>
+    <string name="error_altura">Introduce una altura válida</string>
+    <string name="error_correo_existe">Este correo ya está registrado</string>
+    <string name="registro_exitoso">¡Registro exitoso!</string>
+    <string name="error_registro">Error al registrar</string>
 
     <string-array name="tipos_de_barra">
         <item>Ninguna</item>
@@ -55,5 +76,22 @@
         <item>kg</item>
         <item>lb</item>
     </string-array>
+
+    <string name="info_barra_format">Barra: %1$s (%2$.1f kg)</string>
+    <string name="unidad_lastre">Lastre (kg)</string>
+    <string name="columna_lastre">Lastre</string>
+    <string name="unidad_peso_lado">Peso x lado (kg)</string>
+    <string name="columna_peso_x2">Peso (x2)</string>
+    <string name="kg">kg</string>
+    <string name="lb">lb</string>
+    <string name="permiso_concedido">Permiso de notificaciones concedido</string>
+    <string name="permiso_necesario">El permiso de notificaciones es necesario para avisarte cuando termine el descanso</string>
+    <string name="descanso_terminado">¡Descanso terminado!</string>
+    <string name="serie_actualizada">Serie actualizada</string>
+    <string name="error_reps">Introduce repeticiones válidas</string>
+    <string name="serie_guardada">Serie guardada</string>
+    <string name="error_guardar">Error al guardar serie</string>
+    <string name="no_registros_previos">No hay registros previos para este ejercicio</string>
+    <string name="unit_with_base_format">%1$s (%2$s)</string>
 
 </resources>

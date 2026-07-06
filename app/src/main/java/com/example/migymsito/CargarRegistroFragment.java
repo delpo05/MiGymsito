@@ -90,9 +90,9 @@ public class CargarRegistroFragment extends Fragment {
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
-                    Toast.makeText(getContext(), "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.permiso_concedido, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getContext(), "El permiso de notificaciones es necesario para avisarte cuando termine el descanso", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), R.string.permiso_necesario, Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -209,13 +209,13 @@ public class CargarRegistroFragment extends Fragment {
         }
 
         if (esPesoCorporal) {
-            tvUnidadPeso.setText("Lastre (kg)");
-            tvColumnaPeso.setText("Lastre");
+            tvUnidadPeso.setText(R.string.unidad_lastre);
+            tvColumnaPeso.setText(R.string.columna_lastre);
         } else if (esPesoPorLado) {
-            tvUnidadPeso.setText("Peso x lado (kg)");
-            tvColumnaPeso.setText("Peso (x2)");
+            tvUnidadPeso.setText(R.string.unidad_peso_lado);
+            tvColumnaPeso.setText(R.string.columna_peso_x2);
         } else {
-            tvUnidadPeso.setText("kg");
+            tvUnidadPeso.setText(R.string.kg);
         }
     }
 
@@ -422,7 +422,7 @@ public class CargarRegistroFragment extends Fragment {
                 clearTimerState();
                 vibrarAlFinalizar();
                 if (isAdded()) {
-                    Toast.makeText(getContext(), "¡Descanso terminado!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.descanso_terminado, Toast.LENGTH_SHORT).show();
                 }
             }
         }.start();
@@ -516,9 +516,9 @@ public class CargarRegistroFragment extends Fragment {
         tvUnidad.setOnClickListener(v -> {
             String current = tvUnidad.getText().toString();
             if (current.equalsIgnoreCase("kg")) {
-                tvUnidad.setText("lb");
+                tvUnidad.setText(R.string.lb);
             } else {
-                tvUnidad.setText("kg");
+                tvUnidad.setText(R.string.kg);
             }
         });
 
@@ -550,7 +550,7 @@ public class CargarRegistroFragment extends Fragment {
             }
 
             dialog.dismiss();
-            Toast.makeText(getContext(), "Serie actualizada", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.serie_actualizada, Toast.LENGTH_SHORT).show();
         });
 
         dialog.show();
@@ -567,7 +567,7 @@ public class CargarRegistroFragment extends Fragment {
             if (current.contains("kg") || current.contains("lb")) {
                 String base = current.contains("(") ? current.substring(0, current.indexOf("(")) : "";
                 if (!base.isEmpty()) {
-                    tvUnidadPeso.setText(base + "(" + registro.UnidadPeso + ")");
+                    tvUnidadPeso.setText(getString(R.string.unit_with_base_format, base, registro.UnidadPeso));
                 } else {
                     tvUnidadPeso.setText(registro.UnidadPeso);
                 }
@@ -624,7 +624,7 @@ public class CargarRegistroFragment extends Fragment {
         }
 
         if (reps <= 0) {
-            Toast.makeText(getContext(), "Introduce repeticiones válidas", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.error_reps, Toast.LENGTH_SHORT).show();
             return;
         }
         btnCargar.setEnabled(false);
@@ -644,11 +644,11 @@ public class CargarRegistroFragment extends Fragment {
                             rvHistorial.scrollToPosition(0);
                             serieActual++;
                             tvSerieValue.setText(String.valueOf(serieActual));
-                            Toast.makeText(getContext(), "Serie guardada", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), R.string.serie_guardada, Toast.LENGTH_SHORT).show();
                             resetTimer();
                             startTimer();
                         } else {
-                            Toast.makeText(getContext(), "Error al guardar serie", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), R.string.error_guardar, Toast.LENGTH_SHORT).show();
                         }
                         btnCargar.setEnabled(true);
                     });
@@ -676,7 +676,7 @@ public class CargarRegistroFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     registroRepository.obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntActual, registros -> {
                         if (registros == null || registros.isEmpty()) {
-                            Toast.makeText(getContext(), "No hay registros previos para este ejercicio", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), R.string.no_registros_previos, Toast.LENGTH_SHORT).show();
                             return;
                         }
 

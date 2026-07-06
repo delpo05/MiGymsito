@@ -24,12 +24,34 @@
     <string name="tutorial_title_4">Compare &amp; Excel</string>
     <string name="tutorial_desc_4">After each session, compare your performance to break your personal records.</string>
     <string name="empezar">Start</string>
+    <string name="finalizar">Finish</string>
+    <string name="atras">Back</string>
     <string name="siguiente">Next</string>
     <string name="omitir">Skip</string>
     <string name="tipo_de_barra">Barbell Type</string>
     <string name="peso_de_barra_kg">Barbell Weight (kg)</string>
     <string name="hint_peso_barra">0.0</string>
     <string name="info_barra_format">Barbell: %1$s (%2$.1f kg)</string>
+    <string name="pregunta_nombre">What is your name?</string>
+    <string name="pregunta_correo">What is your email?</string>
+    <string name="pregunta_fecha">When were you born?</string>
+    <string name="pregunta_genero">What is your gender?</string>
+    <string name="pregunta_peso">How much do you weigh? (kg)</string>
+    <string name="pregunta_altura">How tall are you? (cm)</string>
+    <string name="hint_nombre">Full name</string>
+    <string name="hint_correo">Email address</string>
+    <string name="hint_fecha">Birth date</string>
+    <string name="hint_peso">Weight</string>
+    <string name="hint_altura">Height</string>
+    <string name="error_nombre">Please enter your name</string>
+    <string name="error_correo">Enter a valid email</string>
+    <string name="error_fecha">Select your birth date</string>
+    <string name="error_genero">Select your gender</string>
+    <string name="error_peso">Enter a valid weight</string>
+    <string name="error_altura">Enter a valid height</string>
+    <string name="error_correo_existe">This email is already registered</string>
+    <string name="registro_exitoso">Registration successful!</string>
+    <string name="error_registro">Registration error</string>
 
     <string-array name="tipos_de_barra">
         <item>None</item>
@@ -50,4 +72,21 @@
         <item>Swiss Bar / Football Bar (15 kg)</item>
         <item>Cambered Bar (25 kg)</item>
     </string-array>
+
+    <string name="unidad_lastre">Weight (kg)</string>
+    <string name="columna_lastre">Weight</string>
+    <string name="unidad_peso_lado">Weight x side (kg)</string>
+    <string name="columna_peso_x2">Weight (x2)</string>
+    <string name="kg">kg</string>
+    <string name="lb">lb</string>
+    <string name="permiso_concedido">Notification permission granted</string>
+    <string name="permiso_necesario">Notification permission is necessary to notify you when the rest period ends</string>
+    <string name="descanso_terminado">Rest finished!</string>
+    <string name="serie_actualizada">Set updated</string>
+    <string name="error_reps">Enter valid repetitions</string>
+    <string name="serie_guardada">Set saved</string>
+    <string name="error_guardar">Error saving set</string>
+    <string name="no_registros_previos">No previous records for this exercise</string>
+    <string name="unit_with_base_format">%1$s (%2$s)</string>
+
 </resources>
