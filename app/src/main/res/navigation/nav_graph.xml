@@ -25,9 +25,9 @@
 
     <fragment
         android:id="@+id/registroSesionFragment"
-        android:name="com.example.migymsito.RegistroSesionFragment"
+        android:name="com.example.migymsito.RegistroInteractivoFragment"
         android:label="Registro de Sesión"
-        tools:layout="@layout/registro_sesion_activity" />
+        tools:layout="@layout/registro_interactivo" />
 
     <fragment
         android:id="@+id/rutinasFragment"
