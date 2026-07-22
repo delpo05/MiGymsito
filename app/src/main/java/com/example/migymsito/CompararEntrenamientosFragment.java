@@ -135,7 +135,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
                             if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntB_intent) {
                                 entrenamientoB = entrenamientosFinalizados.get(i);
-                                numEntB = i + 1;
+                                numEntB = entrenamientoB.NumeroEntrenamiento;
                                 break;
                             }
                         }
@@ -144,7 +144,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
                             if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntA_intent) {
                                 entrenamientoA = entrenamientosFinalizados.get(i);
-                                numEntA = i + 1;
+                                numEntA = entrenamientoA.NumeroEntrenamiento;
                                 break;
                             }
                         }
@@ -261,7 +261,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
             Entrenamiento e = entrenamientosFinalizados.get(i);
             String fechaStr = dateFormat.format(new Date(e.FechaFin));
-            opciones[i] = String.format("Entrenamiento #%d (%s)", (i + 1), fechaStr);
+            opciones[i] = String.format("Entrenamiento #%d (%s)", e.NumeroEntrenamiento, fechaStr);
         }
 
         new AlertDialog.Builder(requireContext())
@@ -271,11 +271,11 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                     String textoSeleccionado = opciones[which];
                     if (esA) {
                         entrenamientoA = seleccionado;
-                        numEntA = which + 1;
+                        numEntA = seleccionado.NumeroEntrenamiento;
                         tietEntrenamientoA.setText(textoSeleccionado);
                     } else {
                         entrenamientoB = seleccionado;
-                        numEntB = which + 1;
+                        numEntB = seleccionado.NumeroEntrenamiento;
                         tietEntrenamientoB.setText(textoSeleccionado);
                     }
                 })

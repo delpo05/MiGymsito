@@ -245,8 +245,8 @@ public class EjerciciosFragment extends Fragment {
     private void irAComparativaPostFinalizar(List<Entrenamiento> entrenamientos) {
         if (isAdded()) {
             Bundle bundle = new Bundle();
-            bundle.putInt("idEntA", entrenamientos.get(entrenamientos.size() - 1).IdEntrenamiento);
-            bundle.putInt("idEntB", entrenamientos.get(entrenamientos.size() - 2).IdEntrenamiento);
+            bundle.putInt("idEntA", entrenamientos.get(0).IdEntrenamiento);
+            bundle.putInt("idEntB", entrenamientos.get(1).IdEntrenamiento);
             bundle.putInt("idSeccion", seccionActual.IdSeccion);
             Navigation.findNavController(requireView()).navigate(R.id.compararEntrenamientosFragment, bundle);
         }
