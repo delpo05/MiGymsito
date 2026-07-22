@@ -83,6 +83,29 @@ public class EntrenamientoRepository {
         });
     }
 
+    public void iniciarNuevoEntrenamiento(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+        executorService.execute(() -> {
+            // Verificar si ya existe uno activo
+            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            if (activo != null) {
+                notificar(callback, activo);
+                return;
+            }
+
+            Entrenamiento nuevo = new Entrenamiento();
+            nuevo.IdUsuario = idUsuario;
+            nuevo.IdSeccion = idSeccion;
+            nuevo.FechaInicio = System.currentTimeMillis();
+
+            List<Entrenamiento> todos = entrenamientoDao.getEntrenamientosByUsuario(idUsuario);
+            nuevo.NumeroEntrenamiento = todos.size() + 1;
+
+            long id = entrenamientoDao.insert(nuevo);
+            nuevo.IdEntrenamiento = (int) id;
+            notificar(callback, nuevo);
+        });
+    }
+
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {
         if (callback != null) {
             new Handler(Looper.getMainLooper()).post(() -> callback.onResult(resultado));

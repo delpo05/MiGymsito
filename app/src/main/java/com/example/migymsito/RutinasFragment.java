@@ -1,5 +1,6 @@
 package com.example.migymsito;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
