@@ -5,7 +5,9 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.example.migymsito.data.Entrenamiento;
+import com.example.migymsito.data.Registro;
 import com.example.migymsito.dataDao.EntrenamientoDao;
+import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
 import java.util.List;
@@ -15,11 +17,13 @@ import java.util.concurrent.Executors;
 public class EntrenamientoRepository {
 
     private final EntrenamientoDao entrenamientoDao;
+    private final RegistroDao registroDao;
     private final ExecutorService executorService;
 
     public EntrenamientoRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         entrenamientoDao = db.entrenamientoDao();
+        registroDao = db.registroDao();
         executorService = Executors.newFixedThreadPool(4);
     }
 
@@ -79,6 +83,30 @@ public class EntrenamientoRepository {
                 notificar(callback, true);
             } else {
                 notificar(callback, false);
+            }
+        });
+    }
+
+    /**
+     * Finaliza el entrenamiento activo si tiene registros.
+     * Si no tiene registros, lo elimina de la base de datos.
+     * El callback devuelve true si se finalizó (con registros), false si se eliminó (sin registros).
+     */
+    public void finalizarOEliminarSiVacio(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+        executorService.execute(() -> {
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            if (e != null) {
+                List<Registro> registros = registroDao.obtenerRegistrosPorEntrenamiento(e.IdEntrenamiento);
+                if (registros != null && !registros.isEmpty()) {
+                    e.FechaFin = System.currentTimeMillis();
+                    entrenamientoDao.update(e);
+                    notificar(callback, true);
+                } else {
+                    entrenamientoDao.delete(e);
+                    notificar(callback, false);
+                }
+            } else {
+                notificar(callback, null); // Ocurrió un error o no había entrenamiento
             }
         });
     }

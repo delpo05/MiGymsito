@@ -190,11 +190,18 @@ public class EjerciciosFragment extends Fragment {
 
                                 btnFinalizarEntrenamiento.setEnabled(false);
 
-                                entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
-                                        MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, success -> {
-                                            if (success != null && success) {
-                                                Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
-                                                validarYRedirigir();
+                                entrenamientoRepository.finalizarOEliminarSiVacio(
+                                        MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, finalizado -> {
+                                            if (finalizado != null) {
+                                                if (finalizado) {
+                                                    Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
+                                                    validarYRedirigir();
+                                                } else {
+                                                    Toast.makeText(getContext(), "Entrenamiento sin registros no guardado", Toast.LENGTH_SHORT).show();
+                                                    if (isAdded()) {
+                                                        Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null);
+                                                    }
+                                                }
                                             } else {
                                                 Toast.makeText(getContext(), "Error al finalizar", Toast.LENGTH_SHORT).show();
                                                 btnFinalizarEntrenamiento.setEnabled(true);
