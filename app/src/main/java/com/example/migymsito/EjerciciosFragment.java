@@ -1,5 +1,6 @@
 package com.example.migymsito;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -172,32 +173,62 @@ public class EjerciciosFragment extends Fragment {
 
         entrenamientoRepository.obtenerEntrenamientoActivoPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, entrenamiento -> {
             if (entrenamiento != null) {
+                btnFinalizarEntrenamiento.setText("FINALIZAR ENTRENAMIENTO");
                 btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
                 btnFinalizarEntrenamiento.setEnabled(true);
+                
+                btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                    new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+                            .setTitle("Finalizar Entrenamiento")
+                            .setMessage("¿Estás seguro de que deseas finalizar esta sección?")
+                            .setPositiveButton("Finalizar", (dialog, which) -> {
+                                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido3);
+                                if (mp != null) {
+                                    mp.start();
+                                    mp.setOnCompletionListener(MediaPlayer::release);
+                                }
+
+                                btnFinalizarEntrenamiento.setEnabled(false);
+
+                                entrenamientoRepository.finalizarOEliminarSiVacio(
+                                        MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, finalizado -> {
+                                            if (finalizado != null) {
+                                                if (finalizado) {
+                                                    Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
+                                                    validarYRedirigir();
+                                                } else {
+                                                    Toast.makeText(getContext(), "Entrenamiento sin registros no guardado", Toast.LENGTH_SHORT).show();
+                                                    if (isAdded()) {
+                                                        Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null);
+                                                    }
+                                                }
+                                            } else {
+                                                Toast.makeText(getContext(), "Error al finalizar", Toast.LENGTH_SHORT).show();
+                                                btnFinalizarEntrenamiento.setEnabled(true);
+                                            }
+                                        });
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                });
             } else {
-                btnFinalizarEntrenamiento.setVisibility(View.GONE);
+                btnFinalizarEntrenamiento.setText("INICIAR SECCIÓN");
+                btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
+                btnFinalizarEntrenamiento.setEnabled(true);
+
+                btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                    new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+                            .setTitle("Iniciar Sección")
+                            .setMessage("¿Deseas comenzar con la sección \"" + seccionActual.NombreSeccion + "\"?")
+                            .setPositiveButton("Comenzar", (dialog, which) -> {
+                                entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, nuevoEnt -> {
+                                    configurarBotonFinalizar();
+                                });
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                });
             }
-        });
-
-        btnFinalizarEntrenamiento.setOnClickListener(v -> {
-            MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido3);
-            if (mp != null) {
-                mp.start();
-                mp.setOnCompletionListener(MediaPlayer::release); 
-            }
-
-            btnFinalizarEntrenamiento.setEnabled(false);
-
-            entrenamientoRepository.finalizarEntrenamientoActivoPorSeccion(
-                    MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, success -> {
-                        if (success != null && success) {
-                            Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
-                            validarYRedirigir();
-                        } else {
-                            Toast.makeText(getContext(), "Error al finalizar", Toast.LENGTH_SHORT).show();
-                            btnFinalizarEntrenamiento.setEnabled(true);
-                        }
-                    });
         });
     }
 
@@ -221,8 +252,8 @@ public class EjerciciosFragment extends Fragment {
     private void irAComparativaPostFinalizar(List<Entrenamiento> entrenamientos) {
         if (isAdded()) {
             Bundle bundle = new Bundle();
-            bundle.putInt("idEntA", entrenamientos.get(entrenamientos.size() - 1).IdEntrenamiento);
-            bundle.putInt("idEntB", entrenamientos.get(entrenamientos.size() - 2).IdEntrenamiento);
+            bundle.putInt("idEntA", entrenamientos.get(0).IdEntrenamiento);
+            bundle.putInt("idEntB", entrenamientos.get(1).IdEntrenamiento);
             bundle.putInt("idSeccion", seccionActual.IdSeccion);
             Navigation.findNavController(requireView()).navigate(R.id.compararEntrenamientosFragment, bundle);
         }
@@ -373,6 +404,8 @@ public class EjerciciosFragment extends Fragment {
         }
         adapter = new EjerciciosAdapter(new ArrayList<>(), new EjerciciosAdapter.OnEjercicioClickListener() {
             @Override public void onEjercicioClick(Ejercicio ej) {
+                if (MainActivity.usuarioLogueado == null || seccionActual == null) return;
+                
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("ejercicio", ej);
                 bundle.putSerializable("seccion", seccionActual);

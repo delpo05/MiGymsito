@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.migymsito.adapter.SeccionesAdapter;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
+import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

@@ -23,6 +23,7 @@ public class RegistroRepository {
     private final EntrenamientoDao entrenamientoDao;
     private final SeccionXejercicioDao seccionXejercicioDao;
     private final ExecutorService executorService;
+    private final EntrenamientoRepository entrenamientoRepository;
 
     public RegistroRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
@@ -30,6 +31,7 @@ public class RegistroRepository {
         entrenamientoDao = db.entrenamientoDao();
         seccionXejercicioDao = db.seccionXejercicioDao();
         executorService = Executors.newFixedThreadPool(4);
+        entrenamientoRepository = new EntrenamientoRepository(application);
     }
 
     public void insertarRegistro(Registro registro) {
@@ -80,6 +82,9 @@ public class RegistroRepository {
             nuevo.PesoCorporalMomento = pesoCorporal;
 
             registroDao.insertarRegistro(nuevo);
+            
+            // Refrescar alarmas de inactividad
+            entrenamientoRepository.refrescarAlarmasInactividad(idUsuario, idSeccion);
             
             notificar(callback, nuevo);
         });
