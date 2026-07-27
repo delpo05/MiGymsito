@@ -32,6 +32,7 @@
         </activity>
 
         <receiver android:name=".TimerReceiver" android:exported="false" />
+        <receiver android:name=".EntrenamientoReceiver" android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
