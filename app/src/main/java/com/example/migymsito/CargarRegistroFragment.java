@@ -120,6 +120,16 @@ public class CargarRegistroFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    if (MainActivity.usuarioLogueado != null) {
+                        idUsuario = MainActivity.usuarioLogueado.IdUsuario;
+                        continuarCarga(requireView());
+                    }
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         if (MainActivity.usuarioLogueado != null) {
@@ -143,6 +153,7 @@ public class CargarRegistroFragment extends Fragment {
     }
 
     private void continuarCarga(View view) {
+        if (view == null) return;
         if (getArguments() != null) {
             Ejercicio ejercicio;
             Seccion seccion;

@@ -86,11 +86,13 @@ public class MainActivity extends AppCompatActivity {
                     if (user != null) {
                         usuarioLogueado = user;
                         actualizarNombreHeader();
+                        sharedViewModel.notifyUserLoaded();
                     }
                 });
             }
         } else {
             actualizarNombreHeader();
+            sharedViewModel.notifyUserLoaded();
         }
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {

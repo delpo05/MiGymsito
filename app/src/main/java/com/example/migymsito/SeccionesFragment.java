@@ -66,6 +66,13 @@ public class SeccionesFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    cargarSeccionesDesdeDB();
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         if (getArguments() != null) {

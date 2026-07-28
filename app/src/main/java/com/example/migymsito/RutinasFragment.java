@@ -97,6 +97,13 @@ public class RutinasFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    cargarRutinasDesdeDB();
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         usuarioRepository = new UsuarioRepository(getActivity().getApplication());
@@ -361,7 +368,7 @@ public class RutinasFragment extends Fragment {
     }
 
     private void cargarRutinasDesdeDB() {
-        if (MainActivity.usuarioLogueado != null) {
+        if (MainActivity.usuarioLogueado != null && rutinaRepository != null) {
             rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> adapter.setRutinas(rutinas));
         }
     }
