@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -431,7 +432,15 @@ public class CargarRegistroFragment extends Fragment {
                 updateCountDownText();
                 updateTimerUI();
                 clearTimerState();
+                cancelAlarm();
                 vibrarAlFinalizar();
+                
+                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido1);
+                if (mp != null) {
+                    mp.start();
+                    mp.setOnCompletionListener(MediaPlayer::release);
+                }
+
                 if (isAdded()) {
                     Toast.makeText(getContext(), R.string.descanso_terminado, Toast.LENGTH_SHORT).show();
                 }
