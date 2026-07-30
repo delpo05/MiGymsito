@@ -100,6 +100,14 @@ public class EjerciciosFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    configurarBotonFinalizar();
+                    cargarEjerciciosDesdeDB();
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         if (getArguments() != null) {
@@ -234,6 +242,8 @@ public class EjerciciosFragment extends Fragment {
 
     private void validarYRedirigir() {
         new Thread(() -> {
+            if (MainActivity.usuarioLogueado == null) return;
+
             AppDatabase db = AppDatabase.getDatabase(getContext());
             List<Entrenamiento> entrenamientos = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion);
             

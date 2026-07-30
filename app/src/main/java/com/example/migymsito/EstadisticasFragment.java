@@ -98,6 +98,13 @@ public class EstadisticasFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    cargarRutinasDelUsuario();
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         autoCompleteRutinas = view.findViewById(R.id.autoCompleteRutinas);

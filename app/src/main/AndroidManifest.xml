@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".TimerReceiver" android:exported="false" />
+        <receiver android:name=".TimerReceiver" android:exported="true" />
         <receiver android:name=".EntrenamientoReceiver" android:exported="false" />
 
         <provider

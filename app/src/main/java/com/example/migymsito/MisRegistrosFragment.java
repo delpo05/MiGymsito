@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -98,6 +99,14 @@ public class MisRegistrosFragment extends Fragment {
         seccionRepository = new SeccionRepository(requireActivity().getApplication());
         ejerciciosRepository = new EjercicioRepository(requireActivity().getApplication());
         registroRepository = new RegistroRepository(requireActivity().getApplication());
+
+        SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+            if (loaded != null && loaded) {
+                cargarRutinasDelUsuario();
+                sharedViewModel.resetUserLoadedTrigger();
+            }
+        });
 
         cargarRutinasDelUsuario();
         configurarListeners();

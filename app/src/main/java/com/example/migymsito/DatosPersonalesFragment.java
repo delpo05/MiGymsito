@@ -66,7 +66,17 @@ public class DatosPersonalesFragment extends Fragment {
         if (MainActivity.usuarioLogueado != null) {
             cargarDatosUsuario();
         } else {
-            Toast.makeText(getContext(), "Sesión no iniciada", Toast.LENGTH_SHORT).show();
+            int idSesion = usuarioRepository.obtenerIdSesion();
+            if (idSesion != -1) {
+                usuarioRepository.obtenerUsuarioPorId(idSesion, user -> {
+                    if (user != null) {
+                        MainActivity.usuarioLogueado = user;
+                        cargarDatosUsuario();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "Sesión no iniciada", Toast.LENGTH_SHORT).show();
+            }
         }
 
         View btnGuardar = view.findViewById(R.id.btnGuardarDatos);

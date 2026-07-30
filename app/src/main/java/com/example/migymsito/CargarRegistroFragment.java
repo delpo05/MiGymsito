@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -120,6 +121,16 @@ public class CargarRegistroFragment extends Fragment {
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    if (MainActivity.usuarioLogueado != null) {
+                        idUsuario = MainActivity.usuarioLogueado.IdUsuario;
+                        continuarCarga(requireView());
+                    }
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         if (MainActivity.usuarioLogueado != null) {
@@ -143,6 +154,7 @@ public class CargarRegistroFragment extends Fragment {
     }
 
     private void continuarCarga(View view) {
+        if (view == null) return;
         if (getArguments() != null) {
             Ejercicio ejercicio;
             Seccion seccion;
@@ -420,7 +432,15 @@ public class CargarRegistroFragment extends Fragment {
                 updateCountDownText();
                 updateTimerUI();
                 clearTimerState();
+                cancelAlarm();
                 vibrarAlFinalizar();
+                
+                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido1);
+                if (mp != null) {
+                    mp.start();
+                    mp.setOnCompletionListener(MediaPlayer::release);
+                }
+
                 if (isAdded()) {
                     Toast.makeText(getContext(), R.string.descanso_terminado, Toast.LENGTH_SHORT).show();
                 }

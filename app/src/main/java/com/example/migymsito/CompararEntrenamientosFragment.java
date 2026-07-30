@@ -90,6 +90,16 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                     sharedViewModel.resetImportFinishedTrigger();
                 }
             });
+
+            sharedViewModel.getUserLoadedTrigger().observe(getViewLifecycleOwner(), loaded -> {
+                if (loaded != null && loaded) {
+                    if (seccionSeleccionada == null) {
+                        manejarArgumentsDirecto();
+                    }
+                    cargarRutinas();
+                    sharedViewModel.resetUserLoadedTrigger();
+                }
+            });
         }
 
         actvRutina = view.findViewById(R.id.actv_rutina);
@@ -120,7 +130,17 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
 
             new Thread(() -> {
                 AppDatabase db = AppDatabase.getDatabase(getContext());
-                List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
+                int userId = -1;
+                if (MainActivity.usuarioLogueado != null) {
+                    userId = MainActivity.usuarioLogueado.IdUsuario;
+                } else if (getActivity() != null) {
+                    com.example.migymsito.dataRepository.UsuarioRepository tempRepo = new com.example.migymsito.dataRepository.UsuarioRepository(getActivity().getApplication());
+                    userId = tempRepo.obtenerIdSesion();
+                }
+
+                if (userId == -1) return;
+
+                List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(userId);
                 for (Seccion s : todas) {
                     if (s.IdSeccion == idSeccion) {
                         seccionSeleccionada = s;
@@ -129,7 +149,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                 }
 
                 if (seccionSeleccionada != null) {
-                    entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, idSeccion);
+                    entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(userId, idSeccion);
 
                     if (idEntB_intent != -1) {
                         for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
