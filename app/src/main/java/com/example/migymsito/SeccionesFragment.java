@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -83,6 +84,12 @@ public class SeccionesFragment extends Fragment {
             }
         }
 
+        if (rutinaActual == null) {
+            Toast.makeText(getContext(), "Error: Rutina no encontrada", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).popBackStack();
+            return;
+        }
+
         rvSecciones = view.findViewById(R.id.rvGenerico);
         fabAdd = view.findViewById(R.id.fabAdd);
 
@@ -116,6 +123,8 @@ public class SeccionesFragment extends Fragment {
             seccionRepository = new SeccionRepository(getActivity().getApplication());
         }
         
+        if (rutinaActual == null) return;
+
         adapter = new SeccionesAdapter(new ArrayList<>(), new SeccionesAdapter.OnSeccionClickListener() {
             @Override
             public void onSeccionClick(Seccion seccion) {

@@ -87,8 +87,12 @@ public class MainActivity extends AppCompatActivity {
                         usuarioLogueado = user;
                         actualizarNombreHeader();
                         sharedViewModel.notifyUserLoaded();
+                    } else {
+                        sharedViewModel.notifyUserLoaded();
                     }
                 });
+            } else {
+                sharedViewModel.notifyUserLoaded();
             }
         } else {
             actualizarNombreHeader();

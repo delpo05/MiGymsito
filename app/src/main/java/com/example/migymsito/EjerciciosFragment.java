@@ -118,6 +118,12 @@ public class EjerciciosFragment extends Fragment {
             }
         }
 
+        if (seccionActual == null) {
+            Toast.makeText(getContext(), "Error: Sección no encontrada", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).popBackStack();
+            return;
+        }
+
         rvEjercicios = view.findViewById(R.id.rvGenerico);
         tvTituloGrid = view.findViewById(R.id.tvTituloGrid);
         btnFinalizarEntrenamiento = view.findViewById(R.id.btnFinalizarEntrenamiento);

@@ -29,6 +29,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -135,7 +137,7 @@ public class CargarRegistroFragment extends Fragment {
         if (MainActivity.usuarioLogueado != null) {
             idUsuario = MainActivity.usuarioLogueado.IdUsuario;
             continuarCarga(view);
-        } else if (usuarioRepository != null) {
+        } else {
             idUsuario = usuarioRepository.obtenerIdSesion();
             if (idUsuario != -1) {
                 usuarioRepository.obtenerUsuarioPorId(idUsuario, usuario -> {
@@ -144,10 +146,12 @@ public class CargarRegistroFragment extends Fragment {
                         continuarCarga(view);
                     } else {
                         Toast.makeText(getContext(), "Error: Sesión de usuario no encontrada", Toast.LENGTH_LONG).show();
+                        Navigation.findNavController(requireView()).popBackStack();
                     }
                 });
             } else {
                 Toast.makeText(getContext(), "Error: No hay una sesión activa", Toast.LENGTH_LONG).show();
+                Navigation.findNavController(requireView()).popBackStack();
             }
         }
     }
@@ -172,11 +176,23 @@ public class CargarRegistroFragment extends Fragment {
                 esPesoPorLado = (ejercicio.PesoPorLado != null && ejercicio.PesoPorLado);
                 tipoDeBarra = ejercicio.TipoDeBarra;
                 pesoBarra = ejercicio.PesoBarra != null ? ejercicio.PesoBarra : 0.0f;
+            } else {
+                Toast.makeText(getContext(), "Error: Ejercicio no encontrado", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).popBackStack();
+                return;
             }
             
             if (seccion != null) {
                 idSeccion = seccion.IdSeccion;
+            } else {
+                Toast.makeText(getContext(), "Error: Sección no encontrada", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).popBackStack();
+                return;
             }
+        } else {
+            Toast.makeText(getContext(), "Error: No se proporcionaron datos del ejercicio", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).popBackStack();
+            return;
         }
 
         initViews(view);
