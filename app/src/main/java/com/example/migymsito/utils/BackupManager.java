@@ -88,8 +88,8 @@ public class BackupManager {
 
                 // 4. Ejercicios
                 JSONArray ejerciciosArray = new JSONArray();
-                List<EjercicioStrength> ejercicios = db.ejercicioDao().obtenerTodosLosEjercicios();
-                for (EjercicioStrength e : ejercicios) {
+                List<Ejercicio> ejercicios = db.ejercicioDao().obtenerTodosLosEjercicios();
+                for (Ejercicio e : ejercicios) {
                     JSONObject je = new JSONObject();
                     je.put("IdEjercicio", e.IdEjercicio);
                     je.put("TipoEjercicio", e.TipoEjercicio);
@@ -255,7 +255,7 @@ public class BackupManager {
                             JSONArray ejArray = backup.getJSONArray("ejercicios");
                             for (int i = 0; i < ejArray.length(); i++) {
                                 JSONObject je = ejArray.getJSONObject(i);
-                                EjercicioStrength e = new EjercicioStrength();
+                                Ejercicio e = new Ejercicio();
                                 e.IdEjercicio = je.getInt("IdEjercicio");
                                 e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
                                 e.NombreEjercicio = je.getString("NombreEjercicio");

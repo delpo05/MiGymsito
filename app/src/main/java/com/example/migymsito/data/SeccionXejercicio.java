@@ -18,7 +18,7 @@ import java.io.Serializable;
                         onDelete = ForeignKey.CASCADE
                 ),
                 @ForeignKey(
-                        entity = EjercicioStrength.class,
+                        entity = Ejercicio.class,
                         parentColumns = "IdEjercicio",
                         childColumns = "IdEjercicio",
                         onDelete = ForeignKey.CASCADE

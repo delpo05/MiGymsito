@@ -83,7 +83,7 @@ public interface RegistroDao {
            "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
            "FROM Registro r " +
            "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
-           "JOIN EjerciciosStrength ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+           "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
            "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
            "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
            "WHERE rut.IdUsuarioRutina = :idUsuario " +
@@ -102,7 +102,7 @@ public interface RegistroDao {
             "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
             "FROM Registro r " +
             "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
-            "JOIN EjerciciosStrength ej ON sxe.IdEjercicio = ej.IdEjercicio " +
+            "JOIN Ejercicio ej ON sxe.IdEjercicio = ej.IdEjercicio " +
             "JOIN Seccion s ON sxe.IdSeccion = s.IdSeccion " +
             "JOIN Rutina rut ON s.IdRutinaSeccion = rut.IdRutina " +
             "WHERE rut.IdUsuarioRutina = :idUsuario " +

@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.migymsito.data.EjercicioStrength;
+import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.RegistroDetallado;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
@@ -60,7 +60,7 @@ public class MisRegistrosFragment extends Fragment {
 
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
-    private List<EjercicioStrength> listaEjerciciosActuales = new ArrayList<>();
+    private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
 
     private int idRutinaSeleccionada = -1;
     private int idSeccionSeleccionada = -1;
@@ -195,7 +195,7 @@ public class MisRegistrosFragment extends Fragment {
             if (position == 0) {
                 idEjercicioSeleccionado = -1;
             } else {
-                EjercicioStrength seleccionado = listaEjerciciosActuales.get(position - 1);
+                Ejercicio seleccionado = listaEjerciciosActuales.get(position - 1);
                 idEjercicioSeleccionado = seleccionado.IdEjercicio;
             }
         });
@@ -247,11 +247,11 @@ public class MisRegistrosFragment extends Fragment {
         }
     }
 
-    private void actualizarDropdownEjercicios(List<EjercicioStrength> ejercicios) {
+    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
         this.listaEjerciciosActuales = ejercicios;
         List<String> nombres = new ArrayList<>();
         nombres.add("Todos los ejercicios");
-        for (EjercicioStrength e : ejercicios) {
+        for (Ejercicio e : ejercicios) {
             nombres.add(e.NombreEjercicio);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres);
