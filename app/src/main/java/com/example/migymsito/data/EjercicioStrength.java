@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 
-@Entity(tableName = "Ejercicio")
-public class Ejercicio implements Serializable {
+@Entity(tableName = "EjerciciosStrength")
+public class EjercicioStrength implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int IdEjercicio;
 

@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioStrength;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
@@ -65,8 +65,8 @@ public class EstadisticasFragment extends Fragment {
 
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
-    private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
-    private Ejercicio ejercicioSeleccionado;
+    private List<EjercicioStrength> listaEjerciciosActuales = new ArrayList<>();
+    private EjercicioStrength ejercicioSeleccionado;
 
     private int currentOffset = 0;
     private static final int PAGE_SIZE = 25;
@@ -284,10 +284,10 @@ public class EstadisticasFragment extends Fragment {
         }
     }
 
-    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+    private void actualizarDropdownEjercicios(List<EjercicioStrength> ejercicios) {
         this.listaEjerciciosActuales = ejercicios;
         List<String> nombres = new ArrayList<>();
-        for (Ejercicio e : ejercicios) {
+        for (EjercicioStrength e : ejercicios) {
             nombres.add(e.NombreEjercicio);
         }
 

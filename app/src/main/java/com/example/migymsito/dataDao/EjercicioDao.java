@@ -6,7 +6,7 @@ import androidx.room.Query;
 import androidx.room.Delete;
 import androidx.room.Update;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioStrength;
 
 import java.util.List;
 
@@ -14,39 +14,39 @@ import java.util.List;
 public interface EjercicioDao {
 
     @Insert
-    long insertarEjercicio(Ejercicio ejercicio);
+    long insertarEjercicio(EjercicioStrength ejercicio);
 
     @Update
-    void actualizarEjercicio(Ejercicio ejercicio);
+    void actualizarEjercicio(EjercicioStrength ejercicio);
 
     @Delete
-    void eliminarEjercicio(Ejercicio ejercicio);
+    void eliminarEjercicio(EjercicioStrength ejercicio);
 
-    @Query("SELECT * FROM Ejercicio")
-    List<Ejercicio> obtenerTodosLosEjercicios();
+    @Query("SELECT * FROM EjerciciosStrength")
+    List<EjercicioStrength> obtenerTodosLosEjercicios();
 
-    @Query("SELECT * FROM Ejercicio WHERE IdEjercicio = :id")
-    Ejercicio obtenerEjercicioPorId(int id);
+    @Query("SELECT * FROM EjerciciosStrength WHERE IdEjercicio = :id")
+    EjercicioStrength obtenerEjercicioPorId(int id);
 
     // Obtiene ejercicios que pertenecen a una sección específica
-    @Query("SELECT e.* FROM Ejercicio e INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio WHERE sxe.IdSeccion = :idSeccion")
-    List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);
+    @Query("SELECT e.* FROM EjerciciosStrength e INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio WHERE sxe.IdSeccion = :idSeccion")
+    List<EjercicioStrength> obtenerEjerciciosPorSeccion(int idSeccion);
 
     // Obtiene solo los ejercicios que el usuario ha entrenado al menos una vez
-    @Query("SELECT DISTINCT e.* FROM Ejercicio e " +
+    @Query("SELECT DISTINCT e.* FROM EjerciciosStrength e " +
            "INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio " +
            "INNER JOIN Registro r ON sxe.IdSeccionXejercicio = r.IdSeccionXejercicio " +
            "INNER JOIN Entrenamiento ent ON r.IdEntrenamiento = ent.IdEntrenamiento " +
            "WHERE ent.IdUsuario = :idUsuario")
-    List<Ejercicio> obtenerEjerciciosEnUsoPorUsuario(int idUsuario);
+    List<EjercicioStrength> obtenerEjerciciosEnUsoPorUsuario(int idUsuario);
 
     // Obtiene todos los ejercicios preestablecidos usando el campo TipoEjercicio
-    @Query("SELECT * FROM Ejercicio WHERE TipoEjercicio = 'Preestablecido'")
-    List<Ejercicio> obtenerEjerciciosPreestablecidos();
+    @Query("SELECT * FROM EjerciciosStrength WHERE TipoEjercicio = 'Preestablecido'")
+    List<EjercicioStrength> obtenerEjerciciosPreestablecidos();
 
-    @Query("SELECT nombreEjercicio FROM Ejercicio JOIN SeccionXejercicio ON Ejercicio.IdEjercicio = SeccionXejercicio.IdEjercicio WHERE SeccionXejercicio.IdSeccion = :idSeccion")
+    @Query("SELECT nombreEjercicio FROM EjerciciosStrength JOIN SeccionXejercicio ON EjerciciosStrength.IdEjercicio = SeccionXejercicio.IdEjercicio WHERE SeccionXejercicio.IdSeccion = :idSeccion")
     List<String> obtenerNombresEjerciciosPorSeccion(int idSeccion);
 
-    @Query("DELETE FROM Ejercicio")
+    @Query("DELETE FROM EjerciciosStrength")
     void borrarTodo();
 }

@@ -35,7 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.HistorialEjercicioAdapter;
 import com.example.migymsito.adapter.RegistroAdapter;
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioStrength;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
@@ -156,13 +156,13 @@ public class CargarRegistroFragment extends Fragment {
     private void continuarCarga(View view) {
         if (view == null) return;
         if (getArguments() != null) {
-            Ejercicio ejercicio;
+            EjercicioStrength ejercicio;
             Seccion seccion;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ejercicio = getArguments().getSerializable("ejercicio", Ejercicio.class);
+                ejercicio = getArguments().getSerializable("ejercicio", EjercicioStrength.class);
                 seccion = getArguments().getSerializable("seccion", Seccion.class);
             } else {
-                ejercicio = (Ejercicio) getArguments().getSerializable("ejercicio");
+                ejercicio = (EjercicioStrength) getArguments().getSerializable("ejercicio");
                 seccion = (Seccion) getArguments().getSerializable("seccion");
             }
             

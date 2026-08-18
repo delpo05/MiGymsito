@@ -7,9 +7,9 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioCardio;
+import com.example.migymsito.data.EjercicioStrength;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
@@ -17,6 +17,7 @@ import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
+import com.example.migymsito.dataDao.EjercicioCardioDao;
 import com.example.migymsito.dataDao.EjercicioDao;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.HistorialDao;
@@ -32,18 +33,20 @@ import java.util.concurrent.Executors;
         Usuario.class,
         Rutina.class,
         Seccion.class,
-        Ejercicio.class,
+        EjercicioStrength.class,
+        EjercicioCardio.class,
         Registro.class,
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 15, exportSchema = false)
+}, version = 16, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
     public abstract RutinaDao rutinaDao();
     public abstract SeccionDao seccionDao();
     public abstract EjercicioDao ejercicioDao();
+    public abstract EjercicioCardioDao ejercicioCardioDao();
     public abstract RegistroDao registroDao();
     public abstract HistorialDao historialDao();
     public abstract EntrenamientoDao entrenamientoDao();
@@ -185,7 +188,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
      */
     private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
-        Ejercicio e = new Ejercicio();
+        EjercicioStrength e = new EjercicioStrength();
         e.TipoEjercicio = "Preestablecido";
         e.NombreEjercicio = nombre;
         e.PesoCorporalEjercicio = false;
