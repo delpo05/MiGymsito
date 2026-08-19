@@ -58,7 +58,27 @@ public class NotificationHelper {
     }
 
     public static void showTimerFinishedNotification(Context context) {
-        // ... (existing code)
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.sonido1);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_fitness_center)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
+                .setContentTitle("¡Descanso Terminado!")
+                .setContentText("Es hora de tu siguiente serie.")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setSound(soundUri)
+                .setVibrate(new long[]{0, 500, 200, 500})
+                .setContentIntent(pendingIntent);
+
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID, builder.build());
+        }
     }
 
     public static void showInactivityNotification(Context context) {

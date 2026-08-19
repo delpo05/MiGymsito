@@ -657,8 +657,9 @@ public class CargarRegistroFragment extends Fragment {
         btnCargar.setEnabled(false);
 
         double finalPesoFinal = pesoFinal;
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getContext());
+            AppDatabase db = AppDatabase.getDatabase(appContext);
             Historial ultimoPeso = db.historialDao().obtenerUltimoHistorial(idUsuario);
             Double pesoCorporal = (ultimoPeso != null) ? ultimoPeso.PesoHistorial : null;
 
@@ -694,8 +695,9 @@ public class CargarRegistroFragment extends Fragment {
     }
 
     private void mostrarHistorialCompleto() {
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getContext());
+            AppDatabase db = AppDatabase.getDatabase(appContext);
             Entrenamiento activo = db.entrenamientoDao().getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
             int idEntActual = (activo != null) ? activo.IdEntrenamiento : Integer.MAX_VALUE;
 

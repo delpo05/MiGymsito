@@ -262,10 +262,10 @@ public class MainActivity extends AppCompatActivity {
                             userRepo.guardarIdSesion(user.IdUsuario); // Actualizar ID en SharedPreferences
                             actualizarNombreHeader();
                             Toast.makeText(MainActivity.this, "Importación exitosa.", Toast.LENGTH_LONG).show();
-                            navController.navigate(R.id.Home);
+                            navController.navigate(R.id.rutinasFragment);
                         } else {
                             Toast.makeText(MainActivity.this, "Importación exitosa. Crea un usuario para comenzar.", Toast.LENGTH_LONG).show();
-                            navController.navigate(R.id.Home);
+                            navController.navigate(R.id.rutinasFragment);
                         }
                     });
                 });

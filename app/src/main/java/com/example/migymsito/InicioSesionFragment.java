@@ -2,6 +2,7 @@ package com.example.migymsito;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -118,8 +119,9 @@ public class InicioSesionFragment extends Fragment {
     }
 
     private void saltarDirectoASecciones(int idRutina) {
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getContext());
+            AppDatabase db = AppDatabase.getDatabase(appContext);
             Rutina rutina = db.rutinaDao().obtenerRutinaPorId(idRutina);
             if (getActivity() != null && isAdded()) {
                 getActivity().runOnUiThread(() -> {

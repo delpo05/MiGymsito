@@ -2,6 +2,7 @@ package com.example.migymsito;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -136,8 +137,9 @@ public class RutinasFragment extends Fragment {
     }
 
     private void saltarASecciones(int idRutina) {
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getContext());
+            AppDatabase db = AppDatabase.getDatabase(appContext);
             Rutina rutina = db.rutinaDao().obtenerRutinaPorId(idRutina);
             if (rutina != null && isAdded()) {
                 getActivity().runOnUiThread(() -> {
@@ -258,8 +260,9 @@ public class RutinasFragment extends Fragment {
     }
 
     private void exportarRutinaAArchivo(Rutina rutina) {
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(getContext());
+            AppDatabase db = AppDatabase.getDatabase(appContext);
             try {
                 JSONObject jsonRutina = new JSONObject();
                 jsonRutina.put("nombre", rutina.NombreRutina);
@@ -480,12 +483,13 @@ public class RutinasFragment extends Fragment {
     }
 
     private void procesarJsonImportacion(String jsonString) {
+        Context appContext = requireContext().getApplicationContext();
         executorService.execute(() -> {
             try {
                 JSONObject jsonRutina = new JSONObject(jsonString);
                 String nombreRutina = jsonRutina.getString("nombre");
 
-                AppDatabase db = AppDatabase.getDatabase(getContext());
+                AppDatabase db = AppDatabase.getDatabase(appContext);
                 
                 db.runInTransaction(() -> {
                     if (importacionCancelada) throw new RuntimeException("CANCEL");
