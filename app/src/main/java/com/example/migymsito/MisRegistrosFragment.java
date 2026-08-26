@@ -20,11 +20,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.RegistroDetallado;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.EjercicioPesoRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
@@ -55,12 +55,12 @@ public class MisRegistrosFragment extends Fragment {
 
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
-    private EjercicioRepository ejerciciosRepository;
+    private EjercicioPesoRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
 
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
-    private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
+    private List<EjercicioPeso> listaEjerciciosActuales = new ArrayList<>();
 
     private int idRutinaSeleccionada = -1;
     private int idSeccionSeleccionada = -1;
@@ -97,7 +97,7 @@ public class MisRegistrosFragment extends Fragment {
 
         rutinaRepository = new RutinaRepository(requireActivity().getApplication());
         seccionRepository = new SeccionRepository(requireActivity().getApplication());
-        ejerciciosRepository = new EjercicioRepository(requireActivity().getApplication());
+        ejerciciosRepository = new EjercicioPesoRepository(requireActivity().getApplication());
         registroRepository = new RegistroRepository(requireActivity().getApplication());
 
         SharedViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -195,7 +195,7 @@ public class MisRegistrosFragment extends Fragment {
             if (position == 0) {
                 idEjercicioSeleccionado = -1;
             } else {
-                Ejercicio seleccionado = listaEjerciciosActuales.get(position - 1);
+                EjercicioPeso seleccionado = listaEjerciciosActuales.get(position - 1);
                 idEjercicioSeleccionado = seleccionado.IdEjercicio;
             }
         });
@@ -247,11 +247,11 @@ public class MisRegistrosFragment extends Fragment {
         }
     }
 
-    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+    private void actualizarDropdownEjercicios(List<EjercicioPeso> ejercicios) {
         this.listaEjerciciosActuales = ejercicios;
         List<String> nombres = new ArrayList<>();
         nombres.add("Todos los ejercicios");
-        for (Ejercicio e : ejercicios) {
+        for (EjercicioPeso e : ejercicios) {
             nombres.add(e.NombreEjercicio);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, nombres);

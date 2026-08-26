@@ -5,9 +5,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.SeccionXejercicio;
-import com.example.migymsito.dataDao.EjercicioDao;
+import com.example.migymsito.dataDao.EjercicioPesoDao;
 import com.example.migymsito.dataDao.SeccionXejercicioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
@@ -16,17 +16,17 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class EjercicioRepository {
+public class EjercicioPesoRepository {
 
-    private final EjercicioDao ejercicioDao;
+    private final EjercicioPesoDao ejercicioDao;
     private final SeccionXejercicioDao seccionXejercicioDao;
     private final ExecutorService executorService;
     private final Handler mainThreadHandler;
-    private final String TAG = "EjercicioRepository";
+    private final String TAG = "EjercicioPesoRepository";
 
-    public EjercicioRepository(Application application) {
+    public EjercicioPesoRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
-        ejercicioDao = db.ejercicioDao();
+        ejercicioDao = db.ejercicioPesoDao();
         seccionXejercicioDao = db.seccionXejercicioDao();
         executorService = Executors.newFixedThreadPool(4);
         mainThreadHandler = new Handler(Looper.getMainLooper());
@@ -36,10 +36,10 @@ public class EjercicioRepository {
         void onResult(T result);
     }
 
-    public void insertarEjercicioConSeccion(Ejercicio ejercicio, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void insertarEjercicioConSeccion(EjercicioPeso ejercicio, int idSeccion, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             try {
-                long idEjercicio = ejercicioDao.insertarEjercicio(ejercicio);
+                long idEjercicio = ejercicioDao.insertarEjercicioPeso(ejercicio);
                 
                 SeccionXejercicio relacion = new SeccionXejercicio();
                 relacion.IdSeccion = idSeccion;
@@ -72,20 +72,20 @@ public class EjercicioRepository {
         });
     }
 
-    public void actualizarEjercicio(Ejercicio ejercicio) {
+    public void actualizarEjercicio(EjercicioPeso ejercicio) {
         executorService.execute(() -> {
             try {
-                ejercicioDao.actualizarEjercicio(ejercicio);
+                ejercicioDao.actualizarEjercicioPeso(ejercicio);
             } catch (Exception e) {
                 Log.e(TAG, "Error al actualizar ejercicio: " + e.getMessage());
             }
         });
     }
 
-    public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void actualizarEjercicioIndependiente(EjercicioPeso ejercicioEditado, int idSeccion, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
             try {
-                Ejercicio nuevoEj = new Ejercicio();
+                EjercicioPeso nuevoEj = new EjercicioPeso();
                 nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
                 nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
                 nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
@@ -94,7 +94,7 @@ public class EjercicioRepository {
                 nuevoEj.TipoDeBarra = ejercicioEditado.TipoDeBarra;
                 nuevoEj.PesoBarra = ejercicioEditado.PesoBarra;
 
-                long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
+                long nuevoIdEjercicio = ejercicioDao.insertarEjercicioPeso(nuevoEj);
                 SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
 
                 if (relacion != null) {
@@ -123,13 +123,13 @@ public class EjercicioRepository {
         });
     }
 
-    public void obtenerEjerciciosPorSeccion(int idSeccion, RepositoryCallback<List<Ejercicio>> callback) {
+    public void obtenerEjerciciosPorSeccion(int idSeccion, RepositoryCallback<List<EjercicioPeso>> callback) {
         executorService.execute(() -> {
             try {
                 List<SeccionXejercicio> relaciones = seccionXejercicioDao.getEjerciciosBySeccion(idSeccion);
-                List<Ejercicio> ejercicios = new ArrayList<>();
+                List<EjercicioPeso> ejercicios = new ArrayList<>();
                 for (SeccionXejercicio rel : relaciones) {
-                    Ejercicio ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
+                    EjercicioPeso ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
                     if (ej != null) {
                         ejercicios.add(ej);
                     }
@@ -142,10 +142,10 @@ public class EjercicioRepository {
         });
     }
 
-    public void obtenerEjerciciosEnUso(int idUsuario, RepositoryCallback<List<Ejercicio>> callback) {
+    public void obtenerEjerciciosEnUso(int idUsuario, RepositoryCallback<List<EjercicioPeso>> callback) {
         executorService.execute(() -> {
             try {
-                List<Ejercicio> ejercicios = ejercicioDao.obtenerEjerciciosEnUsoPorUsuario(idUsuario);
+                List<EjercicioPeso> ejercicios = ejercicioDao.obtenerEjerciciosEnUsoPorUsuario(idUsuario);
                 mainThreadHandler.post(() -> callback.onResult(ejercicios));
             } catch (Exception e) {
                 Log.e(TAG, "Error al obtener ejercicios en uso: " + e.getMessage());
@@ -164,7 +164,7 @@ public class EjercicioRepository {
                 List<SeccionXejercicio> relaciones = seccionXejercicioDao.getEjerciciosBySeccion(idSeccion);
                 List<String> nombres = new ArrayList<>();
                 for (SeccionXejercicio rel : relaciones) {
-                    Ejercicio ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
+                    EjercicioPeso ej = ejercicioDao.obtenerEjercicioPorId(rel.IdEjercicio);
                     if (ej != null) {
                         nombres.add(ej.NombreEjercicio);
                     }
@@ -177,10 +177,10 @@ public class EjercicioRepository {
         });
     }
 
-    public void obtenerTodosLosEjercicios(RepositoryCallback<List<Ejercicio>> callback) {
+    public void obtenerTodosLosEjercicios(RepositoryCallback<List<EjercicioPeso>> callback) {
         executorService.execute(() -> {
             try {
-                List<Ejercicio> ejercicios = ejercicioDao.obtenerTodosLosEjercicios();
+                List<EjercicioPeso> ejercicios = ejercicioDao.obtenerTodosLosEjercicios();
                 mainThreadHandler.post(() -> callback.onResult(ejercicios));
             } catch (Exception e) {
                 Log.e(TAG, "Error al obtener todos los ejercicios: " + e.getMessage());

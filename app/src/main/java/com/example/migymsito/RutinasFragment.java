@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.RutinasAdapter;
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
@@ -273,8 +273,8 @@ public class RutinasFragment extends Fragment {
                     jsonSeccion.put("tipo", seccion.TipoSeccion);
 
                     JSONArray jsonEjercicios = new JSONArray();
-                    List<Ejercicio> ejercicios = db.ejercicioDao().obtenerEjerciciosPorSeccion(seccion.IdSeccion);
-                    for (Ejercicio ejercicio : ejercicios) {
+                    List<EjercicioPeso> ejercicios = db.ejercicioPesoDao().obtenerEjerciciosPorSeccion(seccion.IdSeccion);
+                    for (EjercicioPeso ejercicio : ejercicios) {
                         JSONObject jsonEjercicio = new JSONObject();
                         jsonEjercicio.put("nombre", ejercicio.NombreEjercicio);
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
@@ -517,18 +517,18 @@ public class RutinasFragment extends Fragment {
                                 String nombreEj = jsonEjercicio.getString("nombre");
                                 
                                 int idEjercicio;
-                                Ejercicio ejExistente = buscarEjercicioPorNombre(db, nombreEj);
+                                EjercicioPeso ejExistente = buscarEjercicioPorNombre(db, nombreEj);
                                 if (ejExistente != null) {
                                     idEjercicio = ejExistente.IdEjercicio;
                                     if (ejExistente.ImagenEjercicio == null || ejExistente.ImagenEjercicio.isEmpty()) {
                                         String base64Data = jsonEjercicio.optString("imagenData", "");
                                         if (!base64Data.isEmpty()) {
                                             ejExistente.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
-                                            db.ejercicioDao().actualizarEjercicio(ejExistente);
+                                            db.ejercicioPesoDao().actualizarEjercicioPeso(ejExistente);
                                         }
                                     }
                                 } else {
-                                    Ejercicio nuevoEj = new Ejercicio();
+                                    EjercicioPeso nuevoEj = new EjercicioPeso();
                                     nuevoEj.NombreEjercicio = nombreEj;
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
@@ -540,7 +540,7 @@ public class RutinasFragment extends Fragment {
                                         nuevoEj.ImagenEjercicio = jsonEjercicio.optString("imagen", null);
                                     }
                                     
-                                    idEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevoEj);
+                                    idEjercicio = (int) db.ejercicioPesoDao().insertarEjercicioPeso(nuevoEj);
                                 }
 
                                 SeccionXejercicio sxe = new SeccionXejercicio();
@@ -581,9 +581,9 @@ public class RutinasFragment extends Fragment {
         });
     }
 
-    private Ejercicio buscarEjercicioPorNombre(AppDatabase db, String nombre) {
-        List<Ejercicio> todos = db.ejercicioDao().obtenerTodosLosEjercicios();
-        for (Ejercicio e : todos) {
+    private EjercicioPeso buscarEjercicioPorNombre(AppDatabase db, String nombre) {
+        List<EjercicioPeso> todos = db.ejercicioPesoDao().obtenerTodosLosEjercicios();
+        for (EjercicioPeso e : todos) {
             if (e.NombreEjercicio.equalsIgnoreCase(nombre)) return e;
         }
         return null;

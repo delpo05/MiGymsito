@@ -16,11 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
-import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.EjercicioPesoRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
@@ -60,13 +60,13 @@ public class EstadisticasFragment extends Fragment {
 
     private RutinaRepository rutinaRepository;
     private SeccionRepository seccionRepository;
-    private EjercicioRepository ejerciciosRepository;
+    private EjercicioPesoRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
 
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
-    private List<Ejercicio> listaEjerciciosActuales = new ArrayList<>();
-    private Ejercicio ejercicioSeleccionado;
+    private List<EjercicioPeso> listaEjerciciosActuales = new ArrayList<>();
+    private EjercicioPeso ejercicioSeleccionado;
 
     private int currentOffset = 0;
     private static final int PAGE_SIZE = 25;
@@ -88,7 +88,7 @@ public class EstadisticasFragment extends Fragment {
             
             rutinaRepository = new RutinaRepository(getActivity().getApplication());
             seccionRepository = new SeccionRepository(getActivity().getApplication());
-            ejerciciosRepository = new EjercicioRepository(getActivity().getApplication());
+            ejerciciosRepository = new EjercicioPesoRepository(getActivity().getApplication());
             registroRepository = new RegistroRepository(getActivity().getApplication());
 
             sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -284,10 +284,10 @@ public class EstadisticasFragment extends Fragment {
         }
     }
 
-    private void actualizarDropdownEjercicios(List<Ejercicio> ejercicios) {
+    private void actualizarDropdownEjercicios(List<EjercicioPeso> ejercicios) {
         this.listaEjerciciosActuales = ejercicios;
         List<String> nombres = new ArrayList<>();
-        for (Ejercicio e : ejercicios) {
+        for (EjercicioPeso e : ejercicios) {
             nombres.add(e.NombreEjercicio);
         }
 

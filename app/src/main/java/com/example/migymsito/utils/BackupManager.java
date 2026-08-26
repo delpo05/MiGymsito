@@ -88,8 +88,8 @@ public class BackupManager {
 
                 // 4. Ejercicios
                 JSONArray ejerciciosArray = new JSONArray();
-                List<Ejercicio> ejercicios = db.ejercicioDao().obtenerTodosLosEjercicios();
-                for (Ejercicio e : ejercicios) {
+                List<EjercicioPeso> ejercicios = db.ejercicioPesoDao().obtenerTodosLosEjercicios();
+                for (EjercicioPeso e : ejercicios) {
                     JSONObject je = new JSONObject();
                     je.put("IdEjercicio", e.IdEjercicio);
                     je.put("TipoEjercicio", e.TipoEjercicio);
@@ -222,7 +222,7 @@ public class BackupManager {
                         db.seccionXejercicioDao().borrarTodo();
                         db.seccionDao().borrarTodo();
                         db.rutinaDao().borrarTodo();
-                        db.ejercicioDao().borrarTodo();
+                        db.ejercicioPesoDao().borrarTodo();
                         db.historialDao().borrarTodo();
                         db.usuarioDao().deleteAll();
 
@@ -255,7 +255,7 @@ public class BackupManager {
                             JSONArray ejArray = backup.getJSONArray("ejercicios");
                             for (int i = 0; i < ejArray.length(); i++) {
                                 JSONObject je = ejArray.getJSONObject(i);
-                                Ejercicio e = new Ejercicio();
+                                EjercicioPeso e = new EjercicioPeso();
                                 e.IdEjercicio = je.getInt("IdEjercicio");
                                 e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
                                 e.NombreEjercicio = je.getString("NombreEjercicio");
@@ -267,7 +267,7 @@ public class BackupManager {
                                 if (je.has("imagenData")) {
                                     e.ImagenEjercicio = guardarImagenDesdeBase64(je.getString("imagenData"));
                                 }
-                                db.ejercicioDao().insertarEjercicio(e);
+                                db.ejercicioPesoDao().insertarEjercicioPeso(e);
                             }
                         }
 

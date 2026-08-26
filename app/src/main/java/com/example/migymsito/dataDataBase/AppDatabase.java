@@ -9,7 +9,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
@@ -17,7 +17,7 @@ import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.data.Usuario;
-import com.example.migymsito.dataDao.EjercicioDao;
+import com.example.migymsito.dataDao.EjercicioPesoDao;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.HistorialDao;
 import com.example.migymsito.dataDao.RegistroDao;
@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
         Usuario.class,
         Rutina.class,
         Seccion.class,
-        Ejercicio.class,
+        EjercicioPeso.class,
         Registro.class,
         Historial.class,
         Entrenamiento.class,
@@ -43,7 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract UsuarioDao usuarioDao();
     public abstract RutinaDao rutinaDao();
     public abstract SeccionDao seccionDao();
-    public abstract EjercicioDao ejercicioDao();
+    public abstract EjercicioPesoDao ejercicioPesoDao();
     public abstract RegistroDao registroDao();
     public abstract HistorialDao historialDao();
     public abstract EntrenamientoDao entrenamientoDao();
@@ -97,7 +97,7 @@ public abstract class AppDatabase extends RoomDatabase {
      */
     private static void inicializarDatosPreestablecidos(AppDatabase db) {
         SeccionDao seccionDao = db.seccionDao();
-        EjercicioDao ejercicioDao = db.ejercicioDao();
+        EjercicioPesoDao ejercicioDao = db.ejercicioPesoDao();
         SeccionXejercicioDao sxeDao = db.seccionXejercicioDao();
 
         if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
@@ -184,12 +184,12 @@ public abstract class AppDatabase extends RoomDatabase {
     /**
      * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
      */
-    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
-        Ejercicio e = new Ejercicio();
+    private static void insertarEjercicio(EjercicioPesoDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
+        EjercicioPeso e = new EjercicioPeso();
         e.TipoEjercicio = "Preestablecido";
         e.NombreEjercicio = nombre;
         e.PesoCorporalEjercicio = false;
-        long idEjercicio = ejDao.insertarEjercicio(e);
+        long idEjercicio = ejDao.insertarEjercicioPeso(e);
 
         SeccionXejercicio sxe = new SeccionXejercicio();
         sxe.IdSeccion = (int) idSeccion;

@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.data.EjercicioPeso;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.Rutina;
@@ -334,7 +334,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
             List<SeccionXejercicio> sxeList = db.seccionXejercicioDao().getEjerciciosBySeccion(seccionSeleccionada.IdSeccion);
 
             for (SeccionXejercicio sxe : sxeList) {
-                Ejercicio ej = db.ejercicioDao().obtenerEjercicioPorId(sxe.IdEjercicio);
+                EjercicioPeso ej = db.ejercicioPesoDao().obtenerEjercicioPorId(sxe.IdEjercicio);
                 Double volBase = volumenesBase.get(sxe.IdSeccionXejercicio);
                 double vBase = volBase != null ? volBase : 0.0;
                 Double volTarget = volumenesTarget.get(sxe.IdSeccionXejercicio);
