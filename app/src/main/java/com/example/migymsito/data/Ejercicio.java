@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
 @Entity(tableName = "Ejercicio")
-public class EjercicioPeso implements Serializable {
+public class Ejercicio implements Serializable {
     @PrimaryKey(autoGenerate = true)
     public int IdEjercicio;
 
@@ -20,6 +20,13 @@ public class EjercicioPeso implements Serializable {
 
     @NonNull
     public String NombreEjercicio;
+
+    /**
+     * Define la categoría del ejercicio.
+     * Puede ser "FUERZA" o "CARDIO".
+     */
+    @NonNull
+    public String CategoriaEjercicio = "FUERZA";
 
     public String ImagenEjercicio;
 

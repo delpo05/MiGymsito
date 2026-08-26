@@ -6,31 +6,31 @@ import androidx.room.Query;
 import androidx.room.Delete;
 import androidx.room.Update;
 
-import com.example.migymsito.data.EjercicioPeso;
+import com.example.migymsito.data.Ejercicio;
 
 import java.util.List;
 
 @Dao
-public interface EjercicioPesoDao {
+public interface EjercicioDao {
 
     @Insert
-    long insertarEjercicioPeso(EjercicioPeso ejercicio);
+    long insertarEjercicio(Ejercicio ejercicio);
 
     @Update
-    void actualizarEjercicioPeso(EjercicioPeso ejercicio);
+    void actualizarEjercicio(Ejercicio ejercicio);
 
     @Delete
-    void eliminarEjercicioPeso(EjercicioPeso ejercicio);
+    void eliminarEjercicio(Ejercicio ejercicio);
 
     @Query("SELECT * FROM Ejercicio")
-    List<EjercicioPeso> obtenerTodosLosEjercicios();
+    List<Ejercicio> obtenerTodosLosEjercicios();
 
     @Query("SELECT * FROM Ejercicio WHERE IdEjercicio = :id")
-    EjercicioPeso obtenerEjercicioPorId(int id);
+    Ejercicio obtenerEjercicioPorId(int id);
 
     // Obtiene ejercicios que pertenecen a una sección específica
     @Query("SELECT e.* FROM Ejercicio e INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio WHERE sxe.IdSeccion = :idSeccion")
-    List<EjercicioPeso> obtenerEjerciciosPorSeccion(int idSeccion);
+    List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);
 
     // Obtiene solo los ejercicios que el usuario ha entrenado al menos una vez
     @Query("SELECT DISTINCT e.* FROM Ejercicio e " +
@@ -38,14 +38,17 @@ public interface EjercicioPesoDao {
            "INNER JOIN Registro r ON sxe.IdSeccionXejercicio = r.IdSeccionXejercicio " +
            "INNER JOIN Entrenamiento ent ON r.IdEntrenamiento = ent.IdEntrenamiento " +
            "WHERE ent.IdUsuario = :idUsuario")
-    List<EjercicioPeso> obtenerEjerciciosEnUsoPorUsuario(int idUsuario);
+    List<Ejercicio> obtenerEjerciciosEnUsoPorUsuario(int idUsuario);
 
     // Obtiene todos los ejercicios preestablecidos usando el campo TipoEjercicio
     @Query("SELECT * FROM Ejercicio WHERE TipoEjercicio = 'Preestablecido'")
-    List<EjercicioPeso> obtenerEjerciciosPreestablecidos();
+    List<Ejercicio> obtenerEjerciciosPreestablecidos();
 
-    @Query("SELECT nombreEjercicio FROM Ejercicio JOIN SeccionXejercicio ON Ejercicio.IdEjercicio = SeccionXejercicio.IdEjercicio WHERE SeccionXejercicio.IdSeccion = :idSeccion")
+    @Query("SELECT NombreEjercicio FROM Ejercicio JOIN SeccionXejercicio ON Ejercicio.IdEjercicio = SeccionXejercicio.IdEjercicio WHERE SeccionXejercicio.IdSeccion = :idSeccion")
     List<String> obtenerNombresEjerciciosPorSeccion(int idSeccion);
+
+    @Query("SELECT * FROM Ejercicio WHERE CategoriaEjercicio = :categoria")
+    List<Ejercicio> obtenerEjerciciosPorCategoria(String categoria);
 
     @Query("DELETE FROM Ejercicio")
     void borrarTodo();

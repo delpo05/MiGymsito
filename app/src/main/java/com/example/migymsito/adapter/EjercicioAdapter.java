@@ -15,27 +15,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.migymsito.R;
-import com.example.migymsito.data.EjercicioPeso;
+import com.example.migymsito.data.Ejercicio;
 
 import java.util.List;
 
-public class EjerciciosPesoAdapter extends RecyclerView.Adapter<EjerciciosPesoAdapter.EjercicioViewHolder> {
+public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.EjercicioViewHolder> {
 
-    private List<EjercicioPeso> ejercicios;
+    private List<Ejercicio> ejercicios;
     private final OnEjercicioClickListener listener;
     private int lastPosition = -1;
 
     public interface OnEjercicioClickListener {
-        void onEjercicioClick(EjercicioPeso ejercicio);
-        void onOptionsClick(View view, EjercicioPeso ejercicio);
+        void onEjercicioClick(Ejercicio ejercicio);
+        void onOptionsClick(View view, Ejercicio ejercicio);
     }
 
-    public EjerciciosPesoAdapter(List<EjercicioPeso> ejercicios, OnEjercicioClickListener listener) {
+    public EjercicioAdapter(List<Ejercicio> ejercicios, OnEjercicioClickListener listener) {
         this.ejercicios = ejercicios;
         this.listener = listener;
     }
 
-    public void setEjercicios(List<EjercicioPeso> ejercicios) {
+    public void setEjercicios(List<Ejercicio> ejercicios) {
         this.ejercicios = ejercicios;
         this.lastPosition = -1;
         notifyDataSetChanged();
@@ -50,7 +50,7 @@ public class EjerciciosPesoAdapter extends RecyclerView.Adapter<EjerciciosPesoAd
 
     @Override
     public void onBindViewHolder(@NonNull EjercicioViewHolder holder, int position) {
-        EjercicioPeso ejercicio = ejercicios.get(position);
+        Ejercicio ejercicio = ejercicios.get(position);
         holder.txtNombre.setText(ejercicio.NombreEjercicio);
 
         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {

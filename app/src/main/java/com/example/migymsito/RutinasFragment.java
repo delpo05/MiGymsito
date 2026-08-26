@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.RutinasAdapter;
-import com.example.migymsito.data.EjercicioPeso;
+import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
@@ -273,11 +273,12 @@ public class RutinasFragment extends Fragment {
                     jsonSeccion.put("tipo", seccion.TipoSeccion);
 
                     JSONArray jsonEjercicios = new JSONArray();
-                    List<EjercicioPeso> ejercicios = db.ejercicioPesoDao().obtenerEjerciciosPorSeccion(seccion.IdSeccion);
-                    for (EjercicioPeso ejercicio : ejercicios) {
+                    List<Ejercicio> ejercicios = db.ejercicioDao().obtenerEjerciciosPorSeccion(seccion.IdSeccion);
+                    for (Ejercicio ejercicio : ejercicios) {
                         JSONObject jsonEjercicio = new JSONObject();
                         jsonEjercicio.put("nombre", ejercicio.NombreEjercicio);
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
+                        jsonEjercicio.put("categoria", ejercicio.CategoriaEjercicio);
                         jsonEjercicio.put("pesoCorporal", ejercicio.PesoCorporalEjercicio);
                         
                         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
@@ -517,20 +518,21 @@ public class RutinasFragment extends Fragment {
                                 String nombreEj = jsonEjercicio.getString("nombre");
                                 
                                 int idEjercicio;
-                                EjercicioPeso ejExistente = buscarEjercicioPorNombre(db, nombreEj);
+                                Ejercicio ejExistente = buscarEjercicioPorNombre(db, nombreEj);
                                 if (ejExistente != null) {
                                     idEjercicio = ejExistente.IdEjercicio;
                                     if (ejExistente.ImagenEjercicio == null || ejExistente.ImagenEjercicio.isEmpty()) {
                                         String base64Data = jsonEjercicio.optString("imagenData", "");
                                         if (!base64Data.isEmpty()) {
                                             ejExistente.ImagenEjercicio = guardarImagenDesdeBase64(base64Data);
-                                            db.ejercicioPesoDao().actualizarEjercicioPeso(ejExistente);
+                                            db.ejercicioDao().actualizarEjercicio(ejExistente);
                                         }
                                     }
                                 } else {
-                                    EjercicioPeso nuevoEj = new EjercicioPeso();
+                                    Ejercicio nuevoEj = new Ejercicio();
                                     nuevoEj.NombreEjercicio = nombreEj;
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
+                                    nuevoEj.CategoriaEjercicio = jsonEjercicio.optString("categoria", "FUERZA");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
                                     
                                     String base64Data = jsonEjercicio.optString("imagenData", "");
@@ -540,7 +542,7 @@ public class RutinasFragment extends Fragment {
                                         nuevoEj.ImagenEjercicio = jsonEjercicio.optString("imagen", null);
                                     }
                                     
-                                    idEjercicio = (int) db.ejercicioPesoDao().insertarEjercicioPeso(nuevoEj);
+                                    idEjercicio = (int) db.ejercicioDao().insertarEjercicio(nuevoEj);
                                 }
 
                                 SeccionXejercicio sxe = new SeccionXejercicio();
@@ -581,9 +583,9 @@ public class RutinasFragment extends Fragment {
         });
     }
 
-    private EjercicioPeso buscarEjercicioPorNombre(AppDatabase db, String nombre) {
-        List<EjercicioPeso> todos = db.ejercicioPesoDao().obtenerTodosLosEjercicios();
-        for (EjercicioPeso e : todos) {
+    private Ejercicio buscarEjercicioPorNombre(AppDatabase db, String nombre) {
+        List<Ejercicio> todos = db.ejercicioDao().obtenerTodosLosEjercicios();
+        for (Ejercicio e : todos) {
             if (e.NombreEjercicio.equalsIgnoreCase(nombre)) return e;
         }
         return null;

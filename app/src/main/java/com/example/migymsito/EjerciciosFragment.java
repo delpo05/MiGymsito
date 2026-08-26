@@ -41,12 +41,12 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.migymsito.adapter.EjerciciosPesoAdapter;
-import com.example.migymsito.data.EjercicioPeso;
+import com.example.migymsito.adapter.EjercicioAdapter;
+import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataDataBase.AppDatabase;
-import com.example.migymsito.dataRepository.EjercicioPesoRepository;
+import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,11 +64,11 @@ public class EjerciciosFragment extends Fragment {
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private RecyclerView rvEjercicios;
-    private EjercicioPesoRepository ejercicioRepository;
+    private EjercicioRepository ejercicioRepository;
     private SeccionRepository seccionRepository;
     private EntrenamientoRepository entrenamientoRepository;
     private SharedViewModel sharedViewModel;
-    private EjerciciosPesoAdapter adapter;
+    private EjercicioAdapter adapter;
     private Button btnFinalizarEntrenamiento;
     private FloatingActionButton fabAdd;
 
@@ -269,7 +269,7 @@ public class EjerciciosFragment extends Fragment {
         }
     }
 
-    private void mostrarPopUpCrearEjercicioPersonalizado(EjercicioPeso ejercicioExistente) {
+    private void mostrarPopUpCrearEjercicioPersonalizado(Ejercicio ejercicioExistente) {
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_aniadir_ej_personalizado);
         if (dialog.getWindow() != null) {
@@ -364,9 +364,10 @@ public class EjerciciosFragment extends Fragment {
             }
 
             if (ejercicioExistente == null) {
-                EjercicioPeso nuevo = new EjercicioPeso();
+                Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
+                nuevo.CategoriaEjercicio = "FUERZA"; // Default for now
                 nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
                 nuevo.PesoPorLado = cbPesoPorLado.isChecked();
                 if (nuevo.PesoPorLado) {
@@ -408,12 +409,12 @@ public class EjerciciosFragment extends Fragment {
     private void configurarGridView(View view) {
         if (seccionActual != null) tvTituloGrid.setText(String.format("Ejercicios de %s", seccionActual.NombreSeccion));
         if (getActivity() != null) {
-            ejercicioRepository = new EjercicioPesoRepository(getActivity().getApplication());
+            ejercicioRepository = new EjercicioRepository(getActivity().getApplication());
             seccionRepository = new SeccionRepository(getActivity().getApplication());
             entrenamientoRepository = new EntrenamientoRepository(getActivity().getApplication());
         }
-        adapter = new EjerciciosPesoAdapter(new ArrayList<>(), new EjerciciosPesoAdapter.OnEjercicioClickListener() {
-            @Override public void onEjercicioClick(EjercicioPeso ej) {
+        adapter = new EjercicioAdapter(new ArrayList<>(), new EjercicioAdapter.OnEjercicioClickListener() {
+            @Override public void onEjercicioClick(Ejercicio ej) {
                 if (MainActivity.usuarioLogueado == null || seccionActual == null) return;
                 
                 Bundle bundle = new Bundle();
@@ -421,7 +422,7 @@ public class EjerciciosFragment extends Fragment {
                 bundle.putSerializable("seccion", seccionActual);
                 Navigation.findNavController(requireView()).navigate(R.id.cargarRegistroFragment, bundle);
             }
-            @Override public void onOptionsClick(View v, EjercicioPeso ej) { mostrarMenuOpciones(v, ej); }
+            @Override public void onOptionsClick(View v, Ejercicio ej) { mostrarMenuOpciones(v, ej); }
         });
         rvEjercicios.setAdapter(adapter);
         cargarEjerciciosDesdeDB();
@@ -467,7 +468,7 @@ public class EjerciciosFragment extends Fragment {
         popup.show();
     }
 
-    private void mostrarMenuOpciones(View view, EjercicioPeso ejercicio) {
+    private void mostrarMenuOpciones(View view, Ejercicio ejercicio) {
         Dialog dialog = new Dialog(requireContext());
         dialog.setContentView(R.layout.pop_up_modificar_eliminar);
         if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -617,7 +618,7 @@ public class EjerciciosFragment extends Fragment {
                 @Override public View getView(int pos, View v, ViewGroup p) {
                     View row = v;
                     if (row == null) row = LayoutInflater.from(p.getContext()).inflate(R.layout.item_ejercicio_previo, p, false);
-                    EjercicioPeso e = ejercicios.get(pos);
+                    Ejercicio e = ejercicios.get(pos);
                     ((TextView)row.findViewById(R.id.tv_nombre_ejercicio_previo)).setText(e.NombreEjercicio);
                     
                     TextView tvTipo = row.findViewById(R.id.tv_tipo_ejercicio_previo);

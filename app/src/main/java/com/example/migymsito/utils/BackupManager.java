@@ -88,12 +88,13 @@ public class BackupManager {
 
                 // 4. Ejercicios
                 JSONArray ejerciciosArray = new JSONArray();
-                List<EjercicioPeso> ejercicios = db.ejercicioPesoDao().obtenerTodosLosEjercicios();
-                for (EjercicioPeso e : ejercicios) {
+                List<Ejercicio> ejercicios = db.ejercicioDao().obtenerTodosLosEjercicios();
+                for (Ejercicio e : ejercicios) {
                     JSONObject je = new JSONObject();
                     je.put("IdEjercicio", e.IdEjercicio);
                     je.put("TipoEjercicio", e.TipoEjercicio);
                     je.put("NombreEjercicio", e.NombreEjercicio);
+                    je.put("CategoriaEjercicio", e.CategoriaEjercicio);
                     je.put("PesoCorporalEjercicio", e.PesoCorporalEjercicio);
                     je.put("PesoPorLado", e.PesoPorLado != null ? e.PesoPorLado : false);
                     je.put("TipoDeBarra", e.TipoDeBarra);
@@ -222,7 +223,7 @@ public class BackupManager {
                         db.seccionXejercicioDao().borrarTodo();
                         db.seccionDao().borrarTodo();
                         db.rutinaDao().borrarTodo();
-                        db.ejercicioPesoDao().borrarTodo();
+                        db.ejercicioDao().borrarTodo();
                         db.historialDao().borrarTodo();
                         db.usuarioDao().deleteAll();
 
@@ -255,10 +256,11 @@ public class BackupManager {
                             JSONArray ejArray = backup.getJSONArray("ejercicios");
                             for (int i = 0; i < ejArray.length(); i++) {
                                 JSONObject je = ejArray.getJSONObject(i);
-                                EjercicioPeso e = new EjercicioPeso();
+                                Ejercicio e = new Ejercicio();
                                 e.IdEjercicio = je.getInt("IdEjercicio");
                                 e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
                                 e.NombreEjercicio = je.getString("NombreEjercicio");
+                                e.CategoriaEjercicio = je.optString("CategoriaEjercicio", "FUERZA");
                                 e.PesoCorporalEjercicio = je.optBoolean("PesoCorporalEjercicio", false);
                                 e.PesoPorLado = je.optBoolean("PesoPorLado", false);
                                 e.TipoDeBarra = je.optString("TipoDeBarra", "");
@@ -267,7 +269,7 @@ public class BackupManager {
                                 if (je.has("imagenData")) {
                                     e.ImagenEjercicio = guardarImagenDesdeBase64(je.getString("imagenData"));
                                 }
-                                db.ejercicioPesoDao().insertarEjercicioPeso(e);
+                                db.ejercicioDao().insertarEjercicio(e);
                             }
                         }
 
