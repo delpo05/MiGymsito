@@ -46,10 +46,14 @@ public class RegistroCardio implements Serializable {
     @NonNull
     public long DuracionSegundos;
 
+    public Long FechaInicio;
+    public Long FechaFin;
+
     public Double Distancia;
     public String UnidadDistancia;
 
     public Double VelocidadPromedio;
+    public Integer CadenciaPromedio;
     public Integer CaloriasQuemadas;
 
     public Integer RitmoCardiacoPromedio;
@@ -57,4 +61,7 @@ public class RegistroCardio implements Serializable {
 
     public Double Inclinacion;
     public Integer NivelResistencia;
+
+    public Integer EsfuerzoPercibido;
+    public String Notas;
 }
