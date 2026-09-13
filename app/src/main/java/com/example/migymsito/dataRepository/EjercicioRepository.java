@@ -82,7 +82,7 @@ public class EjercicioRepository {
         });
     }
 
-    public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void actualizarEjercicioIndependiente(Ejercicio ejercicioEditado, int idSeccion, RepositoryCallback<Ejercicio> callback) {
         executorService.execute(() -> {
             try {
                 Ejercicio nuevoEj = new Ejercicio();
@@ -94,8 +94,16 @@ public class EjercicioRepository {
                 nuevoEj.TipoDeBarra = ejercicioEditado.TipoDeBarra;
                 nuevoEj.PesoBarra = ejercicioEditado.PesoBarra;
                 nuevoEj.CategoriaEjercicio = ejercicioEditado.CategoriaEjercicio;
+                nuevoEj.registraDistancia = ejercicioEditado.registraDistancia;
+                nuevoEj.registraCalorias = ejercicioEditado.registraCalorias;
+                nuevoEj.registraCadencia = ejercicioEditado.registraCadencia;
+                nuevoEj.registraRitmo = ejercicioEditado.registraRitmo;
+                nuevoEj.registraInclinacion = ejercicioEditado.registraInclinacion;
+                nuevoEj.registraResistencia = ejercicioEditado.registraResistencia;
 
                 long nuevoIdEjercicio = ejercicioDao.insertarEjercicio(nuevoEj);
+                nuevoEj.IdEjercicio = (int) nuevoIdEjercicio;
+
                 SeccionXejercicio relacion = seccionXejercicioDao.getRelacion(idSeccion, ejercicioEditado.IdEjercicio);
 
                 if (relacion != null) {
@@ -104,12 +112,12 @@ public class EjercicioRepository {
                 }
 
                 if (callback != null) {
-                    mainThreadHandler.post(() -> callback.onResult(true));
+                    mainThreadHandler.post(() -> callback.onResult(nuevoEj));
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error en actualizarEjercicioIndependiente: " + e.getMessage());
                 if (callback != null) {
-                    mainThreadHandler.post(() -> callback.onResult(false));
+                    mainThreadHandler.post(() -> callback.onResult(null));
                 }
             }
         });

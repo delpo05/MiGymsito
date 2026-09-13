@@ -38,4 +38,12 @@ public class Ejercicio implements Serializable {
     public String TipoDeBarra;
 
     public Float PesoBarra;
+
+    // Configuración Cardio
+    public Boolean registraDistancia = true;
+    public Boolean registraCalorias = true;
+    public Boolean registraCadencia = false;
+    public Boolean registraRitmo = false;
+    public Boolean registraInclinacion = false;
+    public Boolean registraResistencia = false;
 }

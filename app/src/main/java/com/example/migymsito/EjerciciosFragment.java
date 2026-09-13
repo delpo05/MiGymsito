@@ -278,11 +278,31 @@ public class EjerciciosFragment extends Fragment {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
+        
+        // Tipo Selector
+        android.widget.RadioGroup rgTipo = dialog.findViewById(R.id.rgTipoEjercicio);
+        android.widget.RadioButton rbFuerza = dialog.findViewById(R.id.rbFuerza);
+        android.widget.RadioButton rbCardio = dialog.findViewById(R.id.rbCardio);
+        
+        // Containers
+        View llFuerza = dialog.findViewById(R.id.llOpcionesFuerza);
+        View llCardio = dialog.findViewById(R.id.llOpcionesCardio);
+
+        // Fuerza Fields
         CheckBox cbPesoCorporal = dialog.findViewById(R.id.cbPesoCorporal);
         CheckBox cbPesoPorLado = dialog.findViewById(R.id.cbPesoPorLado);
         View llContenedorBarra = dialog.findViewById(R.id.llContenedorBarra);
         Spinner spTipoDeBarra = dialog.findViewById(R.id.spTipoDeBarra);
         EditText etPesoBarra = dialog.findViewById(R.id.etPesoBarra);
+        
+        // Cardio Fields
+        CheckBox cbDist = dialog.findViewById(R.id.cbRegDistancia);
+        CheckBox cbCal = dialog.findViewById(R.id.cbRegCalorias);
+        CheckBox cbCad = dialog.findViewById(R.id.cbRegCadencia);
+        CheckBox cbRitmo = dialog.findViewById(R.id.cbRegRitmo);
+        CheckBox cbInc = dialog.findViewById(R.id.cbRegInclinacion);
+        CheckBox cbRes = dialog.findViewById(R.id.cbRegResistencia);
+
         ivPreviewImagen = dialog.findViewById(R.id.ivSeleccionarImagen);
         Button btnAceptar = dialog.findViewById(R.id.btnAceptarEjercicio);
         Button btnCancelar = dialog.findViewById(R.id.btnCancelarEjercicio);
@@ -291,6 +311,17 @@ public class EjerciciosFragment extends Fragment {
                 R.array.tipos_de_barra, R.layout.spinner_item_dark);
         barAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_dark);
         spTipoDeBarra.setAdapter(barAdapter);
+
+        // Logic for Type Switching
+        rgTipo.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbFuerza) {
+                llFuerza.setVisibility(View.VISIBLE);
+                llCardio.setVisibility(View.GONE);
+            } else {
+                llFuerza.setVisibility(View.GONE);
+                llCardio.setVisibility(View.VISIBLE);
+            }
+        });
 
         cbPesoPorLado.setOnCheckedChangeListener((buttonView, isChecked) -> {
             llContenedorBarra.setVisibility(isChecked ? View.VISIBLE : View.GONE);
@@ -318,20 +349,38 @@ public class EjerciciosFragment extends Fragment {
         if (ejercicioExistente != null) {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
-            cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
-            cbPesoPorLado.setChecked(ejercicioExistente.PesoPorLado != null && ejercicioExistente.PesoPorLado);
-            llContenedorBarra.setVisibility(cbPesoPorLado.isChecked() ? View.VISIBLE : View.GONE);
             
-            if (ejercicioExistente.TipoDeBarra != null) {
-                for (int i = 0; i < spTipoDeBarra.getCount(); i++) {
-                    if (spTipoDeBarra.getItemAtPosition(i).toString().equals(ejercicioExistente.TipoDeBarra)) {
-                        spTipoDeBarra.setSelection(i);
-                        break;
+            if ("CARDIO".equalsIgnoreCase(ejercicioExistente.CategoriaEjercicio)) {
+                rbCardio.setChecked(true);
+                llFuerza.setVisibility(View.GONE);
+                llCardio.setVisibility(View.VISIBLE);
+                
+                cbDist.setChecked(ejercicioExistente.registraDistancia != null && ejercicioExistente.registraDistancia);
+                cbCal.setChecked(ejercicioExistente.registraCalorias != null && ejercicioExistente.registraCalorias);
+                cbCad.setChecked(ejercicioExistente.registraCadencia != null && ejercicioExistente.registraCadencia);
+                cbRitmo.setChecked(ejercicioExistente.registraRitmo != null && ejercicioExistente.registraRitmo);
+                cbInc.setChecked(ejercicioExistente.registraInclinacion != null && ejercicioExistente.registraInclinacion);
+                cbRes.setChecked(ejercicioExistente.registraResistencia != null && ejercicioExistente.registraResistencia);
+            } else {
+                rbFuerza.setChecked(true);
+                llFuerza.setVisibility(View.VISIBLE);
+                llCardio.setVisibility(View.GONE);
+                
+                cbPesoCorporal.setChecked(ejercicioExistente.PesoCorporalEjercicio != null && ejercicioExistente.PesoCorporalEjercicio);
+                cbPesoPorLado.setChecked(ejercicioExistente.PesoPorLado != null && ejercicioExistente.PesoPorLado);
+                llContenedorBarra.setVisibility(cbPesoPorLado.isChecked() ? View.VISIBLE : View.GONE);
+                
+                if (ejercicioExistente.TipoDeBarra != null) {
+                    for (int i = 0; i < spTipoDeBarra.getCount(); i++) {
+                        if (spTipoDeBarra.getItemAtPosition(i).toString().equals(ejercicioExistente.TipoDeBarra)) {
+                            spTipoDeBarra.setSelection(i);
+                            break;
+                        }
                     }
                 }
-            }
-            if (ejercicioExistente.PesoBarra != null) {
-                etPesoBarra.setText(String.valueOf(ejercicioExistente.PesoBarra));
+                if (ejercicioExistente.PesoBarra != null) {
+                    etPesoBarra.setText(String.valueOf(ejercicioExistente.PesoBarra));
+                }
             }
 
             btnAceptar.setText("Guardar");
@@ -355,28 +404,35 @@ public class EjerciciosFragment extends Fragment {
                 return;
             }
 
-            String pesoBarraStr = etPesoBarra.getText().toString().trim();
-            float pesoBarra = 0.0f;
-            if (!pesoBarraStr.isEmpty()) {
-                try {
-                    pesoBarra = Float.parseFloat(pesoBarraStr);
-                } catch (NumberFormatException ignored) {}
-            }
+            String categoria = rbCardio.isChecked() ? "CARDIO" : "FUERZA";
 
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
                 nuevo.TipoEjercicio = "Personalizado";
-                nuevo.CategoriaEjercicio = "FUERZA"; // Default for now
-                nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
-                nuevo.PesoPorLado = cbPesoPorLado.isChecked();
-                if (nuevo.PesoPorLado) {
-                    nuevo.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
-                    nuevo.PesoBarra = pesoBarra;
+                nuevo.CategoriaEjercicio = categoria;
+                
+                if (categoria.equals("FUERZA")) {
+                    nuevo.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                    nuevo.PesoPorLado = cbPesoPorLado.isChecked();
+                    if (nuevo.PesoPorLado) {
+                        nuevo.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
+                        String pb = etPesoBarra.getText().toString();
+                        nuevo.PesoBarra = pb.isEmpty() ? 0f : Float.parseFloat(pb);
+                    } else {
+                        nuevo.TipoDeBarra = "Ninguna";
+                        nuevo.PesoBarra = 0.0f;
+                    }
                 } else {
-                    nuevo.TipoDeBarra = "Ninguna";
-                    nuevo.PesoBarra = 0.0f;
+                    nuevo.PesoCorporalEjercicio = false;
+                    nuevo.registraDistancia = cbDist.isChecked();
+                    nuevo.registraCalorias = cbCal.isChecked();
+                    nuevo.registraCadencia = cbCad.isChecked();
+                    nuevo.registraRitmo = cbRitmo.isChecked();
+                    nuevo.registraInclinacion = cbInc.isChecked();
+                    nuevo.registraResistencia = cbRes.isChecked();
                 }
+
                 if (uriImagenSeleccionada != null) nuevo.ImagenEjercicio = uriImagenSeleccionada.toString();
 
                 ejercicioRepository.insertarEjercicioConSeccion(nuevo, seccionActual.IdSeccion, success -> {
@@ -385,21 +441,34 @@ public class EjerciciosFragment extends Fragment {
                 });
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;
+                ejercicioExistente.CategoriaEjercicio = categoria;
                 ejercicioExistente.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
-                ejercicioExistente.TipoEjercicio = "Personalizado";
-                ejercicioExistente.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
-                ejercicioExistente.PesoPorLado = cbPesoPorLado.isChecked();
-                if (ejercicioExistente.PesoPorLado) {
-                    ejercicioExistente.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
-                    ejercicioExistente.PesoBarra = pesoBarra;
+                
+                if (categoria.equals("FUERZA")) {
+                    ejercicioExistente.PesoCorporalEjercicio = cbPesoCorporal.isChecked();
+                    ejercicioExistente.PesoPorLado = cbPesoPorLado.isChecked();
+                    if (ejercicioExistente.PesoPorLado) {
+                        ejercicioExistente.TipoDeBarra = spTipoDeBarra.getSelectedItem().toString();
+                        String pb = etPesoBarra.getText().toString();
+                        ejercicioExistente.PesoBarra = pb.isEmpty() ? 0f : Float.parseFloat(pb);
+                    } else {
+                        ejercicioExistente.TipoDeBarra = "Ninguna";
+                        ejercicioExistente.PesoBarra = 0.0f;
+                    }
                 } else {
-                    ejercicioExistente.TipoDeBarra = "Ninguna";
-                    ejercicioExistente.PesoBarra = 0.0f;
+                    ejercicioExistente.registraDistancia = cbDist.isChecked();
+                    ejercicioExistente.registraCalorias = cbCal.isChecked();
+                    ejercicioExistente.registraCadencia = cbCad.isChecked();
+                    ejercicioExistente.registraRitmo = cbRitmo.isChecked();
+                    ejercicioExistente.registraInclinacion = cbInc.isChecked();
+                    ejercicioExistente.registraResistencia = cbRes.isChecked();
                 }
 
-                ejercicioRepository.actualizarEjercicioIndependiente(ejercicioExistente, seccionActual.IdSeccion, success -> {
+                ejercicioRepository.actualizarEjercicioIndependiente(ejercicioExistente, seccionActual.IdSeccion, nuevo -> {
                     dialog.dismiss();
-                    new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 300);
+                    if (nuevo != null) {
+                        new Handler(Looper.getMainLooper()).postDelayed(this::cargarEjerciciosDesdeDB, 100);
+                    }
                 });
             }
         });
@@ -420,7 +489,12 @@ public class EjerciciosFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("ejercicio", ej);
                 bundle.putSerializable("seccion", seccionActual);
-                Navigation.findNavController(requireView()).navigate(R.id.cargarRegistroFragment, bundle);
+
+                if ("CARDIO".equalsIgnoreCase(ej.CategoriaEjercicio)) {
+                    Navigation.findNavController(requireView()).navigate(R.id.cargarRegistroCardioFragment, bundle);
+                } else {
+                    Navigation.findNavController(requireView()).navigate(R.id.cargarRegistroFragment, bundle);
+                }
             }
             @Override public void onOptionsClick(View v, Ejercicio ej) { mostrarMenuOpciones(v, ej); }
         });

@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/negro"
+    tools:context=".CargarRegistroCardioFragment">
+
+    <!-- Header Fijo -->
+    <TextView
+        android:id="@+id/tvNombreEjercicioCardio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Nombre del Ejercicio"
+        android:textColor="@color/blanco"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tlTimerMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicioCardio"
+        app:tabIndicatorColor="@color/blanco"
+        app:tabSelectedTextColor="@color/blanco"
+        app:tabTextColor="#80FFFFFF">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_stopwatch" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_timer" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Timer Central -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvCardioTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#1A1A1A"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tlTimerMode"
+        app:strokeColor="#40FFFFFF"
+        app:strokeWidth="0.5dp">
+
+        <TextView
+            android:id="@+id/tvCardioTimerValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            android:text="00:00:00"
+            android:textColor="@color/blanco"
+            android:textSize="48sp"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:id="@+id/llTimerControls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvCardioTimer">
+
+        <ImageButton
+            android:id="@+id/btnResetCardioTimer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_reset"
+            android:contentDescription="Reset Timer"
+            app:tint="@color/blanco" />
+
+        <ImageButton
+            android:id="@+id/btnStartPauseCardioTimer"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_media_play"
+            android:contentDescription="Start/Pause"
+            app:tint="@color/blanco" />
+
+        <ImageButton
+            android:id="@+id/btnEditCardioTimer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_edit_outline"
+            android:contentDescription="Edit Timer"
+            app:tint="@color/blanco" />
+    </LinearLayout>
+
+    <!-- Contenido Scrollable -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llTimerControls">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <GridLayout
+                android:id="@+id/glCardioInputs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
+
+                <!-- Inputs dinámicos -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioDistancia"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Distancia (km)"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioDistancia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioCalorias"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Calorías"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioCalorias"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioCadencia"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Cadencia"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioCadencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioRitmo"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Pulsaciones"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioRitmo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioInclinacion"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Inclinación"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioInclinacion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioResistencia"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Resistencia"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioResistencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioRPE"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:hint="Esfuerzo (1-10)"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioRPE"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCardioNotas"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnSpan="2"
+                    android:hint="Notas"
+                    android:textColorHint="#BBBBBB"
+                    app:boxStrokeColor="@color/blanco"
+                    app:hintTextColor="@color/blanco">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCardioNotas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:textColor="@color/blanco" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </GridLayout>
+
+            <!-- Sección Historial -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clCardioHistorialHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#1A1A1A"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="REGISTROS RECIENTES"
+                    android:textColor="@color/blanco"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/btnEliminarUltimoCardio"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="Delete last"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/blanco" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCardioHistorial"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="200dp"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="80dp"
+                android:clipToPadding="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <Button
+        android:id="@+id/btnRegistrarCardio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#4CAF50"
+        android:text="REGISTRAR"
+        android:textColor="@color/blanco"
+        app:cornerRadius="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
