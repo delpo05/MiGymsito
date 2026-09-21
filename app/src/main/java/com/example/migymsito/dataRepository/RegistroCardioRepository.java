@@ -84,6 +84,13 @@ public class RegistroCardioRepository {
         });
     }
 
+    public void obtenerHistorialCardioPaginado(int idUsuario, int idEjercicio, int limit, int offset, RepositoryCallback<List<RegistroCardio>> callback) {
+        executorService.execute(() -> {
+            List<RegistroCardio> lista = registroCardioDao.obtenerPorEjercicioYUsuarioPaginado(idUsuario, idEjercicio, limit, offset);
+            notificar(callback, lista);
+        });
+    }
+
     public void eliminarUltimo(RegistroCardio registro) {
         executorService.execute(() -> registroCardioDao.eliminar(registro));
     }
