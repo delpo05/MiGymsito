@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import com.example.migymsito.utils.NotificationHelper;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
@@ -294,7 +295,13 @@ public class CargarRegistroCardioFragment extends Fragment {
         updatedTime = initialTimeLimit;
         actualizarTextoTimer(0);
         btnStartPause.setImageResource(android.R.drawable.ic_media_play);
-        
+        cancelAlarm();
+
+        Context context = getContext();
+        if (context != null && !MainActivity.isAppInForeground) {
+            NotificationHelper.showCardioTimerFinishedNotification(context);
+        }
+
         vibrarAlFinalizar();
         sonarAlerta();
         if (isAdded()) Toast.makeText(getContext(), "¡Ejercicio de cardio finalizado!", Toast.LENGTH_SHORT).show();
@@ -333,22 +340,42 @@ public class CargarRegistroCardioFragment extends Fragment {
 
     private void scheduleAlarm(long durationMs) {
         AlarmManager am = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
         intent.putExtra("IS_CARDIO", true);
-        PendingIntent pi = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pi = PendingIntent.getBroadcast(
+                requireContext(),
+                1002,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         long triggerTime = System.currentTimeMillis() + durationMs;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) {
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pi);
-        } else {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pi);
-        }
+        Intent showIntent = new Intent(requireContext(), MainActivity.class);
+        PendingIntent showPendingIntent = PendingIntent.getActivity(
+                requireContext(),
+                0,
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(triggerTime, showPendingIntent);
+        am.setAlarmClock(clockInfo, pi);
     }
 
     private void cancelAlarm() {
         AlarmManager am = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
         intent.putExtra("IS_CARDIO", true);
-        PendingIntent pi = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pi = PendingIntent.getBroadcast(
+                requireContext(),
+                1002,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         am.cancel(pi);
     }
 

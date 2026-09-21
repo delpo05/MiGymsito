@@ -53,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (!isGranted) {
+                    Toast.makeText(this, R.string.permiso_necesario, Toast.LENGTH_SHORT).show();
+                }
+            });
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleHelper.applyLocale(this);
@@ -64,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         backupManager = new BackupManager(this);
 
         NotificationHelper.createNotificationChannel(this);
+        checkAndRequestNotificationPermission();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -117,6 +125,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         isAppInForeground = false;
+    }
+
+    private void checkAndRequestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     private void setupToolbar(Toolbar toolbar) {

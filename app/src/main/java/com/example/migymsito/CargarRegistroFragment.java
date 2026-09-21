@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import com.example.migymsito.utils.NotificationHelper;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -387,25 +388,40 @@ public class CargarRegistroFragment extends Fragment {
 
     private void scheduleAlarm() {
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                1001,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         long triggerTime = System.currentTimeMillis() + timeLeftInMillis;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            }
-        } else {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-        }
+        Intent showIntent = new Intent(requireContext(), MainActivity.class);
+        PendingIntent showPendingIntent = PendingIntent.getActivity(
+                requireContext(),
+                0,
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(triggerTime, showPendingIntent);
+        alarmManager.setAlarmClock(clockInfo, pendingIntent);
     }
 
     private void cancelAlarm() {
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                1001,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         alarmManager.cancel(pendingIntent);
     }
 
@@ -433,12 +449,20 @@ public class CargarRegistroFragment extends Fragment {
                 updateTimerUI();
                 clearTimerState();
                 cancelAlarm();
+
+                Context context = getContext();
+                if (context != null && !MainActivity.isAppInForeground) {
+                    NotificationHelper.showTimerFinishedNotification(context);
+                }
+
                 vibrarAlFinalizar();
-                
-                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido1);
-                if (mp != null) {
-                    mp.start();
-                    mp.setOnCompletionListener(MediaPlayer::release);
+
+                if (context != null) {
+                    MediaPlayer mp = MediaPlayer.create(context, R.raw.sonido1);
+                    if (mp != null) {
+                        mp.start();
+                        mp.setOnCompletionListener(MediaPlayer::release);
+                    }
                 }
 
                 if (isAdded()) {

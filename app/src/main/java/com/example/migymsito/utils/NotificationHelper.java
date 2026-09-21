@@ -1,5 +1,6 @@
 package com.example.migymsito.utils;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -43,7 +44,7 @@ public class NotificationHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
                     .build();
 
             NotificationChannel channel = new NotificationChannel(
@@ -54,6 +55,7 @@ public class NotificationHelper {
             channel.setDescription("Canal para notificaciones de fin de descanso");
             channel.enableVibration(true);
             channel.setVibrationPattern(new long[]{0, 500, 200, 500});
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 
             Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.sonido1);
             channel.setSound(soundUri, audioAttributes);
@@ -65,9 +67,10 @@ public class NotificationHelper {
                 NotificationChannel trainingChannel = new NotificationChannel(
                         CHANNEL_ID_ENTRENAMIENTO,
                         CHANNEL_NAME_ENTRENAMIENTO,
-                        NotificationManager.IMPORTANCE_DEFAULT
+                        NotificationManager.IMPORTANCE_HIGH
                 );
                 trainingChannel.setDescription("Notificaciones sobre el estado de tu entrenamiento");
+                trainingChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                 manager.createNotificationChannel(trainingChannel);
 
                 NotificationChannel cardioChannel = new NotificationChannel(
@@ -78,6 +81,7 @@ public class NotificationHelper {
                 cardioChannel.setDescription("Canal para notificaciones de fin de ejercicio cardio");
                 cardioChannel.enableVibration(true);
                 cardioChannel.setVibrationPattern(new long[]{0, 500, 200, 500});
+                cardioChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                 Uri cardioSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + getCardioSoundResId(context));
                 cardioChannel.setSound(cardioSoundUri, audioAttributes);
                 manager.createNotificationChannel(cardioChannel);
@@ -88,7 +92,12 @@ public class NotificationHelper {
     public static void showTimerFinishedNotification(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                101,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.sonido1);
 
@@ -97,7 +106,10 @@ public class NotificationHelper {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
                 .setContentTitle("Descanso terminado")
                 .setContentText("¡Es hora de la siguiente serie!")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setSound(soundUri)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
@@ -111,7 +123,12 @@ public class NotificationHelper {
     public static void showCardioTimerFinishedNotification(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                103,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + getCardioSoundResId(context));
 
@@ -120,7 +137,10 @@ public class NotificationHelper {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
                 .setContentTitle("Ejercicio Cardio Finalizado")
                 .setContentText("¡Has completado tu tiempo de cardio!")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setSound(soundUri)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
@@ -134,14 +154,22 @@ public class NotificationHelper {
     public static void showInactivityNotification(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                102,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID_ENTRENAMIENTO)
                 .setSmallIcon(R.drawable.baseline_fitness_center)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
                 .setContentTitle("¿Sigues entrenando?")
                 .setContentText("Llevas 1 hora sin registrar ejercicios. No olvides finalizar tu sesión.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_EVENT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
 
