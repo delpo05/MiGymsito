@@ -9,6 +9,7 @@ import com.example.migymsito.data.Registro;
 import com.example.migymsito.data.RegistroDetallado;
 import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataDao.EntrenamientoDao;
+import com.example.migymsito.dataDao.RegistroCardioDao;
 import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDao.SeccionXejercicioDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
@@ -20,6 +21,7 @@ import java.util.concurrent.Executors;
 public class RegistroRepository {
 
     private final RegistroDao registroDao;
+    private final RegistroCardioDao registroCardioDao;
     private final EntrenamientoDao entrenamientoDao;
     private final SeccionXejercicioDao seccionXejercicioDao;
     private final ExecutorService executorService;
@@ -28,6 +30,7 @@ public class RegistroRepository {
     public RegistroRepository(Application application) {
         AppDatabase db = AppDatabase.getDatabase(application);
         registroDao = db.registroDao();
+        registroCardioDao = db.registroCardioDao();
         entrenamientoDao = db.entrenamientoDao();
         seccionXejercicioDao = db.seccionXejercicioDao();
         executorService = Executors.newFixedThreadPool(4);
@@ -158,15 +161,32 @@ public class RegistroRepository {
 
     public void buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset, RepositoryCallback<List<RegistroDetallado>> callback) {
         executorService.execute(() -> {
-            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetalladosPaginado(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta, limit, offset);
-            notificar(callback, lista);
+            List<RegistroDetallado> fuerza = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+            List<RegistroDetallado> cardio = registroCardioDao.buscarRegistrosCardioDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+
+            List<RegistroDetallado> combinados = new java.util.ArrayList<>(fuerza);
+            combinados.addAll(cardio);
+            java.util.Collections.sort(combinados, (r1, r2) -> Long.compare(r2.fecha, r1.fecha));
+
+            List<RegistroDetallado> paginado = new java.util.ArrayList<>();
+            if (offset < combinados.size()) {
+                int toIndex = Math.min(offset + limit, combinados.size());
+                paginado = combinados.subList(offset, toIndex);
+            }
+            notificar(callback, paginado);
         });
     }
 
     public void buscarRegistrosDetallados(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, RepositoryCallback<List<RegistroDetallado>> callback) {
         executorService.execute(() -> {
-            List<RegistroDetallado> lista = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
-            notificar(callback, lista);
+            List<RegistroDetallado> fuerza = registroDao.buscarRegistrosDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+            List<RegistroDetallado> cardio = registroCardioDao.buscarRegistrosCardioDetallados(idUsuario, idRutina, idSeccion, idEjercicio, fechaDesde, fechaHasta);
+
+            List<RegistroDetallado> combinados = new java.util.ArrayList<>(fuerza);
+            combinados.addAll(cardio);
+            java.util.Collections.sort(combinados, (r1, r2) -> Long.compare(r2.fecha, r1.fecha));
+
+            notificar(callback, combinados);
         });
     }
 

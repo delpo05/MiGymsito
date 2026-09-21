@@ -20,9 +20,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroCardio;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.EjercicioRepository;
+import com.example.migymsito.dataRepository.RegistroCardioRepository;
 import com.example.migymsito.dataRepository.RegistroRepository;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
@@ -64,6 +66,7 @@ public class EstadisticasFragment extends Fragment {
     private SeccionRepository seccionRepository;
     private EjercicioRepository ejerciciosRepository;
     private RegistroRepository registroRepository;
+    private RegistroCardioRepository registroCardioRepository;
 
     private List<Rutina> listaRutinas = new ArrayList<>();
     private List<Seccion> listaSecciones = new ArrayList<>();
@@ -73,6 +76,7 @@ public class EstadisticasFragment extends Fragment {
     private int currentOffset = 0;
     private static final int PAGE_SIZE = 25;
     private final List<Registro> registrosAcumulados = new ArrayList<>();
+    private final List<RegistroCardio> registrosCardioAcumulados = new ArrayList<>();
 
     @Nullable
     @Override
@@ -92,6 +96,7 @@ public class EstadisticasFragment extends Fragment {
             seccionRepository = new SeccionRepository(getActivity().getApplication());
             ejerciciosRepository = new EjercicioRepository(getActivity().getApplication());
             registroRepository = new RegistroRepository(getActivity().getApplication());
+            registroCardioRepository = new RegistroCardioRepository(getActivity().getApplication());
 
             sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
             sharedViewModel.getImportFinishedTrigger().observe(getViewLifecycleOwner(), finished -> {
@@ -131,6 +136,7 @@ public class EstadisticasFragment extends Fragment {
         btnConsultarProgreso.setOnClickListener(v -> {
             currentOffset = 0;
             registrosAcumulados.clear();
+            registrosCardioAcumulados.clear();
             consultarProgreso();
         });
         
@@ -304,6 +310,7 @@ public class EstadisticasFragment extends Fragment {
 
         autoCompleteEjercicios.setOnItemClickListener((parent, view, position, id) -> {
             ejercicioSeleccionado = listaEjerciciosActuales.get(position);
+            actualizarDropdownConsultaForEjercicio(ejercicioSeleccionado);
         });
     }
 
@@ -311,6 +318,20 @@ public class EstadisticasFragment extends Fragment {
         String[] opcionesConsulta = {"Peso Máximo", "Volumen de Entrenamiento"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, opcionesConsulta);
         autoCompleteConsulta.setAdapter(adapter);
+    }
+
+    private void actualizarDropdownConsultaForEjercicio(Ejercicio ejercicio) {
+        if (ejercicio != null && "CARDIO".equalsIgnoreCase(ejercicio.CategoriaEjercicio)) {
+            String[] opciones = {"Distancia Total (km)", "Duración Total (min)", "Calorías Quemadas (kcal)", "Velocidad Promedio (km/h)"};
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, opciones);
+            autoCompleteConsulta.setAdapter(adapter);
+            autoCompleteConsulta.setText(opciones[0], false);
+        } else {
+            String[] opciones = {"Peso Máximo", "Volumen de Entrenamiento"};
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item, opciones);
+            autoCompleteConsulta.setAdapter(adapter);
+            autoCompleteConsulta.setText(opciones[0], false);
+        }
     }
 
     private void consultarProgreso() {
@@ -337,6 +358,13 @@ public class EstadisticasFragment extends Fragment {
                 Toast.makeText(getContext(), "La fecha 'Hasta' no puede ser anterior a 'Desde'", Toast.LENGTH_SHORT).show();
                 return;
             }
+        }
+
+        if ("CARDIO".equalsIgnoreCase(ejercicioSeleccionado.CategoriaEjercicio)) {
+            registroCardioRepository.obtenerHistorialCardioPaginado(MainActivity.usuarioLogueado.IdUsuario, ejercicioSeleccionado.IdEjercicio, PAGE_SIZE, currentOffset, registros -> {
+                procesarRegistrosCardio(registros, tieneDesde, consulta);
+            });
+            return;
         }
 
         if (consulta.equals("Peso Máximo")) {
@@ -396,6 +424,44 @@ public class EstadisticasFragment extends Fragment {
         }
     }
 
+    private void procesarRegistrosCardio(List<RegistroCardio> registros, boolean filtrar, String tipoConsulta) {
+        if (registros.isEmpty() && currentOffset == 0) {
+            Toast.makeText(getContext(), "No hay datos para este ejercicio", Toast.LENGTH_SHORT).show();
+            barChart.clear();
+            tvFormulaEstadistica.setVisibility(View.GONE);
+            btnCargarMas.setVisibility(View.GONE);
+            return;
+        }
+
+        List<RegistroCardio> filtrados = filtrarPorFechaCardio(registros, filtrar, calendarDesde, calendarHasta);
+        this.registrosCardioAcumulados.addAll(filtrados);
+
+        if (this.registrosCardioAcumulados.isEmpty()) {
+            Toast.makeText(getContext(), "No hay datos en el rango seleccionado", Toast.LENGTH_SHORT).show();
+            barChart.clear();
+            tvFormulaEstadistica.setVisibility(View.GONE);
+            if (registros.size() == PAGE_SIZE) {
+                btnCargarMas.setVisibility(View.VISIBLE);
+                currentOffset += PAGE_SIZE;
+            } else {
+                btnCargarMas.setVisibility(View.GONE);
+            }
+            return;
+        }
+
+        tvFormulaEstadistica.setText(tipoConsulta);
+        tvFormulaEstadistica.setVisibility(View.VISIBLE);
+
+        mostrarGraficoBarrasCardio(this.registrosCardioAcumulados, tipoConsulta);
+
+        if (registros.size() == PAGE_SIZE) {
+            btnCargarMas.setVisibility(View.VISIBLE);
+            currentOffset += PAGE_SIZE;
+        } else {
+            btnCargarMas.setVisibility(View.GONE);
+        }
+    }
+
     private List<Registro> filtrarPorFecha(List<Registro> original, boolean aplicarFiltro, Calendar desde, Calendar hasta) {
         if (!aplicarFiltro) return original;
         
@@ -406,6 +472,19 @@ public class EstadisticasFragment extends Fragment {
         for (Registro r : original) {
             if (r.FechaRegistro >= inicio && r.FechaRegistro <= fin) {
                 filtrados.add(r);
+            }
+        }
+        return filtrados;
+    }
+
+    private List<RegistroCardio> filtrarPorFechaCardio(List<RegistroCardio> original, boolean aplicarFiltro, Calendar desde, Calendar hasta) {
+        if (!aplicarFiltro) return original;
+        List<RegistroCardio> filtrados = new ArrayList<>();
+        long inicio = desde.getTimeInMillis();
+        long fin = hasta.getTimeInMillis();
+        for (RegistroCardio rc : original) {
+            if (rc.FechaRegistro >= inicio && rc.FechaRegistro <= fin) {
+                filtrados.add(rc);
             }
         }
         return filtrados;
@@ -452,6 +531,79 @@ public class EstadisticasFragment extends Fragment {
         }
 
         BarDataSet dataSet = new BarDataSet(entries, etiqueta);
+        dataSet.setColor(Color.WHITE);
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setValueTextSize(10f);
+
+        BarData barData = new BarData(dataSet);
+        barChart.setData(barData);
+
+        barChart.getXAxis().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                int i = (int) value;
+                if (i >= 0 && i < fechas.size()) {
+                    return fechas.get(i);
+                }
+                return "";
+            }
+        });
+
+        barChart.animateY(1000);
+
+        if (fechas.size() > 7) {
+            barChart.setVisibleXRangeMaximum(7);
+            barChart.moveViewToX(fechas.size() - 7);
+        } else {
+            barChart.setVisibleXRangeMaximum(fechas.size());
+        }
+
+        barChart.invalidate();
+    }
+
+    private void mostrarGraficoBarrasCardio(List<RegistroCardio> registros, String tipoConsulta) {
+        List<BarEntry> entries = new ArrayList<>();
+        final List<String> fechas = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
+
+        List<RegistroCardio> sortedRegistros = new ArrayList<>(registros);
+        Collections.sort(sortedRegistros, (r1, r2) -> Long.compare(r1.FechaRegistro, r2.FechaRegistro));
+
+        Map<String, Float> datosConsolidados = new LinkedHashMap<>();
+
+        for (RegistroCardio rc : sortedRegistros) {
+            String fechaStr = sdf.format(new Date(rc.FechaRegistro));
+            float valor = 0f;
+
+            if (tipoConsulta.contains("Distancia")) {
+                if (rc.Distancia != null) valor = rc.Distancia.floatValue();
+            } else if (tipoConsulta.contains("Duración")) {
+                valor = rc.DuracionSegundos / 60f;
+            } else if (tipoConsulta.contains("Calorías")) {
+                if (rc.CaloriasQuemadas != null) valor = rc.CaloriasQuemadas.floatValue();
+            } else if (tipoConsulta.contains("Velocidad")) {
+                if (rc.VelocidadPromedio != null) valor = rc.VelocidadPromedio.floatValue();
+            }
+
+            if (datosConsolidados.containsKey(fechaStr)) {
+                Float current = datosConsolidados.get(fechaStr);
+                if (tipoConsulta.contains("Velocidad")) {
+                    datosConsolidados.put(fechaStr, Math.max(current != null ? current : 0f, valor));
+                } else {
+                    datosConsolidados.put(fechaStr, (current != null ? current : 0f) + valor);
+                }
+            } else {
+                datosConsolidados.put(fechaStr, valor);
+            }
+        }
+
+        int index = 0;
+        for (Map.Entry<String, Float> entry : datosConsolidados.entrySet()) {
+            entries.add(new BarEntry(index++, entry.getValue()));
+            fechas.add(entry.getKey());
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, tipoConsulta);
         dataSet.setColor(Color.WHITE);
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setValueTextSize(10f);
