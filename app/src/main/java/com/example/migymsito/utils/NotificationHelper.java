@@ -21,11 +21,31 @@ public class NotificationHelper {
     private static final String CHANNEL_NAME = "Descanso MiGymsito";
     public static final String CHANNEL_ID_ENTRENAMIENTO = "EntrenamientoChannel";
     private static final String CHANNEL_NAME_ENTRENAMIENTO = "Entrenamiento MiGymsito";
+    public static final String CHANNEL_ID_CARDIO = "CardioTimerChannelV1";
+    private static final String CHANNEL_NAME_CARDIO = "Cardio MiGymsito";
+
     private static final int NOTIFICATION_ID = 101;
     private static final int NOTIFICATION_ID_ENTRENAMIENTO = 102;
+    private static final int NOTIFICATION_ID_CARDIO = 103;
+
+    private static int getCardioSoundResId(Context context) {
+        int audioResId = context.getResources().getIdentifier("silbato", "raw", context.getPackageName());
+        if (audioResId == 0) {
+            audioResId = context.getResources().getIdentifier("silbato_cardio", "raw", context.getPackageName());
+        }
+        if (audioResId == 0) {
+            audioResId = R.raw.sonido1;
+        }
+        return audioResId;
+    }
 
     public static void createNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_NAME,
@@ -36,10 +56,6 @@ public class NotificationHelper {
             channel.setVibrationPattern(new long[]{0, 500, 200, 500});
 
             Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.sonido1);
-            AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build();
             channel.setSound(soundUri, audioAttributes);
 
             NotificationManager manager = context.getSystemService(NotificationManager.class);
@@ -53,6 +69,18 @@ public class NotificationHelper {
                 );
                 trainingChannel.setDescription("Notificaciones sobre el estado de tu entrenamiento");
                 manager.createNotificationChannel(trainingChannel);
+
+                NotificationChannel cardioChannel = new NotificationChannel(
+                        CHANNEL_ID_CARDIO,
+                        CHANNEL_NAME_CARDIO,
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+                cardioChannel.setDescription("Canal para notificaciones de fin de ejercicio cardio");
+                cardioChannel.enableVibration(true);
+                cardioChannel.setVibrationPattern(new long[]{0, 500, 200, 500});
+                Uri cardioSoundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + getCardioSoundResId(context));
+                cardioChannel.setSound(cardioSoundUri, audioAttributes);
+                manager.createNotificationChannel(cardioChannel);
             }
         }
     }
@@ -77,6 +105,29 @@ public class NotificationHelper {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
             manager.notify(NOTIFICATION_ID, builder.build());
+        }
+    }
+
+    public static void showCardioTimerFinishedNotification(Context context) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + getCardioSoundResId(context));
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID_CARDIO)
+                .setSmallIcon(R.drawable.baseline_fitness_center)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.isotipo_white))
+                .setContentTitle("Ejercicio Cardio Finalizado")
+                .setContentText("¡Has completado tu tiempo de cardio!")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setSound(soundUri)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID_CARDIO, builder.build());
         }
     }
 

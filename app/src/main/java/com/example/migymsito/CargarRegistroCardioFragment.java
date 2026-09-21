@@ -297,12 +297,20 @@ public class CargarRegistroCardioFragment extends Fragment {
         
         vibrarAlFinalizar();
         sonarAlerta();
-        if (isAdded()) Toast.makeText(getContext(), "¡Tiempo de cardio finalizado!", Toast.LENGTH_SHORT).show();
+        if (isAdded()) Toast.makeText(getContext(), "¡Ejercicio de cardio finalizado!", Toast.LENGTH_SHORT).show();
     }
 
     private void sonarAlerta() {
         try {
-            MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido1);
+            Context context = requireContext();
+            int audioResId = context.getResources().getIdentifier("silbato", "raw", context.getPackageName());
+            if (audioResId == 0) {
+                audioResId = context.getResources().getIdentifier("silbato_cardio", "raw", context.getPackageName());
+            }
+            if (audioResId == 0) {
+                audioResId = R.raw.sonido1;
+            }
+            MediaPlayer mp = MediaPlayer.create(context, audioResId);
             if (mp != null) {
                 mp.start();
                 mp.setOnCompletionListener(MediaPlayer::release);
@@ -326,6 +334,7 @@ public class CargarRegistroCardioFragment extends Fragment {
     private void scheduleAlarm(long durationMs) {
         AlarmManager am = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
+        intent.putExtra("IS_CARDIO", true);
         PendingIntent pi = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         long triggerTime = System.currentTimeMillis() + durationMs;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) {
@@ -338,6 +347,7 @@ public class CargarRegistroCardioFragment extends Fragment {
     private void cancelAlarm() {
         AlarmManager am = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
+        intent.putExtra("IS_CARDIO", true);
         PendingIntent pi = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         am.cancel(pi);
     }
