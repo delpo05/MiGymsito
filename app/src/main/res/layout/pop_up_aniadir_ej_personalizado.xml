@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="320dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -105,14 +106,18 @@
                 android:text="Fuerza"
                 android:textSize="13sp"
                 android:checked="true"
-                android:textColor="@color/gris_oscuro_texto" />
+                android:textColor="@color/gris_oscuro_texto"
+                android:buttonTint="@color/selector_radio_checkbox"
+                app:buttonTint="@color/selector_radio_checkbox" />
             <RadioButton
                 android:id="@+id/rbCardio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cardio"
                 android:textSize="13sp"
-                android:textColor="@color/gris_oscuro_texto" />
+                android:textColor="@color/gris_oscuro_texto"
+                android:buttonTint="@color/selector_radio_checkbox"
+                app:buttonTint="@color/selector_radio_checkbox" />
         </RadioGroup>
     </LinearLayout>
 
@@ -138,7 +143,9 @@
                     android:layout_height="wrap_content"
                     android:text="¿Es peso corporal?"
                     android:textColor="@color/gris_oscuro_texto"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
 
                 <CheckBox
                     android:id="@+id/cbPesoPorLado"
@@ -146,7 +153,9 @@
                     android:layout_height="wrap_content"
                     android:text="Peso por lado"
                     android:textColor="@color/gris_oscuro_texto"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
 
                 <LinearLayout
                     android:id="@+id/llContenedorBarra"
@@ -181,6 +190,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/hint_peso_barra"
                         android:background="@drawable/edittext_bg_gray"
+                        android:textColor="@color/gris_oscuro_texto"
                         android:textSize="14sp"
                         android:inputType="numberDecimal" />
                 </LinearLayout>
@@ -203,12 +213,56 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="8dp" />
 
-                <CheckBox android:id="@+id/cbRegDistancia" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Distancia" android:textColor="@color/gris_oscuro_texto" android:checked="true" />
-                <CheckBox android:id="@+id/cbRegCalorias" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Calorías" android:textColor="@color/gris_oscuro_texto" android:checked="true" />
-                <CheckBox android:id="@+id/cbRegCadencia" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cadencia" android:textColor="@color/gris_oscuro_texto" />
-                <CheckBox android:id="@+id/cbRegRitmo" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Ritmo Cardíaco" android:textColor="@color/gris_oscuro_texto" />
-                <CheckBox android:id="@+id/cbRegInclinacion" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Inclinación" android:textColor="@color/gris_oscuro_texto" />
-                <CheckBox android:id="@+id/cbRegResistencia" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Resistencia" android:textColor="@color/gris_oscuro_texto" />
+                <CheckBox
+                    android:id="@+id/cbRegDistancia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Distancia"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:checked="true"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
+                <CheckBox
+                    android:id="@+id/cbRegCalorias"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Calorías"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:checked="true"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
+                <CheckBox
+                    android:id="@+id/cbRegCadencia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cadencia"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
+                <CheckBox
+                    android:id="@+id/cbRegRitmo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ritmo Cardíaco"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
+                <CheckBox
+                    android:id="@+id/cbRegInclinacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Inclinación"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
+                <CheckBox
+                    android:id="@+id/cbRegResistencia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Resistencia"
+                    android:textColor="@color/gris_oscuro_texto"
+                    android:buttonTint="@color/selector_radio_checkbox"
+                    app:buttonTint="@color/selector_radio_checkbox" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
