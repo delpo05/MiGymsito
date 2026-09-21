@@ -1,5 +1,7 @@
 <resources>
     <style name="Theme.MiGymsito" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="fontFamily">@font/app_font</item>
+        <item name="android:fontFamily">@font/app_font</item>
         <item name="colorPrimary">@color/blanco</item>
         <item name="colorOnPrimary">@color/negro</item>
         <item name="colorSecondary">@color/gris_pista</item>
@@ -15,11 +17,15 @@
     </style>
 
     <style name="PickerStyle">
+        <item name="fontFamily">@font/app_font</item>
+        <item name="android:fontFamily">@font/app_font</item>
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="colorControlNormal">@color/blanco</item>
     </style>
 
     <style name="CustomDialogTheme" parent="Theme.Material3.DayNight.Dialog">
+        <item name="fontFamily">@font/app_font</item>
+        <item name="android:fontFamily">@font/app_font</item>
         <item name="android:windowBackground">@drawable/bg_dialog_dark</item>
         <item name="android:textColorPrimary">@color/blanco</item>
         <item name="colorPrimary">@color/blanco</item>
@@ -29,6 +35,8 @@
 
     <!-- ESTILO CALENDARIO MODERNO MEJORADO -->
     <style name="CustomDatePicker" parent="Theme.Material3.Dark.Dialog">
+        <item name="fontFamily">@font/app_font</item>
+        <item name="android:fontFamily">@font/app_font</item>
         <item name="android:windowBackground">#1A1A1A</item>
         <item name="colorSurface">#1A1A1A</item>
         <item name="colorOnSurface">@color/blanco</item>
@@ -49,6 +57,8 @@
 
     <!-- Estilo para botones con fondo redondeado forzado -->
     <style name="DialogButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="fontFamily">@font/app_font</item>
+        <item name="android:fontFamily">@font/app_font</item>
         <item name="android:textColor">@color/blanco</item>
         <item name="android:layout_margin">4dp</item>
         <item name="android:paddingHorizontal">16dp</item>

@@ -2,7 +2,9 @@ package com.example.migymsito;
 
 import android.app.DatePickerDialog;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import androidx.core.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -177,6 +179,8 @@ public class EstadisticasFragment extends Fragment {
 
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
+
+        Typeface font = ResourcesCompat.getFont(requireContext(), R.font.roboto_regular);
         
         Legend legend = barChart.getLegend();
         legend.setTextColor(Color.WHITE);
@@ -184,6 +188,7 @@ public class EstadisticasFragment extends Fragment {
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         legend.setDrawInside(false);
+        if (font != null) legend.setTypeface(font);
 
         barChart.setTouchEnabled(true);
         barChart.setDragEnabled(true);
@@ -197,8 +202,11 @@ public class EstadisticasFragment extends Fragment {
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
         xAxis.setLabelRotationAngle(-45f);
+        if (font != null) xAxis.setTypeface(font);
 
         barChart.getAxisLeft().setTextColor(Color.WHITE);
+        if (font != null) barChart.getAxisLeft().setTypeface(font);
+
         barChart.getAxisRight().setEnabled(false);
         barChart.setNoDataText("Selecciona opciones y consulta para ver datos");
         barChart.setNoDataTextColor(Color.GRAY);
