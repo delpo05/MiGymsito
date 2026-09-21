@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,6 +45,7 @@ import java.util.Locale;
 public class CargarRegistroCardioFragment extends Fragment {
 
     private TextView tvNombreEjercicio, tvTimerValue;
+    private View cvCardioTimer;
     private ImageButton btnStartPause, btnReset, btnEdit, btnEliminarUltimo;
     private Button btnRegistrar;
     private RecyclerView rvHistorial;
@@ -72,7 +72,7 @@ public class CargarRegistroCardioFragment extends Fragment {
     private long timeLeftInMillis = 0L;
     private long initialTimeLimit = 0L;
 
-    private int currentMode = 0; // 0: Cronómetro (Up), 1: Timer (Down)
+    private int currentMode = 0; // 0: Cronómetro Libre (Up), 1: Timer Definido (Down)
 
     // Inputs (Dynamic)
     private TextInputLayout tilDistancia, tilCalorias, tilCadencia, tilRitmo, tilInclinacion, tilResistencia, tilRPE, tilNotas;
@@ -109,6 +109,7 @@ public class CargarRegistroCardioFragment extends Fragment {
     private void initViews(View view) {
         tvNombreEjercicio = view.findViewById(R.id.tvNombreEjercicioCardio);
         tvTimerValue = view.findViewById(R.id.tvCardioTimerValue);
+        cvCardioTimer = view.findViewById(R.id.cvCardioTimer);
         btnStartPause = view.findViewById(R.id.btnStartPauseCardioTimer);
         btnReset = view.findViewById(R.id.btnResetCardioTimer);
         btnEdit = view.findViewById(R.id.btnEditCardioTimer);
@@ -138,17 +139,37 @@ public class CargarRegistroCardioFragment extends Fragment {
         if (ejercicio != null) {
             tvNombreEjercicio.setText(ejercicio.NombreEjercicio);
         }
+
+        // Timer por defecto
+        if (tlTimerMode != null) {
+            TabLayout.Tab tab = tlTimerMode.getTabAt(0);
+            if (tab != null) {
+                tab.select();
+            }
+        }
     }
 
     private void setupListeners() {
         tlTimerMode.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(TabLayout.Tab tab) {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
                 resetTimer();
                 currentMode = tab.getPosition();
                 actualizarUIModo();
+                if (currentMode == 1) {
+                    mostrarDialogoAjustarTimer();
+                }
             }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 1) {
+                    mostrarDialogoAjustarTimer();
+                }
+            }
         });
 
         btnStartPause.setOnClickListener(v -> {
@@ -161,6 +182,11 @@ public class CargarRegistroCardioFragment extends Fragment {
 
         btnReset.setOnClickListener(v -> resetTimer());
         btnEdit.setOnClickListener(v -> mostrarDialogoAjustarTimer());
+        tvTimerValue.setOnClickListener(v -> mostrarDialogoAjustarTimer());
+        if (cvCardioTimer != null) {
+            cvCardioTimer.setOnClickListener(v -> mostrarDialogoAjustarTimer());
+        }
+
         btnRegistrar.setOnClickListener(v -> guardarRegistro());
         btnEliminarUltimo.setOnClickListener(v -> eliminarUltimoRegistro());
     }
@@ -172,8 +198,8 @@ public class CargarRegistroCardioFragment extends Fragment {
             } else {
                 actualizarTextoTimer(initialTimeLimit);
             }
-        } else { // Cronómetro
-            tvTimerValue.setText("00:00:00");
+        } else { // Cronómetro Libre
+            actualizarTextoTimer(updatedTime);
         }
     }
 
@@ -204,26 +230,30 @@ public class CargarRegistroCardioFragment extends Fragment {
     }
 
     private void startTimer() {
-        if (currentMode == 0) { // Cronómetro (Up)
+        if (currentMode == 0) { // Cronómetro Libre (Up)
             isRunning = true;
             startTime = SystemClock.uptimeMillis();
             timerHandler.postDelayed(updateTimerThread, 0);
-        } else { // Timer (Down)
+        } else { // Timer Definido (Down)
             if (timeLeftInMillis <= 0) {
-                if (initialTimeLimit > 0) timeLeftInMillis = initialTimeLimit;
-                else {
+                if (initialTimeLimit > 0) {
+                    timeLeftInMillis = initialTimeLimit;
+                } else {
                     mostrarDialogoAjustarTimer();
                     return;
                 }
             }
             isRunning = true;
             countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
-                @Override public void onTick(long millisUntilFinished) {
+                @Override
+                public void onTick(long millisUntilFinished) {
                     timeLeftInMillis = millisUntilFinished;
                     updatedTime = initialTimeLimit - timeLeftInMillis;
                     actualizarTextoTimer(timeLeftInMillis);
                 }
-                @Override public void onFinish() {
+
+                @Override
+                public void onFinish() {
                     finalizarTimer();
                 }
             }.start();
@@ -238,7 +268,9 @@ public class CargarRegistroCardioFragment extends Fragment {
             timeSwapBuff += timeInMilliseconds;
             timerHandler.removeCallbacks(updateTimerThread);
         } else {
-            if (countDownTimer != null) countDownTimer.cancel();
+            if (countDownTimer != null) {
+                countDownTimer.cancel();
+            }
             cancelAlarm();
         }
         btnStartPause.setImageResource(android.R.drawable.ic_media_play);
@@ -249,7 +281,11 @@ public class CargarRegistroCardioFragment extends Fragment {
         timeSwapBuff = 0L;
         timeInMilliseconds = 0L;
         updatedTime = 0L;
-        timeLeftInMillis = 0L;
+        if (currentMode == 1) {
+            timeLeftInMillis = initialTimeLimit;
+        } else {
+            timeLeftInMillis = 0L;
+        }
         actualizarUIModo();
     }
 
@@ -307,35 +343,57 @@ public class CargarRegistroCardioFragment extends Fragment {
     }
 
     private void mostrarDialogoAjustarTimer() {
+        if (isRunning) {
+            pauseTimer();
+        }
+
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_ajustar_tiempo, null);
         NumberPicker npMinutos = dialogView.findViewById(R.id.npMinutos);
         NumberPicker npSegundos = dialogView.findViewById(R.id.npSegundos);
-        
-        npMinutos.setMinValue(0); npMinutos.setMaxValue(120);
-        npSegundos.setMinValue(0); npSegundos.setMaxValue(59);
+        Button btnCancelar = dialogView.findViewById(R.id.btnCancelarDialog);
+        Button btnAceptar = dialogView.findViewById(R.id.btnAceptarDialog);
+        TextView tvTitulo = dialogView.findViewById(R.id.tvTituloDialog);
+
+        if (tvTitulo != null) {
+            tvTitulo.setText(currentMode == 0 ? "Ajustar Tiempo Transcurrido" : "Configurar Tiempo Cardio");
+        }
+
+        npMinutos.setMinValue(0);
+        npMinutos.setMaxValue(120);
+        npSegundos.setMinValue(0);
+        npSegundos.setMaxValue(59);
 
         long displayTime = (currentMode == 1 && initialTimeLimit > 0) ? initialTimeLimit : updatedTime;
         npMinutos.setValue((int) (displayTime / 1000) / 60);
         npSegundos.setValue((int) (displayTime / 1000) % 60);
 
-        new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
                 .setView(dialogView)
-                .setTitle(currentMode == 0 ? "Ajustar Tiempo Transcurrido" : "Configurar Timer")
-                .setPositiveButton("Aceptar", (dialog, which) -> {
-                    long totalMillis = (npMinutos.getValue() * 60L + npSegundos.getValue()) * 1000L;
-                    if (currentMode == 0) {
-                        updatedTime = totalMillis;
-                        timeSwapBuff = totalMillis;
-                        timeInMilliseconds = 0;
-                        startTime = SystemClock.uptimeMillis();
-                    } else {
-                        initialTimeLimit = totalMillis;
-                        timeLeftInMillis = totalMillis;
-                    }
-                    actualizarTextoTimer(totalMillis);
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .create();
+
+        if (btnCancelar != null) {
+            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        if (btnAceptar != null) {
+            btnAceptar.setOnClickListener(v -> {
+                long totalMillis = (npMinutos.getValue() * 60L + npSegundos.getValue()) * 1000L;
+                if (currentMode == 0) {
+                    updatedTime = totalMillis;
+                    timeSwapBuff = totalMillis;
+                    timeInMilliseconds = 0;
+                    startTime = SystemClock.uptimeMillis();
+                } else {
+                    initialTimeLimit = totalMillis;
+                    timeLeftInMillis = totalMillis;
+                    updatedTime = 0;
+                }
+                actualizarTextoTimer(totalMillis);
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
     }
 
     private void actualizarTextoTimer(long timeMs) {
