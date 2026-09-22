@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         isAppInForeground = true;
+        NotificationHelper.cancelAllNotifications(this);
     }
 
     @Override

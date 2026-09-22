@@ -29,6 +29,15 @@ public class NotificationHelper {
     private static final int NOTIFICATION_ID_ENTRENAMIENTO = 102;
     private static final int NOTIFICATION_ID_CARDIO = 103;
 
+    private static final long NOTIFICATION_TIMEOUT_MS = 5 * 60 * 1000L; // 5 minutos
+
+    public static void cancelAllNotifications(Context context) {
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.cancelAll();
+        }
+    }
+
     private static int getCardioSoundResId(Context context) {
         int audioResId = context.getResources().getIdentifier("silbato", "raw", context.getPackageName());
         if (audioResId == 0) {
@@ -112,6 +121,7 @@ public class NotificationHelper {
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setSound(soundUri)
                 .setAutoCancel(true)
+                .setTimeoutAfter(NOTIFICATION_TIMEOUT_MS)
                 .setContentIntent(pendingIntent);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -143,6 +153,7 @@ public class NotificationHelper {
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setSound(soundUri)
                 .setAutoCancel(true)
+                .setTimeoutAfter(NOTIFICATION_TIMEOUT_MS)
                 .setContentIntent(pendingIntent);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -171,6 +182,7 @@ public class NotificationHelper {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setAutoCancel(true)
+                .setTimeoutAfter(NOTIFICATION_TIMEOUT_MS)
                 .setContentIntent(pendingIntent);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
