@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -66,7 +67,10 @@ public class TutorialFragment extends Fragment {
         SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putBoolean(KEY_TUTORIAL_DONE, true).apply();
 
-        Navigation.findNavController(requireView()).navigate(R.id.registroSesionFragment);
+        NavOptions navOptions = new NavOptions.Builder()
+                .setPopUpTo(R.id.tutorialFragment, true)
+                .build();
+        Navigation.findNavController(requireView()).navigate(R.id.registroSesionFragment, null, navOptions);
     }
 
     private static class TutorialAdapter extends RecyclerView.Adapter<TutorialAdapter.ViewHolder> {

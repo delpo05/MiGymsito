@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import com.example.migymsito.data.Rutina;
@@ -83,15 +84,21 @@ public class InicioSesionFragment extends Fragment {
         }
     }
 
+    private NavOptions getPopUpNavOptions() {
+        return new NavOptions.Builder()
+                .setPopUpTo(R.id.inicioSesionFragment, true)
+                .build();
+    }
+
     private void irASeleccionIdioma() {
         if (isAdded()) {
-            Navigation.findNavController(requireView()).navigate(R.id.languageSelectionFragment);
+            Navigation.findNavController(requireView()).navigate(R.id.languageSelectionFragment, null, getPopUpNavOptions());
         }
     }
 
     private void irATutorial() {
         if (isAdded()) {
-            Navigation.findNavController(requireView()).navigate(R.id.tutorialFragment);
+            Navigation.findNavController(requireView()).navigate(R.id.tutorialFragment, null, getPopUpNavOptions());
         }
     }
 
@@ -126,7 +133,7 @@ public class InicioSesionFragment extends Fragment {
                     if (rutina != null) {
                         Bundle bundle = new Bundle();
                         bundle.putSerializable("rutina", rutina);
-                        Navigation.findNavController(requireView()).navigate(R.id.seccionesFragment, bundle);
+                        Navigation.findNavController(requireView()).navigate(R.id.seccionesFragment, bundle, getPopUpNavOptions());
                     } else {
                         usuarioRepository.eliminarRutinaSeleccionada();
                         irARutinas();
@@ -138,13 +145,13 @@ public class InicioSesionFragment extends Fragment {
 
     private void irARutinas() {
         if (isAdded()) {
-            Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment);
+            Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null, getPopUpNavOptions());
         }
     }
 
     private void irARegistro() {
         if (isAdded()) {
-            Navigation.findNavController(requireView()).navigate(R.id.registroSesionFragment);
+            Navigation.findNavController(requireView()).navigate(R.id.registroSesionFragment, null, getPopUpNavOptions());
         }
     }
 

@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -215,7 +216,10 @@ public class RegistroInteractivoFragment extends Fragment {
                             if (getActivity() instanceof MainActivity) {
                                 ((MainActivity) getActivity()).actualizarNombreHeader();
                             }
-                            Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment);
+                            NavOptions navOptions = new NavOptions.Builder()
+                                    .setPopUpTo(R.id.registroSesionFragment, true)
+                                    .build();
+                            Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null, navOptions);
                         } else {
                             Toast.makeText(getContext(), R.string.error_registro, Toast.LENGTH_SHORT).show();
                         }
