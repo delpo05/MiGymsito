@@ -24,6 +24,7 @@ import com.example.migymsito.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import android.app.AlertDialog;
+import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.WindowManager;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
         if (getWindow() != null) {
