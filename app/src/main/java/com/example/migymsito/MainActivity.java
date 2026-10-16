@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import androidx.core.content.ContextCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.example.migymsito.utils.BackupManager;
@@ -64,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
+        if (getWindow() != null) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.negro));
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.negro));
+        }
         setContentView(R.layout.activity_main);
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);

@@ -15,6 +15,19 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import androidx.activity.OnBackPressedCallback;
+import com.bumptech.glide.Glide;
+import com.google.android.material.card.MaterialCardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +59,14 @@ import java.util.Locale;
 public class CargarRegistroCardioFragment extends Fragment {
 
     private TextView tvNombreEjercicio, tvTimerValue;
+    private MaterialCardView cvEjercicioImagenCardio;
+    private ImageView ivEjercicioImagenCardio;
+    private FrameLayout flExpandedImageContainerCardio;
+    private ImageView ivEjercicioImagenExpandedCardio;
+    private Animator currentAnimator;
+    private float lastStartTranslationX, lastStartTranslationY, lastStartScale;
+    private View lastThumbView;
+
     private View cvCardioTimer;
     private ImageButton btnStartPause, btnReset, btnEdit, btnEliminarUltimo;
     private Button btnRegistrar;
@@ -101,6 +122,7 @@ public class CargarRegistroCardioFragment extends Fragment {
         }
 
         initViews(view);
+        configurarImagenEjercicio(view);
         setupListeners();
         setupRecyclerView();
         configurarInputsDinamicos();
@@ -511,6 +533,155 @@ public class CargarRegistroCardioFragment extends Fragment {
         etDistancia.setText(""); etCalorias.setText(""); etCadencia.setText("");
         etRitmo.setText(""); etInclinacion.setText(""); etResistencia.setText("");
         etRPE.setText(""); etNotas.setText("");
+    }
+
+    private void configurarImagenEjercicio(View view) {
+        cvEjercicioImagenCardio = view.findViewById(R.id.cvEjercicioImagenCardio);
+        ivEjercicioImagenCardio = view.findViewById(R.id.ivEjercicioImagenCardio);
+        flExpandedImageContainerCardio = view.findViewById(R.id.flExpandedImageContainerCardio);
+        ivEjercicioImagenExpandedCardio = view.findViewById(R.id.ivEjercicioImagenExpandedCardio);
+
+        if (cvEjercicioImagenCardio == null || ivEjercicioImagenCardio == null) return;
+
+        if (ejercicio != null && ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
+            cvEjercicioImagenCardio.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(Uri.parse(ejercicio.ImagenEjercicio))
+                    .placeholder(R.drawable.cargar_imagen_default)
+                    .error(R.drawable.cargar_imagen_default)
+                    .centerCrop()
+                    .into(ivEjercicioImagenCardio);
+
+            cvEjercicioImagenCardio.setOnClickListener(v -> zoomImageFromThumb(cvEjercicioImagenCardio, ejercicio.ImagenEjercicio));
+        } else {
+            cvEjercicioImagenCardio.setVisibility(View.GONE);
+        }
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (flExpandedImageContainerCardio != null && flExpandedImageContainerCardio.getVisibility() == View.VISIBLE) {
+                    collapseExpandedImage();
+                } else {
+                    setEnabled(false);
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
+    }
+
+    private void zoomImageFromThumb(final View thumbView, String imageUriStr) {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+
+        if (ivEjercicioImagenExpandedCardio == null || flExpandedImageContainerCardio == null) return;
+
+        Glide.with(this)
+                .load(Uri.parse(imageUriStr))
+                .placeholder(R.drawable.cargar_imagen_default)
+                .error(R.drawable.cargar_imagen_default)
+                .fitCenter()
+                .into(ivEjercicioImagenExpandedCardio);
+
+        final Rect thumbBounds = new Rect();
+        final Rect containerBounds = new Rect();
+        final Point globalOffset = new Point();
+
+        thumbView.getGlobalVisibleRect(thumbBounds);
+        View rootContainer = requireView();
+        rootContainer.getGlobalVisibleRect(containerBounds, globalOffset);
+
+        thumbBounds.offset(-globalOffset.x, -globalOffset.y);
+        containerBounds.offset(-globalOffset.x, -globalOffset.y);
+
+        float thumbCenterX = thumbBounds.exactCenterX();
+        float thumbCenterY = thumbBounds.exactCenterY();
+        float containerCenterX = containerBounds.exactCenterX();
+        float containerCenterY = containerBounds.exactCenterY();
+
+        float startTranslationX = thumbCenterX - containerCenterX;
+        float startTranslationY = thumbCenterY - containerCenterY;
+        float startScale = (float) thumbView.getWidth() / Math.max(containerBounds.width(), 1);
+
+        thumbView.setAlpha(0f);
+        flExpandedImageContainerCardio.setVisibility(View.VISIBLE);
+
+        ivEjercicioImagenExpandedCardio.setTranslationX(startTranslationX);
+        ivEjercicioImagenExpandedCardio.setTranslationY(startTranslationY);
+        ivEjercicioImagenExpandedCardio.setScaleX(startScale);
+        ivEjercicioImagenExpandedCardio.setScaleY(startScale);
+
+        lastStartTranslationX = startTranslationX;
+        lastStartTranslationY = startTranslationY;
+        lastStartScale = startScale;
+        lastThumbView = thumbView;
+
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.TRANSLATION_X, startTranslationX, 0f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.TRANSLATION_Y, startTranslationY, 0f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.SCALE_X, startScale, 1f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.SCALE_Y, startScale, 1f))
+                .with(ObjectAnimator.ofFloat(flExpandedImageContainerCardio, View.ALPHA, 0f, 1f));
+
+        set.setDuration(250);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+            }
+        });
+        set.start();
+        currentAnimator = set;
+
+        View.OnClickListener closeListener = v -> collapseExpandedImage();
+        flExpandedImageContainerCardio.setOnClickListener(closeListener);
+        ivEjercicioImagenExpandedCardio.setOnClickListener(closeListener);
+    }
+
+    private void collapseExpandedImage() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+
+        if (lastThumbView == null) {
+            if (flExpandedImageContainerCardio != null) flExpandedImageContainerCardio.setVisibility(View.GONE);
+            return;
+        }
+
+        final View thumbView = lastThumbView;
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.TRANSLATION_X, lastStartTranslationX))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.TRANSLATION_Y, lastStartTranslationY))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.SCALE_X, lastStartScale))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpandedCardio, View.SCALE_Y, lastStartScale))
+                .with(ObjectAnimator.ofFloat(flExpandedImageContainerCardio, View.ALPHA, 0f));
+
+        set.setDuration(250);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                thumbView.setAlpha(1f);
+                if (flExpandedImageContainerCardio != null) flExpandedImageContainerCardio.setVisibility(View.GONE);
+                currentAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                thumbView.setAlpha(1f);
+                if (flExpandedImageContainerCardio != null) flExpandedImageContainerCardio.setVisibility(View.GONE);
+                currentAnimator = null;
+            }
+        });
+        set.start();
+        currentAnimator = set;
     }
 
     @Override

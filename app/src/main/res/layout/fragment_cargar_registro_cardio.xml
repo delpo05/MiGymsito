@@ -8,18 +8,45 @@
     tools:context=".CargarRegistroCardioFragment">
 
     <!-- Header Fijo -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvEjercicioImagenCardio"
+        android:layout_width="140dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:visibility="gone"
+        app:cardBackgroundColor="#1A1A1A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:strokeColor="#40FFFFFF"
+        app:strokeWidth="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivEjercicioImagenCardio"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="Imagen del ejercicio cardio" />
+    </com.google.android.material.card.MaterialCardView>
+
     <TextView
         android:id="@+id/tvNombreEjercicioCardio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="Nombre del Ejercicio"
         android:textColor="@color/blanco"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/cvEjercicioImagenCardio"
+        app:layout_goneMarginTop="16dp" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tlTimerMode"
@@ -335,5 +362,28 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/flExpandedImageContainerCardio"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#DD000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="20dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivEjercicioImagenExpandedCardio"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="16dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="Imagen del ejercicio ampliada" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
