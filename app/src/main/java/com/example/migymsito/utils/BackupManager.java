@@ -94,6 +94,7 @@ public class BackupManager {
                     je.put("IdEjercicio", e.IdEjercicio);
                     je.put("TipoEjercicio", e.TipoEjercicio);
                     je.put("NombreEjercicio", e.NombreEjercicio);
+                    je.put("CategoriaEjercicio", e.CategoriaEjercicio);
                     je.put("PesoCorporalEjercicio", e.PesoCorporalEjercicio);
                     je.put("PesoPorLado", e.PesoPorLado != null ? e.PesoPorLado : false);
                     je.put("TipoDeBarra", e.TipoDeBarra);
@@ -259,6 +260,7 @@ public class BackupManager {
                                 e.IdEjercicio = je.getInt("IdEjercicio");
                                 e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
                                 e.NombreEjercicio = je.getString("NombreEjercicio");
+                                e.CategoriaEjercicio = je.optString("CategoriaEjercicio", "FUERZA");
                                 e.PesoCorporalEjercicio = je.optBoolean("PesoCorporalEjercicio", false);
                                 e.PesoPorLado = je.optBoolean("PesoPorLado", false);
                                 e.TipoDeBarra = je.optString("TipoDeBarra", "");

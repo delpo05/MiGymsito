@@ -21,6 +21,13 @@ public class Ejercicio implements Serializable {
     @NonNull
     public String NombreEjercicio;
 
+    /**
+     * Define la categoría del ejercicio.
+     * Puede ser "FUERZA" o "CARDIO".
+     */
+    @NonNull
+    public String CategoriaEjercicio = "FUERZA";
+
     public String ImagenEjercicio;
 
     @NonNull
@@ -31,4 +38,12 @@ public class Ejercicio implements Serializable {
     public String TipoDeBarra;
 
     public Float PesoBarra;
+
+    // Configuración Cardio
+    public Boolean registraDistancia = true;
+    public Boolean registraCalorias = true;
+    public Boolean registraCadencia = false;
+    public Boolean registraRitmo = false;
+    public Boolean registraInclinacion = false;
+    public Boolean registraResistencia = false;
 }

@@ -19,7 +19,7 @@ import com.example.migymsito.data.Ejercicio;
 
 import java.util.List;
 
-public class EjerciciosAdapter extends RecyclerView.Adapter<EjerciciosAdapter.EjercicioViewHolder> {
+public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.EjercicioViewHolder> {
 
     private List<Ejercicio> ejercicios;
     private final OnEjercicioClickListener listener;
@@ -30,7 +30,7 @@ public class EjerciciosAdapter extends RecyclerView.Adapter<EjerciciosAdapter.Ej
         void onOptionsClick(View view, Ejercicio ejercicio);
     }
 
-    public EjerciciosAdapter(List<Ejercicio> ejercicios, OnEjercicioClickListener listener) {
+    public EjercicioAdapter(List<Ejercicio> ejercicios, OnEjercicioClickListener listener) {
         this.ejercicios = ejercicios;
         this.listener = listener;
     }

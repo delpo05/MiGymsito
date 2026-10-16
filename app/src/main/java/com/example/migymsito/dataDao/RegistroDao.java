@@ -77,7 +77,7 @@ public interface RegistroDao {
            "ORDER BY r.NumSeriesRegistro DESC")
     List<Registro> obtenerRegistrosUltimoEntrenamientoPrevio(int idUsuario, int idEjercicio, int idEntrenamientoActual);
 
-    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+    @Query("SELECT 'FUERZA' as categoriaEjercicio, r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
            "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
            "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
            "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +
@@ -96,7 +96,7 @@ public interface RegistroDao {
            "LIMIT :limit OFFSET :offset")
     List<RegistroDetallado> buscarRegistrosDetalladosPaginado(int idUsuario, int idRutina, int idSeccion, int idEjercicio, long fechaDesde, long fechaHasta, int limit, int offset);
 
-    @Query("SELECT r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
+    @Query("SELECT 'FUERZA' as categoriaEjercicio, r.FechaRegistro as fecha, rut.NombreRutina as nombreRutina, s.NombreSeccion as nombreSeccion, " +
             "ej.NombreEjercicio as nombreEjercicio, r.NumSeriesRegistro as numSerie, " +
             "r.Repeticiones as repeticiones, r.PesoRegistro as peso, r.UnidadPeso as unidadPeso, " +
             "ej.PesoCorporalEjercicio as esPesoCorporal, ej.TipoDeBarra as tipoBarra, ej.PesoBarra as pesoBarra " +

@@ -278,6 +278,7 @@ public class RutinasFragment extends Fragment {
                         JSONObject jsonEjercicio = new JSONObject();
                         jsonEjercicio.put("nombre", ejercicio.NombreEjercicio);
                         jsonEjercicio.put("tipo", ejercicio.TipoEjercicio);
+                        jsonEjercicio.put("categoria", ejercicio.CategoriaEjercicio);
                         jsonEjercicio.put("pesoCorporal", ejercicio.PesoCorporalEjercicio);
                         
                         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
@@ -531,6 +532,7 @@ public class RutinasFragment extends Fragment {
                                     Ejercicio nuevoEj = new Ejercicio();
                                     nuevoEj.NombreEjercicio = nombreEj;
                                     nuevoEj.TipoEjercicio = jsonEjercicio.getString("tipo");
+                                    nuevoEj.CategoriaEjercicio = jsonEjercicio.optString("categoria", "FUERZA");
                                     nuevoEj.PesoCorporalEjercicio = jsonEjercicio.getBoolean("pesoCorporal");
                                     
                                     String base64Data = jsonEjercicio.optString("imagenData", "");

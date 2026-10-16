@@ -9,6 +9,11 @@ import com.example.migymsito.utils.NotificationHelper;
 public class TimerReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        NotificationHelper.showTimerFinishedNotification(context);
+        boolean isCardio = intent != null && intent.getBooleanExtra("IS_CARDIO", false);
+        if (isCardio) {
+            NotificationHelper.showCardioTimerFinishedNotification(context);
+        } else {
+            NotificationHelper.showTimerFinishedNotification(context);
+        }
     }
 }

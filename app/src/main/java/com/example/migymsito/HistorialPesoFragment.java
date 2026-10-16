@@ -2,8 +2,10 @@ package com.example.migymsito;
 
 import android.app.Dialog;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import androidx.core.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -153,9 +155,12 @@ public class HistorialPesoFragment extends Fragment {
         LineData lineData = new LineData(dataSet);
         chartPeso.setData(lineData);
 
+        Typeface font = ResourcesCompat.getFont(requireContext(), R.font.roboto_regular);
+
         XAxis xAxis = chartPeso.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextColor(colorBlanco);
+        if (font != null) xAxis.setTypeface(font);
         xAxis.setValueFormatter(new ValueFormatter() {
             private final SimpleDateFormat mFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
             @Override
@@ -168,9 +173,11 @@ public class HistorialPesoFragment extends Fragment {
 
         YAxis leftAxis = chartPeso.getAxisLeft();
         leftAxis.setTextColor(colorBlanco);
+        if (font != null) leftAxis.setTypeface(font);
         chartPeso.getAxisRight().setEnabled(false);
 
         chartPeso.getLegend().setTextColor(colorBlanco);
+        if (font != null) chartPeso.getLegend().setTypeface(font);
         chartPeso.getDescription().setEnabled(false);
         chartPeso.animateX(1000);
         chartPeso.invalidate();

@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import androidx.core.content.ContextCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.example.migymsito.utils.BackupManager;
@@ -23,6 +24,7 @@ import com.example.migymsito.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
 
 import android.app.AlertDialog;
+import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.WindowManager;
@@ -53,10 +55,22 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+    private final ActivityResultLauncher<String> requestNotificationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (!isGranted) {
+                    Toast.makeText(this, R.string.permiso_necesario, Toast.LENGTH_SHORT).show();
+                }
+            });
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
+        if (getWindow() != null) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.negro));
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.negro));
+        }
         setContentView(R.layout.activity_main);
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
@@ -64,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         backupManager = new BackupManager(this);
 
         NotificationHelper.createNotificationChannel(this);
+        checkAndRequestNotificationPermission();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -111,12 +126,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         isAppInForeground = true;
+        NotificationHelper.cancelAllNotifications(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         isAppInForeground = false;
+    }
+
+    private void checkAndRequestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     private void setupToolbar(Toolbar toolbar) {

@@ -9,9 +9,22 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import com.example.migymsito.utils.NotificationHelper;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.net.Uri;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import androidx.activity.OnBackPressedCallback;
+import com.bumptech.glide.Glide;
+import com.google.android.material.card.MaterialCardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +66,15 @@ import java.util.concurrent.Executors;
 public class CargarRegistroFragment extends Fragment {
 
     private TextView tvNombreEjercicio, tvSerieValue, tvColumnaPeso, tvInfoBarra, tvUnidadPeso;
+    private MaterialCardView cvEjercicioImagen;
+    private ImageView ivEjercicioImagen;
+    private FrameLayout flExpandedImageContainer;
+    private ImageView ivEjercicioImagenExpanded;
+    private Ejercicio ejercicioActual;
+    private Animator currentAnimator;
+    private float lastStartTranslationX, lastStartTranslationY, lastStartScale;
+    private View lastThumbView;
+
     private NumberPicker npRepeticiones, npPesoEntero, npPesoDecimal;
     private ImageButton btnEliminarUltimo;
     private Button btnCargar, btnVerHistorialPrevio;
@@ -167,6 +189,7 @@ public class CargarRegistroFragment extends Fragment {
             }
             
             if (ejercicio != null) {
+                ejercicioActual = ejercicio;
                 idEjercicio = ejercicio.IdEjercicio;
                 nombreEjercicio = ejercicio.NombreEjercicio;
                 esPesoCorporal = (ejercicio.PesoCorporalEjercicio != null && ejercicio.PesoCorporalEjercicio);
@@ -181,6 +204,7 @@ public class CargarRegistroFragment extends Fragment {
         }
 
         initViews(view);
+        configurarImagenEjercicio(view);
         setupPickers();
         setupListeners();
         setupRecyclerView();
@@ -229,6 +253,156 @@ public class CargarRegistroFragment extends Fragment {
         } else {
             tvUnidadPeso.setText(R.string.kg);
         }
+    }
+
+    private void configurarImagenEjercicio(View view) {
+        cvEjercicioImagen = view.findViewById(R.id.cvEjercicioImagen);
+        ivEjercicioImagen = view.findViewById(R.id.ivEjercicioImagen);
+        flExpandedImageContainer = view.findViewById(R.id.flExpandedImageContainer);
+        ivEjercicioImagenExpanded = view.findViewById(R.id.ivEjercicioImagenExpanded);
+
+        if (cvEjercicioImagen == null || ivEjercicioImagen == null) return;
+
+        if (ejercicioActual != null && ejercicioActual.ImagenEjercicio != null && !ejercicioActual.ImagenEjercicio.isEmpty()) {
+            cvEjercicioImagen.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(Uri.parse(ejercicioActual.ImagenEjercicio))
+                    .placeholder(R.drawable.cargar_imagen_default)
+                    .error(R.drawable.cargar_imagen_default)
+                    .centerCrop()
+                    .into(ivEjercicioImagen);
+
+            cvEjercicioImagen.setOnClickListener(v -> zoomImageFromThumb(cvEjercicioImagen, ejercicioActual.ImagenEjercicio));
+        } else {
+            cvEjercicioImagen.setVisibility(View.GONE);
+        }
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (flExpandedImageContainer != null && flExpandedImageContainer.getVisibility() == View.VISIBLE) {
+                    collapseExpandedImage();
+                } else {
+                    setEnabled(false);
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
+    }
+
+    private void zoomImageFromThumb(final View thumbView, String imageUriStr) {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+
+        if (ivEjercicioImagenExpanded == null || flExpandedImageContainer == null) return;
+
+        Glide.with(this)
+                .load(Uri.parse(imageUriStr))
+                .placeholder(R.drawable.cargar_imagen_default)
+                .error(R.drawable.cargar_imagen_default)
+                .fitCenter()
+                .into(ivEjercicioImagenExpanded);
+
+        final Rect thumbBounds = new Rect();
+        final Rect containerBounds = new Rect();
+        final Point globalOffset = new Point();
+
+        thumbView.getGlobalVisibleRect(thumbBounds);
+        View rootContainer = requireView().findViewById(R.id.flRootContainer);
+        if (rootContainer == null) rootContainer = requireView();
+        rootContainer.getGlobalVisibleRect(containerBounds, globalOffset);
+
+        thumbBounds.offset(-globalOffset.x, -globalOffset.y);
+        containerBounds.offset(-globalOffset.x, -globalOffset.y);
+
+        float thumbCenterX = thumbBounds.exactCenterX();
+        float thumbCenterY = thumbBounds.exactCenterY();
+        float containerCenterX = containerBounds.exactCenterX();
+        float containerCenterY = containerBounds.exactCenterY();
+
+        float startTranslationX = thumbCenterX - containerCenterX;
+        float startTranslationY = thumbCenterY - containerCenterY;
+        float startScale = (float) thumbView.getWidth() / Math.max(containerBounds.width(), 1);
+
+        thumbView.setAlpha(0f);
+        flExpandedImageContainer.setVisibility(View.VISIBLE);
+
+        ivEjercicioImagenExpanded.setTranslationX(startTranslationX);
+        ivEjercicioImagenExpanded.setTranslationY(startTranslationY);
+        ivEjercicioImagenExpanded.setScaleX(startScale);
+        ivEjercicioImagenExpanded.setScaleY(startScale);
+
+        lastStartTranslationX = startTranslationX;
+        lastStartTranslationY = startTranslationY;
+        lastStartScale = startScale;
+        lastThumbView = thumbView;
+
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.TRANSLATION_X, startTranslationX, 0f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.TRANSLATION_Y, startTranslationY, 0f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.SCALE_X, startScale, 1f))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.SCALE_Y, startScale, 1f))
+                .with(ObjectAnimator.ofFloat(flExpandedImageContainer, View.ALPHA, 0f, 1f));
+
+        set.setDuration(250);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                currentAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                currentAnimator = null;
+            }
+        });
+        set.start();
+        currentAnimator = set;
+
+        View.OnClickListener closeListener = v -> collapseExpandedImage();
+        flExpandedImageContainer.setOnClickListener(closeListener);
+        ivEjercicioImagenExpanded.setOnClickListener(closeListener);
+    }
+
+    private void collapseExpandedImage() {
+        if (currentAnimator != null) {
+            currentAnimator.cancel();
+        }
+
+        if (lastThumbView == null) {
+            if (flExpandedImageContainer != null) flExpandedImageContainer.setVisibility(View.GONE);
+            return;
+        }
+
+        final View thumbView = lastThumbView;
+        AnimatorSet set = new AnimatorSet();
+        set.play(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.TRANSLATION_X, lastStartTranslationX))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.TRANSLATION_Y, lastStartTranslationY))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.SCALE_X, lastStartScale))
+                .with(ObjectAnimator.ofFloat(ivEjercicioImagenExpanded, View.SCALE_Y, lastStartScale))
+                .with(ObjectAnimator.ofFloat(flExpandedImageContainer, View.ALPHA, 0f));
+
+        set.setDuration(250);
+        set.setInterpolator(new DecelerateInterpolator());
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                thumbView.setAlpha(1f);
+                if (flExpandedImageContainer != null) flExpandedImageContainer.setVisibility(View.GONE);
+                currentAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                thumbView.setAlpha(1f);
+                if (flExpandedImageContainer != null) flExpandedImageContainer.setVisibility(View.GONE);
+                currentAnimator = null;
+            }
+        });
+        set.start();
+        currentAnimator = set;
     }
 
     private void setupPickers() {
@@ -387,25 +561,40 @@ public class CargarRegistroFragment extends Fragment {
 
     private void scheduleAlarm() {
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                1001,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         long triggerTime = System.currentTimeMillis() + timeLeftInMillis;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            }
-        } else {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-        }
+        Intent showIntent = new Intent(requireContext(), MainActivity.class);
+        PendingIntent showPendingIntent = PendingIntent.getActivity(
+                requireContext(),
+                0,
+                showIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(triggerTime, showPendingIntent);
+        alarmManager.setAlarmClock(clockInfo, pendingIntent);
     }
 
     private void cancelAlarm() {
         AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
         Intent intent = new Intent(requireContext(), TimerReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                1001,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         alarmManager.cancel(pendingIntent);
     }
 
@@ -433,12 +622,20 @@ public class CargarRegistroFragment extends Fragment {
                 updateTimerUI();
                 clearTimerState();
                 cancelAlarm();
+
+                Context context = getContext();
+                if (context != null && !MainActivity.isAppInForeground) {
+                    NotificationHelper.showTimerFinishedNotification(context);
+                }
+
                 vibrarAlFinalizar();
-                
-                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido1);
-                if (mp != null) {
-                    mp.start();
-                    mp.setOnCompletionListener(MediaPlayer::release);
+
+                if (context != null) {
+                    MediaPlayer mp = MediaPlayer.create(context, R.raw.sonido1);
+                    if (mp != null) {
+                        mp.start();
+                        mp.setOnCompletionListener(MediaPlayer::release);
+                    }
                 }
 
                 if (isAdded()) {

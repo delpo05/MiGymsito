@@ -331,7 +331,8 @@ public class MisRegistrosFragment extends Fragment {
 
                     StringBuilder csv = new StringBuilder();
                     String sep = ";";
-                    csv.append("Rutina").append(sep)
+                    csv.append("Tipo").append(sep)
+                            .append("Rutina").append(sep)
                             .append("Seccion").append(sep)
                             .append("Ejercicio").append(sep)
                             .append("Numero de Serie").append(sep)
@@ -341,23 +342,58 @@ public class MisRegistrosFragment extends Fragment {
                             .append("Es Peso Corporal").append(sep)
                             .append("Barra").append(sep)
                             .append("Peso Barra").append(sep)
+                            .append("Duracion (s)").append(sep)
+                            .append("Distancia").append(sep)
+                            .append("Unidad Distancia").append(sep)
+                            .append("Calorias").append(sep)
+                            .append("Ritmo Cardiaco").append(sep)
+                            .append("Velocidad Prom").append(sep)
+                            .append("Notas").append(sep)
                             .append("Hora y Fecha\n");
 
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
                     for (RegistroDetallado reg : registros) {
-                        csv.append(reg.nombreRutina).append(sep)
+                        boolean esCardio = "CARDIO".equalsIgnoreCase(reg.categoriaEjercicio);
+
+                        csv.append(esCardio ? "Cardio" : "Fuerza").append(sep)
+                                .append(reg.nombreRutina).append(sep)
                                 .append(reg.nombreSeccion).append(sep)
-                                .append(reg.nombreEjercicio).append(sep)
-                                .append(reg.numSerie).append(sep)
-                                .append(reg.repeticiones).append(sep)
-                                .append(String.valueOf(reg.peso).replace(".", ",")).append(sep)
-                                .append(reg.unidadPeso != null ? reg.unidadPeso : "kg").append(sep)
-                                .append(reg.esPesoCorporal ? "Si" : "No").append(sep)
-                                .append(reg.tipoBarra != null ? reg.tipoBarra : "-").append(sep)
-                                .append(reg.pesoBarra != null ? String.valueOf(reg.pesoBarra).replace(".", ",") : "-").append(sep)
-                                .append(sdf.format(new Date(reg.fecha)))
-                                .append("\n");
+                                .append(reg.nombreEjercicio).append(sep);
+
+                        if (esCardio) {
+                            csv.append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append(reg.duracionSegundos != null ? reg.duracionSegundos : "-").append(sep)
+                                    .append(reg.distancia != null ? String.valueOf(reg.distancia).replace(".", ",") : "-").append(sep)
+                                    .append(reg.unidadDistancia != null ? reg.unidadDistancia : "km").append(sep)
+                                    .append(reg.caloriasQuemadas != null ? reg.caloriasQuemadas : "-").append(sep)
+                                    .append(reg.ritmoCardiacoPromedio != null ? reg.ritmoCardiacoPromedio : "-").append(sep)
+                                    .append(reg.velocidadPromedio != null ? String.valueOf(reg.velocidadPromedio).replace(".", ",") : "-").append(sep)
+                                    .append(reg.notas != null ? reg.notas.replace(";", ",").replace("\n", " ") : "-").append(sep);
+                        } else {
+                            csv.append(reg.numSerie).append(sep)
+                                    .append(reg.repeticiones).append(sep)
+                                    .append(String.valueOf(reg.peso).replace(".", ",")).append(sep)
+                                    .append(reg.unidadPeso != null ? reg.unidadPeso : "kg").append(sep)
+                                    .append(reg.esPesoCorporal ? "Si" : "No").append(sep)
+                                    .append(reg.tipoBarra != null ? reg.tipoBarra : "-").append(sep)
+                                    .append(reg.pesoBarra != null ? String.valueOf(reg.pesoBarra).replace(".", ",") : "-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep)
+                                    .append("-").append(sep);
+                        }
+
+                        csv.append(sdf.format(new Date(reg.fecha))).append("\n");
                     }
 
                     generarYCompartirArchivo(csv.toString());

@@ -155,25 +155,45 @@ public class EntrenamientoRepository {
         intentCheck.setAction(EntrenamientoReceiver.ACTION_INACTIVITY_CHECK);
         intentCheck.putExtra(EntrenamientoReceiver.EXTRA_ID_USUARIO, idUsuario);
         intentCheck.putExtra(EntrenamientoReceiver.EXTRA_ID_SECCION, idSeccion);
-        PendingIntent piCheck = PendingIntent.getBroadcast(context, idUsuario * 1000 + idSeccion, intentCheck, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent piCheck = PendingIntent.getBroadcast(
+                context,
+                10000 + idUsuario * 100 + idSeccion,
+                intentCheck,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         // Alarma 5 horas: Auto-finalizar
         Intent intentAuto = new Intent(context, EntrenamientoReceiver.class);
         intentAuto.setAction(EntrenamientoReceiver.ACTION_AUTO_FINALIZE);
         intentAuto.putExtra(EntrenamientoReceiver.EXTRA_ID_USUARIO, idUsuario);
         intentAuto.putExtra(EntrenamientoReceiver.EXTRA_ID_SECCION, idSeccion);
-        PendingIntent piAuto = PendingIntent.getBroadcast(context, idUsuario * 2000 + idSeccion, intentAuto, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent piAuto = PendingIntent.getBroadcast(
+                context,
+                20000 + idUsuario * 100 + idSeccion,
+                intentAuto,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         long now = System.currentTimeMillis();
         long oneHour = 3600 * 1000;
         long fiveHours = 5 * 3600 * 1000;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
+                } else {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
+            }
+        } catch (SecurityException e) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + oneHour, piCheck);
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, now + fiveHours, piAuto);
         }
     }
 
@@ -183,12 +203,22 @@ public class EntrenamientoRepository {
 
         Intent intentCheck = new Intent(context, EntrenamientoReceiver.class);
         intentCheck.setAction(EntrenamientoReceiver.ACTION_INACTIVITY_CHECK);
-        PendingIntent piCheck = PendingIntent.getBroadcast(context, idUsuario * 1000 + idSeccion, intentCheck, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent piCheck = PendingIntent.getBroadcast(
+                context,
+                10000 + idUsuario * 100 + idSeccion,
+                intentCheck,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         alarmManager.cancel(piCheck);
 
         Intent intentAuto = new Intent(context, EntrenamientoReceiver.class);
         intentAuto.setAction(EntrenamientoReceiver.ACTION_AUTO_FINALIZE);
-        PendingIntent piAuto = PendingIntent.getBroadcast(context, idUsuario * 2000 + idSeccion, intentAuto, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent piAuto = PendingIntent.getBroadcast(
+                context,
+                20000 + idUsuario * 100 + idSeccion,
+                intentAuto,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         alarmManager.cancel(piAuto);
     }
 

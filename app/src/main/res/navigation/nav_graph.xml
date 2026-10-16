@@ -83,4 +83,10 @@
         android:label="Mis registros"
         tools:layout="@layout/fragment_mis_registros" />
 
+    <fragment
+        android:id="@+id/cargarRegistroCardioFragment"
+        android:name="com.example.migymsito.CargarRegistroCardioFragment"
+        android:label="Cargar Registro Cardio"
+        tools:layout="@layout/fragment_cargar_registro_cardio" />
+
 </navigation>

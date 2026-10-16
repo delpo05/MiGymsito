@@ -7,12 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroCardio;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
@@ -21,6 +21,7 @@ import com.example.migymsito.dataDao.EjercicioDao;
 import com.example.migymsito.dataDao.EntrenamientoDao;
 import com.example.migymsito.dataDao.HistorialDao;
 import com.example.migymsito.dataDao.RegistroDao;
+import com.example.migymsito.dataDao.RegistroCardioDao;
 import com.example.migymsito.dataDao.RutinaDao;
 import com.example.migymsito.dataDao.SeccionDao;
 import com.example.migymsito.dataDao.SeccionXejercicioDao;
@@ -34,10 +35,11 @@ import java.util.concurrent.Executors;
         Seccion.class,
         Ejercicio.class,
         Registro.class,
+        RegistroCardio.class,
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 15, exportSchema = false)
+}, version = 18, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -45,6 +47,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SeccionDao seccionDao();
     public abstract EjercicioDao ejercicioDao();
     public abstract RegistroDao registroDao();
+    public abstract RegistroCardioDao registroCardioDao();
     public abstract HistorialDao historialDao();
     public abstract EntrenamientoDao entrenamientoDao();
     public abstract SeccionXejercicioDao seccionXejercicioDao();

@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroCardio;
 import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.data.SeccionXejercicio;
@@ -357,13 +358,29 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     }
 
     private Map<Integer, Double> obtenerVolumenesDeEntrenamiento(AppDatabase db, int idEntrenamiento) {
-        List<Registro> registros = db.registroDao().obtenerRegistrosPorEntrenamiento(idEntrenamiento);
         Map<Integer, Double> volumenes = new HashMap<>();
+
+        List<Registro> registros = db.registroDao().obtenerRegistrosPorEntrenamiento(idEntrenamiento);
         for (Registro r : registros) {
             double vol = r.PesoRegistro * r.Repeticiones;
             Double current = volumenes.get(r.IdSeccionXejercicio);
             volumenes.put(r.IdSeccionXejercicio, (current != null ? current : 0.0) + vol);
         }
+
+        List<RegistroCardio> registrosCardio = db.registroCardioDao().obtenerPorEntrenamiento(idEntrenamiento);
+        for (RegistroCardio rc : registrosCardio) {
+            double vol = 0.0;
+            if (rc.Distancia != null && rc.Distancia > 0) {
+                vol = rc.Distancia;
+            } else if (rc.DuracionSegundos > 0) {
+                vol = rc.DuracionSegundos / 60.0;
+            } else if (rc.CaloriasQuemadas != null && rc.CaloriasQuemadas > 0) {
+                vol = rc.CaloriasQuemadas;
+            }
+            Double current = volumenes.get(rc.IdSeccionXejercicio);
+            volumenes.put(rc.IdSeccionXejercicio, (current != null ? current : 0.0) + vol);
+        }
+
         return volumenes;
     }
 
@@ -397,57 +414,187 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
 
         new Thread(() -> {
             AppDatabase db = AppDatabase.getDatabase(getContext());
-            List<Registro> registrosA = db.registroDao().obtenerRegistrosPorEntrenamiento(entA.IdEntrenamiento);
-            List<Registro> registrosB = db.registroDao().obtenerRegistrosPorEntrenamiento(entB.IdEntrenamiento);
+            SeccionXejercicio sxe = db.seccionXejercicioDao().getRelacionById(item.getIdSeccionXejercicio());
+            Ejercicio ej = null;
+            if (sxe != null) {
+                ej = db.ejercicioDao().obtenerEjercicioPorId(sxe.IdEjercicio);
+            }
 
-            List<Registro> filtradosA = new ArrayList<>();
-            for (Registro r : registrosA) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosA.add(r);
+            boolean esCardio = ej != null && "CARDIO".equalsIgnoreCase(ej.CategoriaEjercicio);
 
-            List<Registro> filtradosB = new ArrayList<>();
-            for (Registro r : registrosB) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosB.add(r);
+            if (esCardio) {
+                List<RegistroCardio> listA = db.registroCardioDao().obtenerPorEntrenamiento(entA.IdEntrenamiento);
+                List<RegistroCardio> listB = db.registroCardioDao().obtenerPorEntrenamiento(entB.IdEntrenamiento);
 
-            int maxSets = Math.max(filtradosA.size(), filtradosB.size());
+                RegistroCardio rcA = null;
+                for (RegistroCardio rc : listA) {
+                    if (rc.IdSeccionXejercicio == item.getIdSeccionXejercicio()) {
+                        rcA = rc;
+                        break;
+                    }
+                }
+                RegistroCardio rcB = null;
+                for (RegistroCardio rc : listB) {
+                    if (rc.IdSeccionXejercicio == item.getIdSeccionXejercicio()) {
+                        rcB = rc;
+                        break;
+                    }
+                }
 
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    for (int index = 0; index < maxSets; index++) {
-                        View filaView = LayoutInflater.from(requireContext()).inflate(R.layout.item_comparacion_detalle_fila, llFilas, false);
-                        TextView tvSet = filaView.findViewById(R.id.tv_detalle_set);
-                        TextView tvA = filaView.findViewById(R.id.tv_detalle_ant);
-                        TextView tvB = filaView.findViewById(R.id.tv_detalle_post);
-                        TextView tvDif = filaView.findViewById(R.id.tv_detalle_dif);
+                final RegistroCardio finalRcA = rcA;
+                final RegistroCardio finalRcB = rcB;
 
-                        tvSet.setText(String.valueOf(index + 1));
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        agregarFilaCardio(llFilas, "Tiempo",
+                                finalRcA != null ? formatDuration(finalRcA.DuracionSegundos) : "-",
+                                finalRcB != null ? formatDuration(finalRcB.DuracionSegundos) : "-",
+                                calcularDifTiempo(finalRcA != null ? finalRcA.DuracionSegundos : null, finalRcB != null ? finalRcB.DuracionSegundos : null));
 
-                        Registro rA = index < filtradosA.size() ? filtradosA.get(index) : null;
-                        Registro rB = index < filtradosB.size() ? filtradosB.get(index) : null;
-
-                        String sA = rA != null ? String.format(Locale.getDefault(), "%.1fk x %d", rA.PesoRegistro, rA.Repeticiones) : "-";
-                        String sB = rB != null ? String.format(Locale.getDefault(), "%.1fk x %d", rB.PesoRegistro, rB.Repeticiones) : "-";
-
-                        tvA.setText(sA);
-                        tvB.setText(sB);
-
-                        if (rA != null && rB != null) {
-                            double difPeso = rB.PesoRegistro - rA.PesoRegistro;
-                            int difReps = rB.Repeticiones - rA.Repeticiones;
-                            String d = String.format(Locale.getDefault(), "%s%.1fk\n%s%d reps", 
-                                    difPeso >= 0 ? "+" : "", difPeso,
-                                    difReps >= 0 ? "+" : "", difReps);
-                            tvDif.setText(d);
-                            if (difPeso > 0 || difReps > 0) tvDif.setTextColor(Color.parseColor("#4CAF50"));
-                            else if (difPeso < 0 || difReps < 0) tvDif.setTextColor(Color.parseColor("#F44336"));
-                        } else {
-                            tvDif.setText("-");
+                        if ((finalRcA != null && finalRcA.Distancia != null) || (finalRcB != null && finalRcB.Distancia != null)) {
+                            Double dA = finalRcA != null ? finalRcA.Distancia : null;
+                            Double dB = finalRcB != null ? finalRcB.Distancia : null;
+                            String uA = finalRcA != null && finalRcA.UnidadDistancia != null ? finalRcA.UnidadDistancia : "km";
+                            agregarFilaCardio(llFilas, "Dist.",
+                                    dA != null ? String.format(Locale.getDefault(), "%.2f %s", dA, uA) : "-",
+                                    dB != null ? String.format(Locale.getDefault(), "%.2f %s", dB, uA) : "-",
+                                    calcularDifDouble(dA, dB, uA));
                         }
 
-                        llFilas.addView(filaView);
-                    }
-                });
+                        if ((finalRcA != null && finalRcA.CaloriasQuemadas != null) || (finalRcB != null && finalRcB.CaloriasQuemadas != null)) {
+                            Integer cA = finalRcA != null ? finalRcA.CaloriasQuemadas : null;
+                            Integer cB = finalRcB != null ? finalRcB.CaloriasQuemadas : null;
+                            agregarFilaCardio(llFilas, "Cal.",
+                                    cA != null ? cA + " kcal" : "-",
+                                    cB != null ? cB + " kcal" : "-",
+                                    calcularDifInteger(cA, cB, "kcal"));
+                        }
+
+                        if ((finalRcA != null && finalRcA.VelocidadPromedio != null) || (finalRcB != null && finalRcB.VelocidadPromedio != null)) {
+                            Double vA = finalRcA != null ? finalRcA.VelocidadPromedio : null;
+                            Double vB = finalRcB != null ? finalRcB.VelocidadPromedio : null;
+                            agregarFilaCardio(llFilas, "Vel.",
+                                    vA != null ? String.format(Locale.getDefault(), "%.1f km/h", vA) : "-",
+                                    vB != null ? String.format(Locale.getDefault(), "%.1f km/h", vB) : "-",
+                                    calcularDifDouble(vA, vB, "km/h"));
+                        }
+
+                        if ((finalRcA != null && finalRcA.RitmoCardiacoPromedio != null) || (finalRcB != null && finalRcB.RitmoCardiacoPromedio != null)) {
+                            Integer rA = finalRcA != null ? finalRcA.RitmoCardiacoPromedio : null;
+                            Integer rB = finalRcB != null ? finalRcB.RitmoCardiacoPromedio : null;
+                            agregarFilaCardio(llFilas, "Pulso",
+                                    rA != null ? rA + " bpm" : "-",
+                                    rB != null ? rB + " bpm" : "-",
+                                    calcularDifInteger(rA, rB, "bpm"));
+                        }
+                    });
+                }
+            } else {
+                List<Registro> registrosA = db.registroDao().obtenerRegistrosPorEntrenamiento(entA.IdEntrenamiento);
+                List<Registro> registrosB = db.registroDao().obtenerRegistrosPorEntrenamiento(entB.IdEntrenamiento);
+
+                List<Registro> filtradosA = new ArrayList<>();
+                for (Registro r : registrosA) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosA.add(r);
+
+                List<Registro> filtradosB = new ArrayList<>();
+                for (Registro r : registrosB) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosB.add(r);
+
+                int maxSets = Math.max(filtradosA.size(), filtradosB.size());
+
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        for (int index = 0; index < maxSets; index++) {
+                            View filaView = LayoutInflater.from(requireContext()).inflate(R.layout.item_comparacion_detalle_fila, llFilas, false);
+                            TextView tvSet = filaView.findViewById(R.id.tv_detalle_set);
+                            TextView tvA = filaView.findViewById(R.id.tv_detalle_ant);
+                            TextView tvB = filaView.findViewById(R.id.tv_detalle_post);
+                            TextView tvDif = filaView.findViewById(R.id.tv_detalle_dif);
+
+                            tvSet.setText(String.valueOf(index + 1));
+
+                            Registro rA = index < filtradosA.size() ? filtradosA.get(index) : null;
+                            Registro rB = index < filtradosB.size() ? filtradosB.get(index) : null;
+
+                            String sA = rA != null ? String.format(Locale.getDefault(), "%.1fk x %d", rA.PesoRegistro, rA.Repeticiones) : "-";
+                            String sB = rB != null ? String.format(Locale.getDefault(), "%.1fk x %d", rB.PesoRegistro, rB.Repeticiones) : "-";
+
+                            tvA.setText(sA);
+                            tvB.setText(sB);
+
+                            if (rA != null && rB != null) {
+                                double difPeso = rB.PesoRegistro - rA.PesoRegistro;
+                                int difReps = rB.Repeticiones - rA.Repeticiones;
+                                String d = String.format(Locale.getDefault(), "%s%.1fk\n%s%d reps", 
+                                        difPeso >= 0 ? "+" : "", difPeso,
+                                        difReps >= 0 ? "+" : "", difReps);
+                                tvDif.setText(d);
+                                if (difPeso > 0 || difReps > 0) tvDif.setTextColor(Color.parseColor("#4CAF50"));
+                                else if (difPeso < 0 || difReps < 0) tvDif.setTextColor(Color.parseColor("#F44336"));
+                            } else {
+                                tvDif.setText("-");
+                            }
+
+                            llFilas.addView(filaView);
+                        }
+                    });
+                }
             }
         }).start();
 
         btnCerrar.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
+    }
+
+    private void agregarFilaCardio(LinearLayout parent, String labelSet, String textA, String textB, String difText) {
+        View filaView = LayoutInflater.from(requireContext()).inflate(R.layout.item_comparacion_detalle_fila, parent, false);
+        TextView tvSet = filaView.findViewById(R.id.tv_detalle_set);
+        TextView tvA = filaView.findViewById(R.id.tv_detalle_ant);
+        TextView tvB = filaView.findViewById(R.id.tv_detalle_post);
+        TextView tvDif = filaView.findViewById(R.id.tv_detalle_dif);
+
+        tvSet.setText(labelSet);
+        tvA.setText(textA);
+        tvB.setText(textB);
+        tvDif.setText(difText);
+
+        if (difText.startsWith("+")) {
+            tvDif.setTextColor(Color.parseColor("#4CAF50"));
+        } else if (difText.startsWith("-")) {
+            tvDif.setTextColor(Color.parseColor("#F44336"));
+        }
+
+        parent.addView(filaView);
+    }
+
+    private String calcularDifTiempo(Long sA, Long sB) {
+        if (sA == null || sB == null) return "-";
+        long dif = sB - sA;
+        String sign = dif >= 0 ? "+" : "-";
+        return sign + formatDuration(Math.abs(dif));
+    }
+
+    private String calcularDifDouble(Double valA, Double valB, String unidad) {
+        if (valA == null || valB == null) return "-";
+        double dif = valB - valA;
+        String sign = dif >= 0 ? "+" : "";
+        return String.format(Locale.getDefault(), "%s%.2f %s", sign, dif, unidad);
+    }
+
+    private String calcularDifInteger(Integer valA, Integer valB, String unidad) {
+        if (valA == null || valB == null) return "-";
+        int dif = valB - valA;
+        String sign = dif >= 0 ? "+" : "";
+        return String.format(Locale.getDefault(), "%s%d %s", sign, dif, unidad);
+    }
+
+    private String formatDuration(long totalSeconds) {
+        long hrs = totalSeconds / 3600;
+        long mins = (totalSeconds % 3600) / 60;
+        long secs = totalSeconds % 60;
+        if (hrs > 0) {
+            return String.format(Locale.getDefault(), "%02d:%02d:%02d", hrs, mins, secs);
+        } else {
+            return String.format(Locale.getDefault(), "%02d:%02d", mins, secs);
+        }
     }
 }
