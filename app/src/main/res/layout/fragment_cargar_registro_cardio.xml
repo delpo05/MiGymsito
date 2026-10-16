@@ -54,6 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@android:color/transparent"
+        app:tabInlineLabel="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvNombreEjercicioCardio"
@@ -64,12 +65,14 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:icon="@drawable/ic_stopwatch" />
+            android:icon="@drawable/ic_stopwatch"
+            android:text="Cronómetro" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:icon="@drawable/ic_timer" />
+            android:icon="@drawable/ic_timer"
+            android:text="Temporizador" />
     </com.google.android.material.tabs.TabLayout>
 
     <!-- Timer Central -->
@@ -91,11 +94,11 @@
             android:id="@+id/tvCardioTimerValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="4dp"
             android:text="00:00:00"
             android:textColor="@color/blanco"
-            android:textSize="48sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
     </com.google.android.material.card.MaterialCardView>
 
@@ -105,14 +108,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cvCardioTimer">
 
         <ImageButton
             android:id="@+id/btnResetCardioTimer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_reset"
             android:contentDescription="Reset Timer"
@@ -120,8 +124,8 @@
 
         <ImageButton
             android:id="@+id/btnStartPauseCardioTimer"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginHorizontal="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_media_play"
@@ -130,8 +134,8 @@
 
         <ImageButton
             android:id="@+id/btnEditCardioTimer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_edit_outline"
             android:contentDescription="Edit Timer"

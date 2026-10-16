@@ -176,11 +176,12 @@ public class CargarRegistroCardioFragment extends Fragment {
         tlTimerMode.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                int previousMode = currentMode;
                 resetTimer();
                 currentMode = tab.getPosition();
                 actualizarUIModo();
                 if (currentMode == 1) {
-                    mostrarDialogoAjustarTimer();
+                    mostrarDialogoAjustarTimer(previousMode);
                 }
             }
 
@@ -190,7 +191,7 @@ public class CargarRegistroCardioFragment extends Fragment {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
                 if (tab.getPosition() == 1) {
-                    mostrarDialogoAjustarTimer();
+                    mostrarDialogoAjustarTimer(currentMode);
                 }
             }
         });
@@ -204,10 +205,10 @@ public class CargarRegistroCardioFragment extends Fragment {
         });
 
         btnReset.setOnClickListener(v -> resetTimer());
-        btnEdit.setOnClickListener(v -> mostrarDialogoAjustarTimer());
-        tvTimerValue.setOnClickListener(v -> mostrarDialogoAjustarTimer());
+        btnEdit.setOnClickListener(v -> mostrarDialogoAjustarTimer(currentMode));
+        tvTimerValue.setOnClickListener(v -> mostrarDialogoAjustarTimer(currentMode));
         if (cvCardioTimer != null) {
-            cvCardioTimer.setOnClickListener(v -> mostrarDialogoAjustarTimer());
+            cvCardioTimer.setOnClickListener(v -> mostrarDialogoAjustarTimer(currentMode));
         }
 
         btnRegistrar.setOnClickListener(v -> guardarRegistro());
@@ -402,6 +403,10 @@ public class CargarRegistroCardioFragment extends Fragment {
     }
 
     private void mostrarDialogoAjustarTimer() {
+        mostrarDialogoAjustarTimer(currentMode);
+    }
+
+    private void mostrarDialogoAjustarTimer(int previousModeOnCancel) {
         if (isRunning) {
             pauseTimer();
         }
@@ -430,12 +435,31 @@ public class CargarRegistroCardioFragment extends Fragment {
                 .setView(dialogView)
                 .create();
 
+        final boolean[] isAccepted = {false};
+
+        Runnable handleCancel = () -> {
+            if (!isAccepted[0] && currentMode == 1 && initialTimeLimit == 0) {
+                currentMode = previousModeOnCancel == 1 ? 0 : previousModeOnCancel;
+                if (tlTimerMode != null) {
+                    TabLayout.Tab tab = tlTimerMode.getTabAt(currentMode);
+                    if (tab != null) {
+                        tab.select();
+                    }
+                }
+                actualizarUIModo();
+            }
+        };
+
         if (btnCancelar != null) {
-            btnCancelar.setOnClickListener(v -> dialog.dismiss());
+            btnCancelar.setOnClickListener(v -> {
+                handleCancel.run();
+                dialog.dismiss();
+            });
         }
 
         if (btnAceptar != null) {
             btnAceptar.setOnClickListener(v -> {
+                isAccepted[0] = true;
                 long totalMillis = (npMinutos.getValue() * 60L + npSegundos.getValue()) * 1000L;
                 if (currentMode == 0) {
                     updatedTime = totalMillis;
@@ -451,6 +475,12 @@ public class CargarRegistroCardioFragment extends Fragment {
                 dialog.dismiss();
             });
         }
+
+        dialog.setOnDismissListener(dialogInterface -> {
+            if (!isAccepted[0]) {
+                handleCancel.run();
+            }
+        });
 
         dialog.show();
     }
