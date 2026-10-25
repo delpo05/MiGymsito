@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.example.migymsito.data.Usuario;
 import com.example.migymsito.dataRepository.UsuarioRepository;
 import com.example.migymsito.utils.BackupManager;
+import com.example.migymsito.utils.InteractiveTutorialDialog;
 import com.example.migymsito.utils.LocaleHelper;
 import com.example.migymsito.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
@@ -187,6 +188,21 @@ public class MainActivity extends AppCompatActivity {
                     navController.navigate(R.id.misRegistrosFragment);
                 } else if (itemId == R.id.CopiaSeguridad) {
                     mostrarPopUpCopiaSeguridad();
+                } else if (itemId == R.id.TutorialInteractivo) {
+                    InteractiveTutorialDialog dialog = new InteractiveTutorialDialog(this, new InteractiveTutorialDialog.OnTutorialActionListener() {
+                        @Override
+                        public void onCreateRoutineRequested() {
+                            userRepo.eliminarRutinaSeleccionada();
+                            Bundle bundle = new Bundle();
+                            bundle.putBoolean("cambiarRutina", true);
+                            navController.navigate(R.id.rutinasFragment, bundle);
+                        }
+
+                        @Override
+                        public void onTutorialDismissed() {
+                        }
+                    });
+                    dialog.show();
                 }
 
                 if (drawerLayout != null) {

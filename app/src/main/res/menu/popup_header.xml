@@ -27,4 +27,8 @@
     <item
         android:id="@+id/CopiaSeguridad"
         android:title="Copia de Seguridad" />
+
+    <item
+        android:id="@+id/TutorialInteractivo"
+        android:title="@string/tutorial_interactivo" />
 </menu>

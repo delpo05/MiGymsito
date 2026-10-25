@@ -89,4 +89,35 @@
     <string name="no_registros_previos">No previous records for this exercise</string>
     <string name="unit_with_base_format">%1$s (%2$s)</string>
 
+    <!-- Interactive Tutorial & Onboarding -->
+    <string name="tutorial_interactivo">Interactive Tutorial</string>
+    <string name="empty_rutinas_titulo">Welcome to your Gym!</string>
+    <string name="empty_rutinas_subtitulo">You don\'t have any routines yet. Follow these steps to get started:</string>
+    <string name="empty_paso_1">1. Tap the + button below to create or import your first routine.</string>
+    <string name="empty_paso_2">2. Create sections (e.g. Chest, Back) to organize your exercises.</string>
+    <string name="empty_paso_3">3. Choose between Preset or Custom exercises and start tracking.</string>
+    <string name="btn_crear_primera_rutina">Create my first routine</string>
+    <string name="btn_ver_tutorial_interactivo">View Interactive Tutorial</string>
+
+    <string name="guide_paso_1_titulo">1. Create Your First Routine</string>
+    <string name="guide_paso_1_desc">Routines structure your workout days (e.g., "Upper / Lower", "Push Pull Legs", or days of the week). Tap the + button to begin.</string>
+
+    <string name="guide_paso_2_titulo">2. Organize by Sections</string>
+    <string name="guide_paso_2_desc">Each routine is split into Sections that can be muscle groups or days (e.g., "Chest &amp; Triceps" or "Mon / Wed") to keep your exercises organized.</string>
+
+    <string name="guide_paso_3_titulo">3. Create Your First Exercise</string>
+    <string name="guide_paso_3_desc">Choose from Preset exercises in the app library with guide images, or create your own Custom exercises with photos from your camera or gallery.</string>
+
+    <string name="guide_paso_4_titulo">4. Compare Your Performance</string>
+    <string name="guide_paso_4_desc">At the end of each workout session, compare your performance against previous workouts to evaluate your progress, increase weights, and break personal records.</string>
+
+    <string name="guide_paso_5_titulo">5. Track "My Progress"</string>
+    <string name="guide_paso_5_desc">View detailed charts and statistics of your evolution, max weight reached, training volume, and consistency over time.</string>
+
+    <string name="guide_paso_6_titulo">6. "My Records" &amp; CSV Export</string>
+    <string name="guide_paso_6_desc">Review your full workout history and export your records easily in CSV or JSON format to back up your data.</string>
+
+    <string name="entendido_a_entrenar">Got it, let\'s train!</string>
+    <string name="saltar_tutorial">Skip tutorial</string>
+
 </resources>

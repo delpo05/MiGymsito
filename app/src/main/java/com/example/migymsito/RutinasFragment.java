@@ -38,6 +38,7 @@ import com.example.migymsito.data.SeccionXejercicio;
 import com.example.migymsito.dataRepository.RutinaRepository;
 import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.UsuarioRepository;
+import com.example.migymsito.utils.InteractiveTutorialDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
@@ -58,6 +59,7 @@ import java.util.concurrent.Executors;
 public class RutinasFragment extends Fragment {
 
     private RecyclerView rvRutinas;
+    private View emptyStateContainer;
     private RutinaRepository rutinaRepository;
     private UsuarioRepository usuarioRepository;
     private RutinasAdapter adapter;
@@ -117,7 +119,18 @@ public class RutinasFragment extends Fragment {
         }
 
         rvRutinas = view.findViewById(R.id.rvGenerico);
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
         fabAdd = view.findViewById(R.id.fabAdd);
+
+        View btnCrearPrimera = view.findViewById(R.id.btnCrearPrimeraRutina);
+        if (btnCrearPrimera != null) {
+            btnCrearPrimera.setOnClickListener(v -> mostrarPopUpRutina(null));
+        }
+
+        View btnVerTutorial = view.findViewById(R.id.btnVerTutorialInteractivo);
+        if (btnVerTutorial != null) {
+            btnVerTutorial.setOnClickListener(v -> mostrarTutorialInteractivo());
+        }
 
         if (rvRutinas != null) {
             rvRutinas.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -370,8 +383,35 @@ public class RutinasFragment extends Fragment {
 
     private void cargarRutinasDesdeDB() {
         if (MainActivity.usuarioLogueado != null && rutinaRepository != null) {
-            rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> adapter.setRutinas(rutinas));
+            rutinaRepository.obtenerRutinasDeUsuario(MainActivity.usuarioLogueado.IdUsuario, rutinas -> {
+                adapter.setRutinas(rutinas);
+                if (rutinas == null || rutinas.isEmpty()) {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.VISIBLE);
+                    if (rvRutinas != null) rvRutinas.setVisibility(View.GONE);
+                    if (getContext() != null && !InteractiveTutorialDialog.hasSeenGuide(requireContext())) {
+                        mostrarTutorialInteractivo();
+                    }
+                } else {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.GONE);
+                    if (rvRutinas != null) rvRutinas.setVisibility(View.VISIBLE);
+                }
+            });
         }
+    }
+
+    public void mostrarTutorialInteractivo() {
+        if (getContext() == null) return;
+        InteractiveTutorialDialog dialog = new InteractiveTutorialDialog(requireContext(), new InteractiveTutorialDialog.OnTutorialActionListener() {
+            @Override
+            public void onCreateRoutineRequested() {
+                mostrarPopUpRutina(null);
+            }
+
+            @Override
+            public void onTutorialDismissed() {
+            }
+        });
+        dialog.show();
     }
 
     private void mostrarPopUpRutina(Rutina rutinaExistente) {
