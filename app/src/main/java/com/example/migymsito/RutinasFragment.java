@@ -212,7 +212,7 @@ public class RutinasFragment extends Fragment {
         View btnOpcionDerecha = dialog.findViewById(R.id.btnOpcionDerecha);
         btnOpcionDerecha.setOnClickListener(v -> {
             dialog.dismiss();
-            filePickerLauncher.launch("application/json");
+            filePickerLauncher.launch("*/*");
         });
 
         View btnCancelar = dialog.findViewById(R.id.btnCancelar);
@@ -334,8 +334,11 @@ public class RutinasFragment extends Fragment {
                         android.content.Intent shareIntent = new android.content.Intent(android.content.Intent.ACTION_SEND);
                         shareIntent.setType("application/json");
                         shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, contentUri);
+                        shareIntent.setClipData(android.content.ClipData.newRawUri("", contentUri));
                         shareIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(android.content.Intent.createChooser(shareIntent, "Compartir Rutina con..."));
+                        android.content.Intent chooserIntent = android.content.Intent.createChooser(shareIntent, "Compartir Rutina con...");
+                        chooserIntent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(chooserIntent);
                     });
                 }
 

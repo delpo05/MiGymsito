@@ -100,6 +100,14 @@ public class BackupManager {
                     je.put("TipoDeBarra", e.TipoDeBarra);
                     je.put("PesoBarra", e.PesoBarra != null ? e.PesoBarra : 0.0f);
                     
+                    // Configuración Cardio
+                    je.put("registraDistancia", e.registraDistancia != null ? e.registraDistancia : true);
+                    je.put("registraCalorias", e.registraCalorias != null ? e.registraCalorias : true);
+                    je.put("registraCadencia", e.registraCadencia != null ? e.registraCadencia : false);
+                    je.put("registraRitmo", e.registraRitmo != null ? e.registraRitmo : false);
+                    je.put("registraInclinacion", e.registraInclinacion != null ? e.registraInclinacion : false);
+                    je.put("registraResistencia", e.registraResistencia != null ? e.registraResistencia : false);
+
                     if (e.ImagenEjercicio != null && !e.ImagenEjercicio.isEmpty()) {
                         String base64 = uriToBase64(Uri.parse(e.ImagenEjercicio));
                         if (base64 != null) {
@@ -137,7 +145,7 @@ public class BackupManager {
                 }
                 backup.put("entrenamientos", entArray);
 
-                // 7. Registros
+                // 7. Registros (Fuerza)
                 JSONArray regArray = new JSONArray();
                 List<Registro> registros = db.registroDao().obtenerTodosLosRegistros();
                 for (Registro r : registros) {
@@ -149,12 +157,40 @@ public class BackupManager {
                     jr.put("NumSeriesRegistro", r.NumSeriesRegistro);
                     jr.put("Repeticiones", r.Repeticiones);
                     jr.put("FechaRegistro", r.FechaRegistro);
+                    jr.put("UnidadPeso", r.UnidadPeso != null ? r.UnidadPeso : "kg");
                     jr.put("PesoCorporalMomento", r.PesoCorporalMomento);
                     regArray.put(jr);
                 }
                 backup.put("registros", regArray);
 
-                // 8. Historial
+                // 8. Registros Cardio
+                JSONArray regCardioArray = new JSONArray();
+                List<RegistroCardio> registrosCardio = db.registroCardioDao().obtenerTodosLosRegistrosCardio();
+                for (RegistroCardio rc : registrosCardio) {
+                    JSONObject jrc = new JSONObject();
+                    jrc.put("IdRegistroCardio", rc.IdRegistroCardio);
+                    jrc.put("IdEntrenamiento", rc.IdEntrenamiento);
+                    jrc.put("IdSeccionXejercicio", rc.IdSeccionXejercicio);
+                    jrc.put("FechaRegistro", rc.FechaRegistro);
+                    jrc.put("DuracionSegundos", rc.DuracionSegundos);
+                    jrc.put("FechaInicio", rc.FechaInicio);
+                    jrc.put("FechaFin", rc.FechaFin);
+                    jrc.put("Distancia", rc.Distancia);
+                    jrc.put("UnidadDistancia", rc.UnidadDistancia);
+                    jrc.put("VelocidadPromedio", rc.VelocidadPromedio);
+                    jrc.put("CadenciaPromedio", rc.CadenciaPromedio);
+                    jrc.put("CaloriasQuemadas", rc.CaloriasQuemadas);
+                    jrc.put("RitmoCardiacoPromedio", rc.RitmoCardiacoPromedio);
+                    jrc.put("RitmoCardiacoMaximo", rc.RitmoCardiacoMaximo);
+                    jrc.put("Inclinacion", rc.Inclinacion);
+                    jrc.put("NivelResistencia", rc.NivelResistencia);
+                    jrc.put("EsfuerzoPercibido", rc.EsfuerzoPercibido);
+                    jrc.put("Notas", rc.Notas);
+                    regCardioArray.put(jrc);
+                }
+                backup.put("registrosCardio", regCardioArray);
+
+                // 9. Historial
                 JSONArray histArray = new JSONArray();
                 List<Historial> historiales = db.historialDao().obtenerTodoElHistorial();
                 for (Historial h : historiales) {
@@ -218,6 +254,7 @@ public class BackupManager {
                 // Borrar e Importar en una sola transacción para seguridad y velocidad
                 db.runInTransaction(() -> {
                     try {
+                        db.registroCardioDao().borrarTodo();
                         db.registroDao().borrarTodo();
                         db.entrenamientoDao().borrarTodo();
                         db.seccionXejercicioDao().borrarTodo();
@@ -242,11 +279,11 @@ public class BackupManager {
                             for (int i = 0; i < usersArray.length(); i++) {
                                 JSONObject ju = usersArray.getJSONObject(i);
                                 Usuario u = new Usuario();
-                                u.IdUsuario = ju.getInt("IdUsuario");
-                                u.NombreUsuario = ju.getString("NombreUsuario");
-                                u.FechaNacimientoUsuario = ju.getLong("FechaNacimientoUsuario");
-                                u.CorreoElectronicoUsuario = ju.getString("CorreoElectronicoUsuario");
-                                u.GeneroUsuario = ju.getString("GeneroUsuario");
+                                u.IdUsuario = ju.optInt("IdUsuario", 1);
+                                u.NombreUsuario = ju.optString("NombreUsuario", "Usuario");
+                                u.FechaNacimientoUsuario = ju.optLong("FechaNacimientoUsuario", System.currentTimeMillis());
+                                u.CorreoElectronicoUsuario = ju.optString("CorreoElectronicoUsuario", "");
+                                u.GeneroUsuario = ju.optString("GeneroUsuario", "");
                                 db.usuarioDao().registrarUsuario(u);
                             }
                         }
@@ -257,17 +294,24 @@ public class BackupManager {
                             for (int i = 0; i < ejArray.length(); i++) {
                                 JSONObject je = ejArray.getJSONObject(i);
                                 Ejercicio e = new Ejercicio();
-                                e.IdEjercicio = je.getInt("IdEjercicio");
+                                e.IdEjercicio = je.optInt("IdEjercicio");
                                 e.TipoEjercicio = je.optString("TipoEjercicio", "Personalizado");
-                                e.NombreEjercicio = je.getString("NombreEjercicio");
+                                e.NombreEjercicio = je.optString("NombreEjercicio", "Ejercicio");
                                 e.CategoriaEjercicio = je.optString("CategoriaEjercicio", "FUERZA");
                                 e.PesoCorporalEjercicio = je.optBoolean("PesoCorporalEjercicio", false);
                                 e.PesoPorLado = je.optBoolean("PesoPorLado", false);
                                 e.TipoDeBarra = je.optString("TipoDeBarra", "");
                                 e.PesoBarra = (float) je.optDouble("PesoBarra", 0.0);
 
+                                e.registraDistancia = je.optBoolean("registraDistancia", true);
+                                e.registraCalorias = je.optBoolean("registraCalorias", true);
+                                e.registraCadencia = je.optBoolean("registraCadencia", false);
+                                e.registraRitmo = je.optBoolean("registraRitmo", false);
+                                e.registraInclinacion = je.optBoolean("registraInclinacion", false);
+                                e.registraResistencia = je.optBoolean("registraResistencia", false);
+
                                 if (je.has("imagenData")) {
-                                    e.ImagenEjercicio = guardarImagenDesdeBase64(je.getString("imagenData"));
+                                    e.ImagenEjercicio = guardarImagenDesdeBase64(je.optString("imagenData", ""));
                                 }
                                 db.ejercicioDao().insertarEjercicio(e);
                             }
@@ -279,9 +323,9 @@ public class BackupManager {
                             for (int i = 0; i < rutinasArray.length(); i++) {
                                 JSONObject jr = rutinasArray.getJSONObject(i);
                                 Rutina r = new Rutina();
-                                r.IdRutina = jr.getInt("IdRutina");
-                                r.NombreRutina = jr.getString("NombreRutina");
-                                r.IdUsuarioRutina = jr.getInt("IdUsuarioRutina");
+                                r.IdRutina = jr.optInt("IdRutina");
+                                r.NombreRutina = jr.optString("NombreRutina", "Rutina");
+                                r.IdUsuarioRutina = jr.optInt("IdUsuarioRutina", 1);
                                 db.rutinaDao().insertarRutina(r);
                             }
                         }
@@ -292,11 +336,13 @@ public class BackupManager {
                             for (int i = 0; i < seccionesArray.length(); i++) {
                                 JSONObject js = seccionesArray.getJSONObject(i);
                                 Seccion s = new Seccion();
-                                s.IdSeccion = js.getInt("IdSeccion");
-                                s.NombreSeccion = js.getString("NombreSeccion");
+                                s.IdSeccion = js.optInt("IdSeccion");
+                                s.NombreSeccion = js.optString("NombreSeccion", "Sección");
                                 s.TipoSeccion = js.optString("TipoSeccion", "Personalizado");
-                                if (!js.isNull("IdRutinaSeccion")) {
-                                    s.IdRutinaSeccion = js.getInt("IdRutinaSeccion");
+                                if (js.has("IdRutinaSeccion") && !js.isNull("IdRutinaSeccion")) {
+                                    s.IdRutinaSeccion = js.optInt("IdRutinaSeccion");
+                                } else {
+                                    s.IdRutinaSeccion = null;
                                 }
                                 db.seccionDao().insertarSeccion(s);
                             }
@@ -308,9 +354,9 @@ public class BackupManager {
                             for (int i = 0; i < sxeArray.length(); i++) {
                                 JSONObject jsxe = sxeArray.getJSONObject(i);
                                 SeccionXejercicio sxe = new SeccionXejercicio();
-                                sxe.IdSeccionXejercicio = jsxe.getInt("IdSeccionXejercicio");
-                                sxe.IdSeccion = jsxe.getInt("IdSeccion");
-                                sxe.IdEjercicio = jsxe.getInt("IdEjercicio");
+                                sxe.IdSeccionXejercicio = jsxe.optInt("IdSeccionXejercicio");
+                                sxe.IdSeccion = jsxe.optInt("IdSeccion");
+                                sxe.IdEjercicio = jsxe.optInt("IdEjercicio");
                                 db.seccionXejercicioDao().insert(sxe);
                             }
                         }
@@ -321,35 +367,64 @@ public class BackupManager {
                             for (int i = 0; i < entArray.length(); i++) {
                                 JSONObject jent = entArray.getJSONObject(i);
                                 Entrenamiento ent = new Entrenamiento();
-                                ent.IdEntrenamiento = jent.getInt("IdEntrenamiento");
-                                ent.IdUsuario = jent.getInt("IdUsuario");
-                                ent.IdSeccion = jent.getInt("IdSeccion");
-                                ent.NumeroEntrenamiento = jent.getInt("NumeroEntrenamiento");
-                                ent.FechaInicio = jent.getLong("FechaInicio");
-                                if (!jent.isNull("FechaFin")) {
-                                    ent.FechaFin = jent.getLong("FechaFin");
+                                ent.IdEntrenamiento = jent.optInt("IdEntrenamiento");
+                                ent.IdUsuario = jent.optInt("IdUsuario", 1);
+                                ent.IdSeccion = jent.optInt("IdSeccion");
+                                ent.NumeroEntrenamiento = jent.optInt("NumeroEntrenamiento", 1);
+                                ent.FechaInicio = jent.optLong("FechaInicio", System.currentTimeMillis());
+                                if (jent.has("FechaFin") && !jent.isNull("FechaFin")) {
+                                    ent.FechaFin = jent.optLong("FechaFin");
                                 }
                                 db.entrenamientoDao().insert(ent);
                             }
                         }
 
-                        // Importar Registros
+                        // Importar Registros (Fuerza)
                         if (backup.has("registros")) {
                             JSONArray regArray = backup.getJSONArray("registros");
                             for (int i = 0; i < regArray.length(); i++) {
                                 JSONObject jr = regArray.getJSONObject(i);
                                 Registro r = new Registro();
-                                r.IdRegistro = jr.getInt("IdRegistro");
-                                r.IdEntrenamiento = jr.getInt("IdEntrenamiento");
-                                r.IdSeccionXejercicio = jr.getInt("IdSeccionXejercicio");
-                                r.PesoRegistro = jr.getDouble("PesoRegistro");
-                                r.NumSeriesRegistro = jr.getInt("NumSeriesRegistro");
-                                r.Repeticiones = jr.getInt("Repeticiones");
-                                r.FechaRegistro = jr.getLong("FechaRegistro");
-                                if (!jr.isNull("PesoCorporalMomento")) {
-                                    r.PesoCorporalMomento = jr.getDouble("PesoCorporalMomento");
+                                r.IdRegistro = jr.optInt("IdRegistro");
+                                r.IdEntrenamiento = jr.optInt("IdEntrenamiento");
+                                r.IdSeccionXejercicio = jr.optInt("IdSeccionXejercicio");
+                                r.PesoRegistro = jr.optDouble("PesoRegistro", 0.0);
+                                r.NumSeriesRegistro = jr.optInt("NumSeriesRegistro", 1);
+                                r.Repeticiones = jr.optInt("Repeticiones", 0);
+                                r.FechaRegistro = jr.optLong("FechaRegistro", System.currentTimeMillis());
+                                r.UnidadPeso = jr.optString("UnidadPeso", "kg");
+                                if (jr.has("PesoCorporalMomento") && !jr.isNull("PesoCorporalMomento")) {
+                                    r.PesoCorporalMomento = jr.optDouble("PesoCorporalMomento");
                                 }
                                 db.registroDao().insertarRegistro(r);
+                            }
+                        }
+
+                        // Importar Registros Cardio
+                        if (backup.has("registrosCardio")) {
+                            JSONArray regCardioArray = backup.getJSONArray("registrosCardio");
+                            for (int i = 0; i < regCardioArray.length(); i++) {
+                                JSONObject jrc = regCardioArray.getJSONObject(i);
+                                RegistroCardio rc = new RegistroCardio();
+                                rc.IdRegistroCardio = jrc.optInt("IdRegistroCardio");
+                                rc.IdEntrenamiento = jrc.optInt("IdEntrenamiento");
+                                rc.IdSeccionXejercicio = jrc.optInt("IdSeccionXejercicio");
+                                rc.FechaRegistro = jrc.optLong("FechaRegistro", System.currentTimeMillis());
+                                rc.DuracionSegundos = jrc.optLong("DuracionSegundos", 0L);
+                                if (jrc.has("FechaInicio") && !jrc.isNull("FechaInicio")) rc.FechaInicio = jrc.optLong("FechaInicio");
+                                if (jrc.has("FechaFin") && !jrc.isNull("FechaFin")) rc.FechaFin = jrc.optLong("FechaFin");
+                                if (jrc.has("Distancia") && !jrc.isNull("Distancia")) rc.Distancia = jrc.optDouble("Distancia");
+                                rc.UnidadDistancia = jrc.optString("UnidadDistancia", "km");
+                                if (jrc.has("VelocidadPromedio") && !jrc.isNull("VelocidadPromedio")) rc.VelocidadPromedio = jrc.optDouble("VelocidadPromedio");
+                                if (jrc.has("CadenciaPromedio") && !jrc.isNull("CadenciaPromedio")) rc.CadenciaPromedio = jrc.optInt("CadenciaPromedio");
+                                if (jrc.has("CaloriasQuemadas") && !jrc.isNull("CaloriasQuemadas")) rc.CaloriasQuemadas = jrc.optInt("CaloriasQuemadas");
+                                if (jrc.has("RitmoCardiacoPromedio") && !jrc.isNull("RitmoCardiacoPromedio")) rc.RitmoCardiacoPromedio = jrc.optInt("RitmoCardiacoPromedio");
+                                if (jrc.has("RitmoCardiacoMaximo") && !jrc.isNull("RitmoCardiacoMaximo")) rc.RitmoCardiacoMaximo = jrc.optInt("RitmoCardiacoMaximo");
+                                if (jrc.has("Inclinacion") && !jrc.isNull("Inclinacion")) rc.Inclinacion = jrc.optDouble("Inclinacion");
+                                if (jrc.has("NivelResistencia") && !jrc.isNull("NivelResistencia")) rc.NivelResistencia = jrc.optInt("NivelResistencia");
+                                if (jrc.has("EsfuerzoPercibido") && !jrc.isNull("EsfuerzoPercibido")) rc.EsfuerzoPercibido = jrc.optInt("EsfuerzoPercibido");
+                                rc.Notas = jrc.optString("Notas", "");
+                                db.registroCardioDao().insertar(rc);
                             }
                         }
 
@@ -359,11 +434,11 @@ public class BackupManager {
                             for (int i = 0; i < histArray.length(); i++) {
                                 JSONObject jh = histArray.getJSONObject(i);
                                 Historial h = new Historial();
-                                h.IdHistorial = jh.getInt("IdHistorial");
-                                h.IdUsuarioHistorial = jh.getInt("IdUsuarioHistorial");
-                                h.PesoHistorial = jh.getDouble("PesoHistorial");
-                                h.AlturaHistorial = jh.getDouble("AlturaHistorial");
-                                h.FechaHistorial = jh.getLong("FechaHistorial");
+                                h.IdHistorial = jh.optInt("IdHistorial");
+                                h.IdUsuarioHistorial = jh.optInt("IdUsuarioHistorial", 1);
+                                h.PesoHistorial = jh.optDouble("PesoHistorial", 0.0);
+                                h.AlturaHistorial = jh.optDouble("AlturaHistorial", 0.0);
+                                h.FechaHistorial = jh.optLong("FechaHistorial", System.currentTimeMillis());
                                 db.historialDao().insertarHistorial(h);
                             }
                         }
@@ -384,21 +459,24 @@ public class BackupManager {
 
     private String uriToBase64(Uri uri) {
         try {
-            // Manejar esquemas de archivo si es necesario
+            InputStream inputStream;
             if (uri.getScheme() == null || uri.getScheme().equals("file")) {
                 String path = uri.getPath();
                 if (path == null) return null;
                 File file = new File(path);
                 if (!file.exists()) return null;
+                inputStream = new FileInputStream(file);
+            } else {
+                inputStream = context.getContentResolver().openInputStream(uri);
             }
 
-            try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+            if (inputStream == null) return null;
+
+            try (InputStream is = inputStream;
                  ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream()) {
-                if (inputStream == null) return null;
-                
-                byte[] buffer = new byte[8192]; // Buffer más grande
+                byte[] buffer = new byte[8192];
                 int len;
-                while ((len = inputStream.read(buffer)) != -1) {
+                while ((len = is.read(buffer)) != -1) {
                     byteBuffer.write(buffer, 0, len);
                 }
                 return Base64.encodeToString(byteBuffer.toByteArray(), Base64.NO_WRAP);
@@ -410,6 +488,7 @@ public class BackupManager {
     }
 
     private String guardarImagenDesdeBase64(String base64Str) {
+        if (base64Str == null || base64Str.isEmpty()) return null;
         try {
             byte[] data = Base64.decode(base64Str, Base64.DEFAULT);
             File folder = new File(context.getFilesDir(), "imagenes_ejercicios");

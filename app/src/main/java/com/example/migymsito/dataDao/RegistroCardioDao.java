@@ -23,6 +23,12 @@ public interface RegistroCardioDao {
     @Delete
     void eliminar(RegistroCardio registro);
 
+    @Query("SELECT * FROM RegistroCardio")
+    List<RegistroCardio> obtenerTodosLosRegistrosCardio();
+
+    @Query("DELETE FROM RegistroCardio")
+    void borrarTodo();
+
     @Query("SELECT * FROM RegistroCardio WHERE IdEntrenamiento = :idEntrenamiento")
     List<RegistroCardio> obtenerPorEntrenamiento(int idEntrenamiento);
 

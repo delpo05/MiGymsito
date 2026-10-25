@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                     .setTitle("Importar Copia")
                     .setMessage("Esto borrará todos tus datos actuales y los reemplazará con los de la copia. ¿Continuar?")
                     .setPositiveButton("Sí", (d, w) -> {
-                        filePickerLauncher.launch(new String[]{"application/json"});
+                        filePickerLauncher.launch(new String[]{"*/*"});
                         dialog.dismiss();
                     })
                     .setNegativeButton("No", null)
@@ -265,8 +265,11 @@ public class MainActivity extends AppCompatActivity {
                     Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     shareIntent.setType("application/json");
                     shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                    shareIntent.setClipData(android.content.ClipData.newRawUri("", fileUri));
                     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(Intent.createChooser(shareIntent, "Compartir Copia de Seguridad"));
+                    Intent chooserIntent = Intent.createChooser(shareIntent, "Compartir Copia de Seguridad");
+                    chooserIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(chooserIntent);
                 });
             }
 
@@ -281,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void lanzarSelectorDeArchivo() {
-        filePickerLauncher.launch(new String[]{"application/json"});
+        filePickerLauncher.launch(new String[]{"*/*"});
     }
 
     public void importarCopia(Uri uri) {
@@ -291,6 +294,9 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(boolean success) {
                 runOnUiThread(() -> {
                     ocultarLoading();
+                    if (sharedViewModel != null) {
+                        sharedViewModel.notifyImportFinished();
+                    }
                     // Reiniciar sesión del usuario actual
                     userRepo.obtenerPrimerUsuario(user -> {
                         if (user != null) {
