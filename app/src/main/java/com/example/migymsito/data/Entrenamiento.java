@@ -21,7 +21,7 @@ import java.io.Serializable;
                         entity = Seccion.class,
                         parentColumns = "IdSeccion",
                         childColumns = "IdSeccion",
-                        onDelete = ForeignKey.CASCADE
+                        onDelete = ForeignKey.SET_NULL
                 )
         },
         indices = {
@@ -37,8 +37,7 @@ public class Entrenamiento implements Serializable {
     @NonNull
     public int IdUsuario;
 
-    @NonNull
-    public int IdSeccion;
+    public Integer IdSeccion;
 
     @NonNull
     public Integer NumeroEntrenamiento;

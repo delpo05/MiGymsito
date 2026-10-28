@@ -23,14 +23,13 @@ public class EntrenamientoReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         int idUsuario = intent.getIntExtra(EXTRA_ID_USUARIO, -1);
-        int idSeccion = intent.getIntExtra(EXTRA_ID_SECCION, -1);
 
-        if (idUsuario == -1 || idSeccion == -1) return;
+        if (idUsuario == -1) return;
 
         Executors.newSingleThreadExecutor().execute(() -> {
             AppDatabase db = AppDatabase.getDatabase(context);
             EntrenamientoDao dao = db.entrenamientoDao();
-            Entrenamiento activo = dao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento activo = dao.getEntrenamientoActivo(idUsuario);
 
             if (activo != null) {
                 if (ACTION_INACTIVITY_CHECK.equals(action)) {

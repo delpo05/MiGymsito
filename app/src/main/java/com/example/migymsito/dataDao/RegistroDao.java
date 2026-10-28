@@ -26,6 +26,12 @@ public interface RegistroDao {
     @Query("SELECT * FROM Registro WHERE IdEntrenamiento = :idEntrenamiento")
     List<Registro> obtenerRegistrosPorEntrenamiento(int idEntrenamiento);
 
+    @Query("SELECT r.* FROM Registro r " +
+           "JOIN SeccionXejercicio sxe ON r.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "WHERE r.IdEntrenamiento = :idEntrenamiento AND sxe.IdEjercicio = :idEjercicio " +
+           "ORDER BY r.NumSeriesRegistro ASC, r.FechaRegistro ASC")
+    List<Registro> obtenerRegistrosPorEntrenamientoYEjercicio(int idEntrenamiento, int idEjercicio);
+
     @Query("SELECT * FROM Registro WHERE IdSeccionXejercicio = :idSeccionXejercicio")
     List<Registro> obtenerRegistrosPorSeccionXejercicio(int idSeccionXejercicio);
 

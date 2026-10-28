@@ -32,6 +32,12 @@ public interface RegistroCardioDao {
     @Query("SELECT * FROM RegistroCardio WHERE IdEntrenamiento = :idEntrenamiento")
     List<RegistroCardio> obtenerPorEntrenamiento(int idEntrenamiento);
 
+    @Query("SELECT rc.* FROM RegistroCardio rc " +
+           "JOIN SeccionXejercicio sxe ON rc.IdSeccionXejercicio = sxe.IdSeccionXejercicio " +
+           "WHERE rc.IdEntrenamiento = :idEntrenamiento AND sxe.IdEjercicio = :idEjercicio " +
+           "ORDER BY rc.FechaRegistro ASC")
+    List<RegistroCardio> obtenerPorEntrenamientoYEjercicio(int idEntrenamiento, int idEjercicio);
+
     @Query("SELECT * FROM RegistroCardio WHERE IdSeccionXejercicio = :idSeccionXejercicio ORDER BY FechaRegistro DESC")
     List<RegistroCardio> obtenerPorSeccionXejercicio(int idSeccionXejercicio);
 

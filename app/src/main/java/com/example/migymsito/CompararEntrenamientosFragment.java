@@ -124,8 +124,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     }
 
     private void manejarArgumentsDirecto() {
-        if (getArguments() != null && getArguments().containsKey("idSeccion")) {
-            int idSeccion = getArguments().getInt("idSeccion", -1);
+        if (getArguments() != null && (getArguments().containsKey("idEntA") || getArguments().containsKey("idSeccion"))) {
             int idEntB_intent = getArguments().getInt("idEntB", -1);
             int idEntA_intent = getArguments().getInt("idEntA", -1);
 
@@ -141,53 +140,46 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
 
                 if (userId == -1) return;
 
-                List<Seccion> todas = db.seccionDao().obtenerSeccionesPorUsuario(userId);
-                for (Seccion s : todas) {
-                    if (s.IdSeccion == idSeccion) {
-                        seccionSeleccionada = s;
-                        break;
+                // Al ser redireccionado tras finalizar entrenamiento, comparamos por ejercicio sin filtrar por sección
+                seccionSeleccionada = null;
+
+                entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorUsuario(userId);
+
+                if (idEntB_intent != -1) {
+                    for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
+                        if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntB_intent) {
+                            entrenamientoB = entrenamientosFinalizados.get(i);
+                            numEntB = entrenamientoB.NumeroEntrenamiento;
+                            break;
+                        }
+                    }
+                }
+                if (idEntA_intent != -1) {
+                    for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
+                        if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntA_intent) {
+                            entrenamientoA = entrenamientosFinalizados.get(i);
+                            numEntA = entrenamientoA.NumeroEntrenamiento;
+                            break;
+                        }
                     }
                 }
 
-                if (seccionSeleccionada != null) {
-                    entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(userId, idSeccion);
-
-                    if (idEntB_intent != -1) {
-                        for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
-                            if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntB_intent) {
-                                entrenamientoB = entrenamientosFinalizados.get(i);
-                                numEntB = entrenamientoB.NumeroEntrenamiento;
-                                break;
-                            }
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        actvSeccion.setText("");
+                        if (entrenamientoA != null) {
+                            String textA = String.format("Entrenamiento #%d (%s)", numEntA, dateFormat.format(new Date(entrenamientoA.FechaFin)));
+                            tietEntrenamientoA.setText(textA);
                         }
-                    }
-                    if (idEntA_intent != -1) {
-                        for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
-                            if (entrenamientosFinalizados.get(i).IdEntrenamiento == idEntA_intent) {
-                                entrenamientoA = entrenamientosFinalizados.get(i);
-                                numEntA = entrenamientoA.NumeroEntrenamiento;
-                                break;
-                            }
+                        if (entrenamientoB != null) {
+                            String textB = String.format("Entrenamiento #%d (%s)", numEntB, dateFormat.format(new Date(entrenamientoB.FechaFin)));
+                            tietEntrenamientoB.setText(textB);
                         }
-                    }
 
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            actvSeccion.setText(seccionSeleccionada.NombreSeccion);
-                            if (entrenamientoA != null) {
-                                String textA = String.format("Entrenamiento #%d (%s)", numEntA, dateFormat.format(new Date(entrenamientoA.FechaFin)));
-                                tietEntrenamientoA.setText(textA);
-                            }
-                            if (entrenamientoB != null) {
-                                String textB = String.format("Entrenamiento #%d (%s)", numEntB, dateFormat.format(new Date(entrenamientoB.FechaFin)));
-                                tietEntrenamientoB.setText(textB);
-                            }
-
-                            if (entrenamientoA != null && entrenamientoB != null) {
-                                realizarComparacion();
-                            }
-                        });
-                    }
+                        if (entrenamientoA != null && entrenamientoB != null) {
+                            realizarComparacion();
+                        }
+                    });
                 }
             }).start();
         }
@@ -258,7 +250,9 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
 
         new Thread(() -> {
             AppDatabase db = AppDatabase.getDatabase(getContext());
-            entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccion.IdSeccion);
+            if (MainActivity.usuarioLogueado != null) {
+                entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
+            }
         }).start();
     }
 
@@ -268,39 +262,44 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     }
 
     private void mostrarDialogoSeleccionEntrenamiento(boolean esA) {
-        if (seccionSeleccionada == null) {
-            Toast.makeText(getContext(), "Primero selecciona una sección", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getDatabase(getContext());
+            if (MainActivity.usuarioLogueado == null) return;
+            entrenamientosFinalizados = db.entrenamientoDao().getEntrenamientosFinalizadosPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
 
-        if (entrenamientosFinalizados.isEmpty()) {
-            Toast.makeText(getContext(), "No hay entrenamientos finalizados para esta sección", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String[] opciones = new String[entrenamientosFinalizados.size()];
-        for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
-            Entrenamiento e = entrenamientosFinalizados.get(i);
-            String fechaStr = dateFormat.format(new Date(e.FechaFin));
-            opciones[i] = String.format("Entrenamiento #%d (%s)", e.NumeroEntrenamiento, fechaStr);
-        }
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle(String.format("Seleccionar Entrenamiento (%s)", (esA ? "A" : "B")))
-                .setItems(opciones, (dialog, which) -> {
-                    Entrenamiento seleccionado = entrenamientosFinalizados.get(which);
-                    String textoSeleccionado = opciones[which];
-                    if (esA) {
-                        entrenamientoA = seleccionado;
-                        numEntA = seleccionado.NumeroEntrenamiento;
-                        tietEntrenamientoA.setText(textoSeleccionado);
-                    } else {
-                        entrenamientoB = seleccionado;
-                        numEntB = seleccionado.NumeroEntrenamiento;
-                        tietEntrenamientoB.setText(textoSeleccionado);
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (entrenamientosFinalizados.isEmpty()) {
+                        Toast.makeText(getContext(), "No hay entrenamientos finalizados", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                })
-                .show();
+
+                    String[] opciones = new String[entrenamientosFinalizados.size()];
+                    for (int i = 0; i < entrenamientosFinalizados.size(); i++) {
+                        Entrenamiento e = entrenamientosFinalizados.get(i);
+                        String fechaStr = dateFormat.format(new Date(e.FechaFin));
+                        opciones[i] = String.format("Entrenamiento #%d (%s)", e.NumeroEntrenamiento, fechaStr);
+                    }
+
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle(String.format("Seleccionar Entrenamiento (%s)", (esA ? "A" : "B")))
+                            .setItems(opciones, (dialog, which) -> {
+                                Entrenamiento seleccionado = entrenamientosFinalizados.get(which);
+                                String textoSeleccionado = opciones[which];
+                                if (esA) {
+                                    entrenamientoA = seleccionado;
+                                    numEntA = seleccionado.NumeroEntrenamiento;
+                                    tietEntrenamientoA.setText(textoSeleccionado);
+                                } else {
+                                    entrenamientoB = seleccionado;
+                                    numEntB = seleccionado.NumeroEntrenamiento;
+                                    tietEntrenamientoB.setText(textoSeleccionado);
+                                }
+                            })
+                            .show();
+                });
+            }
+        }).start();
     }
 
     private void realizarComparacion() {
@@ -323,62 +322,118 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                 eTarget = entrenamientoA; nTarget = numEntA;
             }
 
-            final Entrenamiento eA_final = eBase;
             final int nA_final = nBase;
-            final Entrenamiento eB_final = eTarget;
             final int nB_final = nTarget;
 
-            Map<Integer, Double> volumenesBase = obtenerVolumenesDeEntrenamiento(db, eBase.IdEntrenamiento);
-            Map<Integer, Double> volumenesTarget = obtenerVolumenesDeEntrenamiento(db, eTarget.IdEntrenamiento);
+            int userId = MainActivity.usuarioLogueado != null ? MainActivity.usuarioLogueado.IdUsuario : -1;
+
+            Map<Integer, Double> volumenesTarget = obtenerVolumenesPorEjercicio(db, eTarget.IdEntrenamiento);
+            Map<Integer, Double> volumenesBaseMap = obtenerVolumenesPorEjercicio(db, eBase.IdEntrenamiento);
+
+            java.util.Set<Integer> allEjercicioIds = new java.util.HashSet<>();
+            allEjercicioIds.addAll(volumenesTarget.keySet());
+            allEjercicioIds.addAll(volumenesBaseMap.keySet());
 
             List<ComparacionAdapter.ComparacionFila> filas = new ArrayList<>();
-            List<SeccionXejercicio> sxeList = db.seccionXejercicioDao().getEjerciciosBySeccion(seccionSeleccionada.IdSeccion);
 
-            for (SeccionXejercicio sxe : sxeList) {
-                Ejercicio ej = db.ejercicioDao().obtenerEjercicioPorId(sxe.IdEjercicio);
-                Double volBase = volumenesBase.get(sxe.IdSeccionXejercicio);
-                double vBase = volBase != null ? volBase : 0.0;
-                Double volTarget = volumenesTarget.get(sxe.IdSeccionXejercicio);
+            for (Integer idEjercicio : allEjercicioIds) {
+                if (seccionSeleccionada != null) {
+                    List<SeccionXejercicio> relaciones = db.seccionXejercicioDao().getEjerciciosBySeccion(seccionSeleccionada.IdSeccion);
+                    boolean perteneceASeccion = false;
+                    for (SeccionXejercicio sxe : relaciones) {
+                        if (sxe.IdEjercicio == idEjercicio) {
+                            perteneceASeccion = true;
+                            break;
+                        }
+                    }
+                    if (!perteneceASeccion) continue;
+                }
+
+                Ejercicio ej = db.ejercicioDao().obtenerEjercicioPorId(idEjercicio);
+                if (ej == null) continue;
+
+                Double volTarget = volumenesTarget.get(idEjercicio);
                 double vTarget = volTarget != null ? volTarget : 0.0;
 
-                if (vBase > 0 || vTarget > 0) {
-                    filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, sxe.IdSeccionXejercicio, vTarget, vBase));
+                Double volBase = volumenesBaseMap.get(idEjercicio);
+                double vBase = volBase != null ? volBase : 0.0;
+                int idEntBaseForExercise = eBase.IdEntrenamiento;
+
+                if (vBase == 0.0 && userId != -1) {
+                    Entrenamiento entPrevioEj = obtenerUltimoEntrenamientoPrevioConEjercicio(db, userId, idEjercicio, eTarget.IdEntrenamiento);
+                    if (entPrevioEj != null) {
+                        Map<Integer, Double> volPrevioMap = obtenerVolumenesPorEjercicio(db, entPrevioEj.IdEntrenamiento);
+                        Double vPrev = volPrevioMap.get(idEjercicio);
+                        if (vPrev != null && vPrev > 0) {
+                            vBase = vPrev;
+                            idEntBaseForExercise = entPrevioEj.IdEntrenamiento;
+                        }
+                    }
+                }
+
+                if (vTarget > 0 || vBase > 0) {
+                    filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, idEjercicio, idEntBaseForExercise, vTarget, vBase));
                 }
             }
 
+            final int finalTargetId = eTarget.IdEntrenamiento;
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     if (tvHeaderVolA != null) tvHeaderVolA.setText(String.format("Ent. #%d", nA_final));
                     if (tvHeaderVolB != null) tvHeaderVolB.setText(String.format("Ent. #%d", nB_final));
                     llTablaComparacion.setVisibility(View.VISIBLE);
-                    rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, eA_final, nA_final, eB_final, nB_final)));
+                    rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, finalTargetId, nB_final)));
                 });
             }
         }).start();
     }
 
-    private Map<Integer, Double> obtenerVolumenesDeEntrenamiento(AppDatabase db, int idEntrenamiento) {
+    private Entrenamiento obtenerUltimoEntrenamientoPrevioConEjercicio(AppDatabase db, int idUsuario, int idEjercicio, int idEntrenamientoActual) {
+        List<Registro> registrosPrevios = db.registroDao().obtenerRegistrosUltimoEntrenamientoPrevio(idUsuario, idEjercicio, idEntrenamientoActual);
+        if (registrosPrevios != null && !registrosPrevios.isEmpty()) {
+            return db.entrenamientoDao().getEntrenamientoById(registrosPrevios.get(0).IdEntrenamiento);
+        }
+        
+        List<RegistroCardio> cardioPrevio = db.registroCardioDao().obtenerPorEjercicioYUsuario(idUsuario, idEjercicio);
+        for (RegistroCardio rc : cardioPrevio) {
+            if (rc.IdEntrenamiento < idEntrenamientoActual) {
+                Entrenamiento ent = db.entrenamientoDao().getEntrenamientoById(rc.IdEntrenamiento);
+                if (ent != null && ent.FechaFin != null) {
+                    return ent;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Map<Integer, Double> obtenerVolumenesPorEjercicio(AppDatabase db, int idEntrenamiento) {
         Map<Integer, Double> volumenes = new HashMap<>();
 
         List<Registro> registros = db.registroDao().obtenerRegistrosPorEntrenamiento(idEntrenamiento);
         for (Registro r : registros) {
-            double vol = r.PesoRegistro * r.Repeticiones;
-            Double current = volumenes.get(r.IdSeccionXejercicio);
-            volumenes.put(r.IdSeccionXejercicio, (current != null ? current : 0.0) + vol);
+            SeccionXejercicio sxe = db.seccionXejercicioDao().getRelacionById(r.IdSeccionXejercicio);
+            if (sxe != null) {
+                double vol = r.PesoRegistro * r.Repeticiones;
+                Double current = volumenes.get(sxe.IdEjercicio);
+                volumenes.put(sxe.IdEjercicio, (current != null ? current : 0.0) + vol);
+            }
         }
 
         List<RegistroCardio> registrosCardio = db.registroCardioDao().obtenerPorEntrenamiento(idEntrenamiento);
         for (RegistroCardio rc : registrosCardio) {
-            double vol = 0.0;
-            if (rc.Distancia != null && rc.Distancia > 0) {
-                vol = rc.Distancia;
-            } else if (rc.DuracionSegundos > 0) {
-                vol = rc.DuracionSegundos / 60.0;
-            } else if (rc.CaloriasQuemadas != null && rc.CaloriasQuemadas > 0) {
-                vol = rc.CaloriasQuemadas;
+            SeccionXejercicio sxe = db.seccionXejercicioDao().getRelacionById(rc.IdSeccionXejercicio);
+            if (sxe != null) {
+                double vol = 0.0;
+                if (rc.Distancia != null && rc.Distancia > 0) {
+                    vol = rc.Distancia;
+                } else if (rc.DuracionSegundos > 0) {
+                    vol = rc.DuracionSegundos / 60.0;
+                } else if (rc.CaloriasQuemadas != null && rc.CaloriasQuemadas > 0) {
+                    vol = rc.CaloriasQuemadas;
+                }
+                Double current = volumenes.get(sxe.IdEjercicio);
+                volumenes.put(sxe.IdEjercicio, (current != null ? current : 0.0) + vol);
             }
-            Double current = volumenes.get(rc.IdSeccionXejercicio);
-            volumenes.put(rc.IdSeccionXejercicio, (current != null ? current : 0.0) + vol);
         }
 
         return volumenes;
@@ -388,7 +443,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     public void onItemClick(ComparacionAdapter.ComparacionFila item) {
     }
 
-    private void mostrarPopUpDetalle(ComparacionAdapter.ComparacionFila item, Entrenamiento entA, int nA, Entrenamiento entB, int nB) {
+    private void mostrarPopUpDetalle(ComparacionAdapter.ComparacionFila item, int idEntrenamientoTarget, int nTarget) {
         Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pop_up_detalle_ejercicio_comparacion);
@@ -409,79 +464,69 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
         Button btnCerrar = dialog.findViewById(R.id.btn_cerrar_detalle);
 
         tvTitulo.setText(item.getNombreEjercicio());
-        if (tvLabelA != null) tvLabelA.setText(String.format("Ent. #%d", nA));
-        if (tvLabelB != null) tvLabelB.setText(String.format("Ent. #%d", nB));
 
         new Thread(() -> {
             AppDatabase db = AppDatabase.getDatabase(getContext());
-            SeccionXejercicio sxe = db.seccionXejercicioDao().getRelacionById(item.getIdSeccionXejercicio());
-            Ejercicio ej = null;
-            if (sxe != null) {
-                ej = db.ejercicioDao().obtenerEjercicioPorId(sxe.IdEjercicio);
+            Ejercicio ej = db.ejercicioDao().obtenerEjercicioPorId(item.getIdEjercicio());
+            int idEntBase = item.getIdEntrenamientoBase();
+            Entrenamiento entBase = db.entrenamientoDao().getEntrenamientoById(idEntBase);
+
+            int nBase = (entBase != null) ? entBase.NumeroEntrenamiento : -1;
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (tvLabelA != null) tvLabelA.setText(nBase != -1 ? String.format("Ent. #%d", nBase) : "-");
+                    if (tvLabelB != null) tvLabelB.setText(String.format("Ent. #%d", nTarget));
+                });
             }
 
             boolean esCardio = ej != null && "CARDIO".equalsIgnoreCase(ej.CategoriaEjercicio);
 
             if (esCardio) {
-                List<RegistroCardio> listA = db.registroCardioDao().obtenerPorEntrenamiento(entA.IdEntrenamiento);
-                List<RegistroCardio> listB = db.registroCardioDao().obtenerPorEntrenamiento(entB.IdEntrenamiento);
+                List<RegistroCardio> listTarget = db.registroCardioDao().obtenerPorEntrenamientoYEjercicio(idEntrenamientoTarget, item.getIdEjercicio());
+                List<RegistroCardio> listBase = entBase != null ? db.registroCardioDao().obtenerPorEntrenamientoYEjercicio(entBase.IdEntrenamiento, item.getIdEjercicio()) : new ArrayList<>();
 
-                RegistroCardio rcA = null;
-                for (RegistroCardio rc : listA) {
-                    if (rc.IdSeccionXejercicio == item.getIdSeccionXejercicio()) {
-                        rcA = rc;
-                        break;
-                    }
-                }
-                RegistroCardio rcB = null;
-                for (RegistroCardio rc : listB) {
-                    if (rc.IdSeccionXejercicio == item.getIdSeccionXejercicio()) {
-                        rcB = rc;
-                        break;
-                    }
-                }
-
-                final RegistroCardio finalRcA = rcA;
-                final RegistroCardio finalRcB = rcB;
+                RegistroCardio rcBase = listBase.isEmpty() ? null : listBase.get(0);
+                RegistroCardio rcTarget = listTarget.isEmpty() ? null : listTarget.get(0);
 
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         agregarFilaCardio(llFilas, "Tiempo",
-                                finalRcA != null ? formatDuration(finalRcA.DuracionSegundos) : "-",
-                                finalRcB != null ? formatDuration(finalRcB.DuracionSegundos) : "-",
-                                calcularDifTiempo(finalRcA != null ? finalRcA.DuracionSegundos : null, finalRcB != null ? finalRcB.DuracionSegundos : null));
+                                rcBase != null ? formatDuration(rcBase.DuracionSegundos) : "-",
+                                rcTarget != null ? formatDuration(rcTarget.DuracionSegundos) : "-",
+                                calcularDifTiempo(rcBase != null ? rcBase.DuracionSegundos : null, rcTarget != null ? rcTarget.DuracionSegundos : null));
 
-                        if ((finalRcA != null && finalRcA.Distancia != null) || (finalRcB != null && finalRcB.Distancia != null)) {
-                            Double dA = finalRcA != null ? finalRcA.Distancia : null;
-                            Double dB = finalRcB != null ? finalRcB.Distancia : null;
-                            String uA = finalRcA != null && finalRcA.UnidadDistancia != null ? finalRcA.UnidadDistancia : "km";
+                        if ((rcBase != null && rcBase.Distancia != null) || (rcTarget != null && rcTarget.Distancia != null)) {
+                            Double dA = rcBase != null ? rcBase.Distancia : null;
+                            Double dB = rcTarget != null ? rcTarget.Distancia : null;
+                            String uA = rcTarget != null && rcTarget.UnidadDistancia != null ? rcTarget.UnidadDistancia : (rcBase != null && rcBase.UnidadDistancia != null ? rcBase.UnidadDistancia : "km");
                             agregarFilaCardio(llFilas, "Dist.",
                                     dA != null ? String.format(Locale.getDefault(), "%.2f %s", dA, uA) : "-",
                                     dB != null ? String.format(Locale.getDefault(), "%.2f %s", dB, uA) : "-",
                                     calcularDifDouble(dA, dB, uA));
                         }
 
-                        if ((finalRcA != null && finalRcA.CaloriasQuemadas != null) || (finalRcB != null && finalRcB.CaloriasQuemadas != null)) {
-                            Integer cA = finalRcA != null ? finalRcA.CaloriasQuemadas : null;
-                            Integer cB = finalRcB != null ? finalRcB.CaloriasQuemadas : null;
+                        if ((rcBase != null && rcBase.CaloriasQuemadas != null) || (rcTarget != null && rcTarget.CaloriasQuemadas != null)) {
+                            Integer cA = rcBase != null ? rcBase.CaloriasQuemadas : null;
+                            Integer cB = rcTarget != null ? rcTarget.CaloriasQuemadas : null;
                             agregarFilaCardio(llFilas, "Cal.",
                                     cA != null ? cA + " kcal" : "-",
                                     cB != null ? cB + " kcal" : "-",
                                     calcularDifInteger(cA, cB, "kcal"));
                         }
 
-                        if ((finalRcA != null && finalRcA.VelocidadPromedio != null) || (finalRcB != null && finalRcB.VelocidadPromedio != null)) {
-                            Double vA = finalRcA != null ? finalRcA.VelocidadPromedio : null;
-                            Double vB = finalRcB != null ? finalRcB.VelocidadPromedio : null;
+                        if ((rcBase != null && rcBase.VelocidadPromedio != null) || (rcTarget != null && rcTarget.VelocidadPromedio != null)) {
+                            Double vA = rcBase != null ? rcBase.VelocidadPromedio : null;
+                            Double vB = rcTarget != null ? rcTarget.VelocidadPromedio : null;
                             agregarFilaCardio(llFilas, "Vel.",
                                     vA != null ? String.format(Locale.getDefault(), "%.1f km/h", vA) : "-",
                                     vB != null ? String.format(Locale.getDefault(), "%.1f km/h", vB) : "-",
                                     calcularDifDouble(vA, vB, "km/h"));
                         }
 
-                        if ((finalRcA != null && finalRcA.RitmoCardiacoPromedio != null) || (finalRcB != null && finalRcB.RitmoCardiacoPromedio != null)) {
-                            Integer rA = finalRcA != null ? finalRcA.RitmoCardiacoPromedio : null;
-                            Integer rB = finalRcB != null ? finalRcB.RitmoCardiacoPromedio : null;
+                        if ((rcBase != null && rcBase.RitmoCardiacoPromedio != null) || (rcTarget != null && rcTarget.RitmoCardiacoPromedio != null)) {
+                            Integer rA = rcBase != null ? rcBase.RitmoCardiacoPromedio : null;
+                            Integer rB = rcTarget != null ? rcTarget.RitmoCardiacoPromedio : null;
                             agregarFilaCardio(llFilas, "Pulso",
                                     rA != null ? rA + " bpm" : "-",
                                     rB != null ? rB + " bpm" : "-",
@@ -490,16 +535,10 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                     });
                 }
             } else {
-                List<Registro> registrosA = db.registroDao().obtenerRegistrosPorEntrenamiento(entA.IdEntrenamiento);
-                List<Registro> registrosB = db.registroDao().obtenerRegistrosPorEntrenamiento(entB.IdEntrenamiento);
+                List<Registro> filtradosTarget = db.registroDao().obtenerRegistrosPorEntrenamientoYEjercicio(idEntrenamientoTarget, item.getIdEjercicio());
+                List<Registro> filtradosBase = entBase != null ? db.registroDao().obtenerRegistrosPorEntrenamientoYEjercicio(entBase.IdEntrenamiento, item.getIdEjercicio()) : new ArrayList<>();
 
-                List<Registro> filtradosA = new ArrayList<>();
-                for (Registro r : registrosA) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosA.add(r);
-
-                List<Registro> filtradosB = new ArrayList<>();
-                for (Registro r : registrosB) if (r.IdSeccionXejercicio == item.getIdSeccionXejercicio()) filtradosB.add(r);
-
-                int maxSets = Math.max(filtradosA.size(), filtradosB.size());
+                int maxSets = Math.max(filtradosBase.size(), filtradosTarget.size());
 
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
@@ -512,8 +551,8 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
 
                             tvSet.setText(String.valueOf(index + 1));
 
-                            Registro rA = index < filtradosA.size() ? filtradosA.get(index) : null;
-                            Registro rB = index < filtradosB.size() ? filtradosB.get(index) : null;
+                            Registro rA = index < filtradosBase.size() ? filtradosBase.get(index) : null;
+                            Registro rB = index < filtradosTarget.size() ? filtradosTarget.get(index) : null;
 
                             String sA = rA != null ? String.format(Locale.getDefault(), "%.1fk x %d", rA.PesoRegistro, rA.Repeticiones) : "-";
                             String sB = rB != null ? String.format(Locale.getDefault(), "%.1fk x %d", rB.PesoRegistro, rB.Repeticiones) : "-";

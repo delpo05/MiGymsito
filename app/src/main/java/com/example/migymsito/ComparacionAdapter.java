@@ -93,19 +93,29 @@ public class ComparacionAdapter extends RecyclerView.Adapter<ComparacionAdapter.
 
     public static class ComparacionFila {
         private String nombreEjercicio;
-        private int idSeccionXejercicio;
+        private int idEjercicio;
+        private int idEntrenamientoBase = -1;
         private double volumenB; // Reciente
         private double volumenA; // Antiguo
 
-        public ComparacionFila(String nombreEjercicio, int idSeccionXejercicio, double volumenB, double volumenA) {
+        public ComparacionFila(String nombreEjercicio, int idEjercicio, double volumenB, double volumenA) {
             this.nombreEjercicio = nombreEjercicio;
-            this.idSeccionXejercicio = idSeccionXejercicio;
+            this.idEjercicio = idEjercicio;
+            this.volumenB = volumenB;
+            this.volumenA = volumenA;
+        }
+
+        public ComparacionFila(String nombreEjercicio, int idEjercicio, int idEntrenamientoBase, double volumenB, double volumenA) {
+            this.nombreEjercicio = nombreEjercicio;
+            this.idEjercicio = idEjercicio;
+            this.idEntrenamientoBase = idEntrenamientoBase;
             this.volumenB = volumenB;
             this.volumenA = volumenA;
         }
 
         public String getNombreEjercicio() { return nombreEjercicio; }
-        public int getIdSeccionXejercicio() { return idSeccionXejercicio; }
+        public int getIdEjercicio() { return idEjercicio; }
+        public int getIdEntrenamientoBase() { return idEntrenamientoBase; }
         public double getVolumenB() { return volumenB; }
         public double getVolumenA() { return volumenA; }
         public double getDiferencia() { return volumenB - volumenA; }

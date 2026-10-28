@@ -12,7 +12,9 @@ import android.os.Looper;
 import com.example.migymsito.EntrenamientoReceiver;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Registro;
+import com.example.migymsito.data.RegistroCardio;
 import com.example.migymsito.dataDao.EntrenamientoDao;
+import com.example.migymsito.dataDao.RegistroCardioDao;
 import com.example.migymsito.dataDao.RegistroDao;
 import com.example.migymsito.dataDataBase.AppDatabase;
 
@@ -24,6 +26,7 @@ public class EntrenamientoRepository {
 
     private final EntrenamientoDao entrenamientoDao;
     private final RegistroDao registroDao;
+    private final RegistroCardioDao registroCardioDao;
     private final ExecutorService executorService;
     private final Context context;
 
@@ -32,6 +35,7 @@ public class EntrenamientoRepository {
         AppDatabase db = AppDatabase.getDatabase(application);
         entrenamientoDao = db.entrenamientoDao();
         registroDao = db.registroDao();
+        registroCardioDao = db.registroCardioDao();
         executorService = Executors.newFixedThreadPool(4);
     }
 
@@ -49,11 +53,15 @@ public class EntrenamientoRepository {
         });
     }
 
-    public void obtenerEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+    public void obtenerEntrenamientoActivo(int idUsuario, RepositoryCallback<Entrenamiento> callback) {
         executorService.execute(() -> {
-            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             notificar(callback, e);
         });
+    }
+
+    public void obtenerEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+        obtenerEntrenamientoActivo(idUsuario, callback);
     }
 
     public void finalizarEntrenamiento(int idEntrenamiento) {
@@ -62,22 +70,27 @@ public class EntrenamientoRepository {
             if (e != null) {
                 e.FechaFin = System.currentTimeMillis();
                 entrenamientoDao.update(e);
+                cancelarAlarmasInactividad(e.IdUsuario);
             }
         });
     }
 
-    public void finalizarEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void finalizarEntrenamientoActivo(int idUsuario, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
-            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             if (e != null) {
                 e.FechaFin = System.currentTimeMillis();
                 entrenamientoDao.update(e);
-                cancelarAlarmasInactividad(e.IdUsuario, e.IdSeccion);
+                cancelarAlarmasInactividad(e.IdUsuario);
                 notificar(callback, true);
             } else {
                 notificar(callback, false);
             }
         });
+    }
+
+    public void finalizarEntrenamientoActivoPorSeccion(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+        finalizarEntrenamientoActivo(idUsuario, callback);
     }
 
     public void finalizarEntrenamientosActivosDeRutina(int idUsuario, int idRutina, RepositoryCallback<Boolean> callback) {
@@ -88,6 +101,7 @@ public class EntrenamientoRepository {
                 for (Entrenamiento e : activos) {
                     e.FechaFin = now;
                     entrenamientoDao.update(e);
+                    cancelarAlarmasInactividad(e.IdUsuario);
                 }
                 notificar(callback, true);
             } else {
@@ -97,35 +111,43 @@ public class EntrenamientoRepository {
     }
 
     /**
-     * Finaliza el entrenamiento activo si tiene registros.
+     * Finaliza el entrenamiento activo del usuario si tiene registros (fuerza o cardio).
      * Si no tiene registros, lo elimina de la base de datos.
      * El callback devuelve true si se finalizó (con registros), false si se eliminó (sin registros).
      */
-    public void finalizarOEliminarSiVacio(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+    public void finalizarOEliminarSiVacio(int idUsuario, RepositoryCallback<Boolean> callback) {
         executorService.execute(() -> {
-            Entrenamiento e = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento e = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             if (e != null) {
                 List<Registro> registros = registroDao.obtenerRegistrosPorEntrenamiento(e.IdEntrenamiento);
-                if (registros != null && !registros.isEmpty()) {
+                List<RegistroCardio> registrosCardio = registroCardioDao.obtenerPorEntrenamiento(e.IdEntrenamiento);
+                
+                boolean tieneRegistros = (registros != null && !registros.isEmpty()) || (registrosCardio != null && !registrosCardio.isEmpty());
+
+                if (tieneRegistros) {
                     e.FechaFin = System.currentTimeMillis();
                     entrenamientoDao.update(e);
-                    cancelarAlarmasInactividad(e.IdUsuario, e.IdSeccion);
+                    cancelarAlarmasInactividad(e.IdUsuario);
                     notificar(callback, true);
                 } else {
                     entrenamientoDao.delete(e);
-                    cancelarAlarmasInactividad(e.IdUsuario, e.IdSeccion);
+                    cancelarAlarmasInactividad(e.IdUsuario);
                     notificar(callback, false);
                 }
             } else {
-                notificar(callback, null); // Ocurrió un error o no había entrenamiento
+                notificar(callback, null);
             }
         });
     }
 
-    public void iniciarNuevoEntrenamiento(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+    public void finalizarOEliminarSiVacio(int idUsuario, int idSeccion, RepositoryCallback<Boolean> callback) {
+        finalizarOEliminarSiVacio(idUsuario, callback);
+    }
+
+    public void iniciarNuevoEntrenamiento(int idUsuario, Integer idSeccion, RepositoryCallback<Entrenamiento> callback) {
         executorService.execute(() -> {
-            // Verificar si ya existe uno activo
-            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            // Verificar si ya existe uno activo para el usuario
+            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             if (activo != null) {
                 notificar(callback, activo);
                 return;
@@ -141,35 +163,35 @@ public class EntrenamientoRepository {
 
             long id = entrenamientoDao.insert(nuevo);
             nuevo.IdEntrenamiento = (int) id;
-            programarAlarmasInactividad(nuevo.IdUsuario, nuevo.IdSeccion);
+            programarAlarmasInactividad(nuevo.IdUsuario);
             notificar(callback, nuevo);
         });
     }
 
-    private void programarAlarmasInactividad(int idUsuario, int idSeccion) {
+    public void iniciarNuevoEntrenamiento(int idUsuario, int idSeccion, RepositoryCallback<Entrenamiento> callback) {
+        iniciarNuevoEntrenamiento(idUsuario, Integer.valueOf(idSeccion), callback);
+    }
+
+    public void programarAlarmasInactividad(int idUsuario) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) return;
 
-        // Alarma 1 hora: Notificación
         Intent intentCheck = new Intent(context, EntrenamientoReceiver.class);
         intentCheck.setAction(EntrenamientoReceiver.ACTION_INACTIVITY_CHECK);
         intentCheck.putExtra(EntrenamientoReceiver.EXTRA_ID_USUARIO, idUsuario);
-        intentCheck.putExtra(EntrenamientoReceiver.EXTRA_ID_SECCION, idSeccion);
         PendingIntent piCheck = PendingIntent.getBroadcast(
                 context,
-                10000 + idUsuario * 100 + idSeccion,
+                10000 + idUsuario,
                 intentCheck,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Alarma 5 horas: Auto-finalizar
         Intent intentAuto = new Intent(context, EntrenamientoReceiver.class);
         intentAuto.setAction(EntrenamientoReceiver.ACTION_AUTO_FINALIZE);
         intentAuto.putExtra(EntrenamientoReceiver.EXTRA_ID_USUARIO, idUsuario);
-        intentAuto.putExtra(EntrenamientoReceiver.EXTRA_ID_SECCION, idSeccion);
         PendingIntent piAuto = PendingIntent.getBroadcast(
                 context,
-                20000 + idUsuario * 100 + idSeccion,
+                20000 + idUsuario,
                 intentAuto,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -197,7 +219,11 @@ public class EntrenamientoRepository {
         }
     }
 
-    private void cancelarAlarmasInactividad(int idUsuario, int idSeccion) {
+    public void programarAlarmasInactividad(int idUsuario, int idSeccion) {
+        programarAlarmasInactividad(idUsuario);
+    }
+
+    public void cancelarAlarmasInactividad(int idUsuario) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) return;
 
@@ -205,7 +231,7 @@ public class EntrenamientoRepository {
         intentCheck.setAction(EntrenamientoReceiver.ACTION_INACTIVITY_CHECK);
         PendingIntent piCheck = PendingIntent.getBroadcast(
                 context,
-                10000 + idUsuario * 100 + idSeccion,
+                10000 + idUsuario,
                 intentCheck,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -215,15 +241,23 @@ public class EntrenamientoRepository {
         intentAuto.setAction(EntrenamientoReceiver.ACTION_AUTO_FINALIZE);
         PendingIntent piAuto = PendingIntent.getBroadcast(
                 context,
-                20000 + idUsuario * 100 + idSeccion,
+                20000 + idUsuario,
                 intentAuto,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         alarmManager.cancel(piAuto);
     }
 
+    public void cancelarAlarmasInactividad(int idUsuario, int idSeccion) {
+        cancelarAlarmasInactividad(idUsuario);
+    }
+
+    public void refrescarAlarmasInactividad(int idUsuario) {
+        programarAlarmasInactividad(idUsuario);
+    }
+
     public void refrescarAlarmasInactividad(int idUsuario, int idSeccion) {
-        programarAlarmasInactividad(idUsuario, idSeccion);
+        refrescarAlarmasInactividad(idUsuario);
     }
 
     private <T> void notificar(RepositoryCallback<T> callback, T resultado) {

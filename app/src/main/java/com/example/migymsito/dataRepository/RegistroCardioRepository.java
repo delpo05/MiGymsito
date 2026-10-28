@@ -36,7 +36,7 @@ public class RegistroCardioRepository {
     public void guardarRegistro(int idUsuario, int idSeccion, int idEjercicio, RegistroCardio registro, RepositoryCallback<RegistroCardio> callback) {
         executorService.execute(() -> {
             // 1. Obtener/Crear Entrenamiento
-            Entrenamiento ent = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento ent = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             if (ent == null) {
                 ent = new Entrenamiento();
                 ent.IdUsuario = idUsuario;
@@ -66,7 +66,7 @@ public class RegistroCardioRepository {
             long id = registroCardioDao.insertar(registro);
             registro.IdRegistroCardio = (int) id;
             
-            entrenamientoRepository.refrescarAlarmasInactividad(idUsuario, idSeccion);
+            entrenamientoRepository.refrescarAlarmasInactividad(idUsuario);
             
             notificar(callback, registro);
         });

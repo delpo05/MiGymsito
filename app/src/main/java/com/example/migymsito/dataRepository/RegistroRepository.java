@@ -46,8 +46,8 @@ public class RegistroRepository {
      */
     public void guardarRegistroCompleto(int idUsuario, int idSeccion, int idEjercicio, double peso, String unidadPeso, int series, int reps, Double pesoCorporal, RepositoryCallback<Registro> callback) {
         executorService.execute(() -> {
-            // 1. Obtener Entrenamiento activo específicamente para esta sección
-            Entrenamiento entrenamientoActivo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            // 1. Obtener Entrenamiento activo del usuario
+            Entrenamiento entrenamientoActivo = entrenamientoDao.getEntrenamientoActivo(idUsuario);
 
             if (entrenamientoActivo == null) {
                 entrenamientoActivo = new Entrenamiento();
@@ -87,7 +87,7 @@ public class RegistroRepository {
             registroDao.insertarRegistro(nuevo);
             
             // Refrescar alarmas de inactividad
-            entrenamientoRepository.refrescarAlarmasInactividad(idUsuario, idSeccion);
+            entrenamientoRepository.refrescarAlarmasInactividad(idUsuario);
             
             notificar(callback, nuevo);
         });
@@ -114,7 +114,7 @@ public class RegistroRepository {
      */
     public void obtenerRegistrosEntrenamientoActivo(int idUsuario, int idSeccion, int idEjercicio, RepositoryCallback<List<Registro>> callback) {
         executorService.execute(() -> {
-            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivoPorSeccion(idUsuario, idSeccion);
+            Entrenamiento activo = entrenamientoDao.getEntrenamientoActivo(idUsuario);
             if (activo != null) {
                 List<Registro> lista = registroDao.obtenerHistorialPorEjercicioYUsuario(idUsuario, idEjercicio);
                 // Filtrar solo los que pertenecen a este entrenamiento

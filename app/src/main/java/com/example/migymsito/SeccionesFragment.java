@@ -41,9 +41,11 @@ public class SeccionesFragment extends Fragment {
     private RecyclerView rvSecciones;
     private Rutina rutinaActual;
     private SeccionRepository seccionRepository;
+    private EntrenamientoRepository entrenamientoRepository;
     private SharedViewModel sharedViewModel;
     private SeccionesAdapter adapter;
     private FloatingActionButton fabAdd;
+    private Button btnFinalizarEntrenamiento;
 
     @Nullable
     @Override
@@ -85,6 +87,7 @@ public class SeccionesFragment extends Fragment {
 
         rvSecciones = view.findViewById(R.id.rvGenerico);
         fabAdd = view.findViewById(R.id.fabAdd);
+        btnFinalizarEntrenamiento = view.findViewById(R.id.btnFinalizarEntrenamiento);
 
         if (rvSecciones != null) {
             rvSecciones.setLayoutManager(new GridLayoutManager(requireContext(), 2));
@@ -94,12 +97,77 @@ public class SeccionesFragment extends Fragment {
             fabAdd.setOnClickListener(v -> mostrarPopUpAnadirSeccion());
         }
 
-        View btnFinalizar = view.findViewById(R.id.btnFinalizarEntrenamiento);
-        if (btnFinalizar != null) {
-            btnFinalizar.setVisibility(View.GONE);
+        configurarBotonFinalizar();
+        configurarGridView(view);
+    }
+
+    private void configurarBotonFinalizar() {
+        if (btnFinalizarEntrenamiento == null || MainActivity.usuarioLogueado == null) return;
+        if (getActivity() == null) return;
+
+        if (entrenamientoRepository == null) {
+            entrenamientoRepository = new EntrenamientoRepository(getActivity().getApplication());
         }
 
-        configurarGridView(view);
+        entrenamientoRepository.obtenerEntrenamientoActivo(MainActivity.usuarioLogueado.IdUsuario, entrenamiento -> {
+            if (entrenamiento != null) {
+                btnFinalizarEntrenamiento.setText("FINALIZAR ENTRENAMIENTO");
+                btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
+                btnFinalizarEntrenamiento.setEnabled(true);
+                btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                    new android.app.AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+                            .setTitle("Finalizar Entrenamiento")
+                            .setMessage("¿Estás seguro de que deseas finalizar este entrenamiento?")
+                            .setPositiveButton("Finalizar", (dialog, which) -> {
+                                android.media.MediaPlayer mp = android.media.MediaPlayer.create(getContext(), R.raw.sonido3);
+                                if (mp != null) {
+                                    mp.start();
+                                    mp.setOnCompletionListener(android.media.MediaPlayer::release);
+                                }
+                                btnFinalizarEntrenamiento.setEnabled(false);
+                                entrenamientoRepository.finalizarOEliminarSiVacio(MainActivity.usuarioLogueado.IdUsuario, finalizado -> {
+                                    if (finalizado != null && finalizado) {
+                                        android.widget.Toast.makeText(getContext(), "¡Entrenamiento finalizado!", android.widget.Toast.LENGTH_SHORT).show();
+                                        validarYRedirigir();
+                                    } else {
+                                        android.widget.Toast.makeText(getContext(), "Entrenamiento sin registros no guardado", android.widget.Toast.LENGTH_SHORT).show();
+                                        configurarBotonFinalizar();
+                                    }
+                                });
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                });
+            } else {
+                btnFinalizarEntrenamiento.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void validarYRedirigir() {
+        new Thread(() -> {
+            if (MainActivity.usuarioLogueado == null) return;
+            com.example.migymsito.dataDataBase.AppDatabase db = com.example.migymsito.dataDataBase.AppDatabase.getDatabase(getContext());
+            List<com.example.migymsito.data.Entrenamiento> entrenamientos = db.entrenamientoDao().getEntrenamientosFinalizadosPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (entrenamientos != null && entrenamientos.size() >= 2 && isAdded()) {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("idEntA", entrenamientos.get(0).IdEntrenamiento);
+                    bundle.putInt("idEntB", entrenamientos.get(1).IdEntrenamiento);
+                    Navigation.findNavController(requireView()).navigate(R.id.compararEntrenamientosFragment, bundle);
+                } else {
+                    if (isAdded()) {
+                        Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null);
+                    }
+                }
+            });
+        }).start();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        configurarBotonFinalizar();
     }
 
     private void configurarGridView(View view) {

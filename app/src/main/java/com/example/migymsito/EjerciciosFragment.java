@@ -174,12 +174,12 @@ public class EjerciciosFragment extends Fragment {
     }
 
     private void configurarBotonFinalizar() {
-        if (btnFinalizarEntrenamiento == null || seccionActual == null || MainActivity.usuarioLogueado == null) {
+        if (btnFinalizarEntrenamiento == null || MainActivity.usuarioLogueado == null) {
             if (btnFinalizarEntrenamiento != null) btnFinalizarEntrenamiento.setVisibility(View.GONE);
             return;
         }
 
-        entrenamientoRepository.obtenerEntrenamientoActivoPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, entrenamiento -> {
+        entrenamientoRepository.obtenerEntrenamientoActivo(MainActivity.usuarioLogueado.IdUsuario, entrenamiento -> {
             if (entrenamiento != null) {
                 btnFinalizarEntrenamiento.setText("FINALIZAR ENTRENAMIENTO");
                 btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
@@ -188,7 +188,7 @@ public class EjerciciosFragment extends Fragment {
                 btnFinalizarEntrenamiento.setOnClickListener(v -> {
                     new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
                             .setTitle("Finalizar Entrenamiento")
-                            .setMessage("¿Estás seguro de que deseas finalizar esta sección?")
+                            .setMessage("¿Estás seguro de que deseas finalizar este entrenamiento?")
                             .setPositiveButton("Finalizar", (dialog, which) -> {
                                 MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido3);
                                 if (mp != null) {
@@ -199,7 +199,7 @@ public class EjerciciosFragment extends Fragment {
                                 btnFinalizarEntrenamiento.setEnabled(false);
 
                                 entrenamientoRepository.finalizarOEliminarSiVacio(
-                                        MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, finalizado -> {
+                                        MainActivity.usuarioLogueado.IdUsuario, finalizado -> {
                                             if (finalizado != null) {
                                                 if (finalizado) {
                                                     Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
@@ -220,16 +220,19 @@ public class EjerciciosFragment extends Fragment {
                             .show();
                 });
             } else {
-                btnFinalizarEntrenamiento.setText("INICIAR SECCIÓN");
+                btnFinalizarEntrenamiento.setText("INICIAR ENTRENAMIENTO");
                 btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
                 btnFinalizarEntrenamiento.setEnabled(true);
 
                 btnFinalizarEntrenamiento.setOnClickListener(v -> {
+                    String nombreSeccion = seccionActual != null ? seccionActual.NombreSeccion : "";
+                    String msg = nombreSeccion.isEmpty() ? "¿Deseas comenzar un nuevo entrenamiento?" : "¿Deseas comenzar el entrenamiento con la sección \"" + nombreSeccion + "\"?";
                     new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-                            .setTitle("Iniciar Sección")
-                            .setMessage("¿Deseas comenzar con la sección \"" + seccionActual.NombreSeccion + "\"?")
+                            .setTitle("Iniciar Entrenamiento")
+                            .setMessage(msg)
                             .setPositiveButton("Comenzar", (dialog, which) -> {
-                                entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion, nuevoEnt -> {
+                                Integer idSec = seccionActual != null ? seccionActual.IdSeccion : null;
+                                entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, idSec, nuevoEnt -> {
                                     configurarBotonFinalizar();
                                 });
                             })
@@ -245,7 +248,7 @@ public class EjerciciosFragment extends Fragment {
             if (MainActivity.usuarioLogueado == null) return;
 
             AppDatabase db = AppDatabase.getDatabase(getContext());
-            List<Entrenamiento> entrenamientos = db.entrenamientoDao().getEntrenamientosFinalizadosPorSeccion(MainActivity.usuarioLogueado.IdUsuario, seccionActual.IdSeccion);
+            List<Entrenamiento> entrenamientos = db.entrenamientoDao().getEntrenamientosFinalizadosPorUsuario(MainActivity.usuarioLogueado.IdUsuario);
             
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (entrenamientos != null && entrenamientos.size() >= 2) {
@@ -264,7 +267,6 @@ public class EjerciciosFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putInt("idEntA", entrenamientos.get(0).IdEntrenamiento);
             bundle.putInt("idEntB", entrenamientos.get(1).IdEntrenamiento);
-            bundle.putInt("idSeccion", seccionActual.IdSeccion);
             Navigation.findNavController(requireView()).navigate(R.id.compararEntrenamientosFragment, bundle);
         }
     }

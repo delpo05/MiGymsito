@@ -137,7 +137,7 @@ public class BackupManager {
                     JSONObject jent = new JSONObject();
                     jent.put("IdEntrenamiento", ent.IdEntrenamiento);
                     jent.put("IdUsuario", ent.IdUsuario);
-                    jent.put("IdSeccion", ent.IdSeccion);
+                    jent.put("IdSeccion", ent.IdSeccion != null ? ent.IdSeccion : JSONObject.NULL);
                     jent.put("NumeroEntrenamiento", ent.NumeroEntrenamiento);
                     jent.put("FechaInicio", ent.FechaInicio);
                     jent.put("FechaFin", ent.FechaFin);
@@ -369,7 +369,11 @@ public class BackupManager {
                                 Entrenamiento ent = new Entrenamiento();
                                 ent.IdEntrenamiento = jent.optInt("IdEntrenamiento");
                                 ent.IdUsuario = jent.optInt("IdUsuario", 1);
-                                ent.IdSeccion = jent.optInt("IdSeccion");
+                                if (jent.has("IdSeccion") && !jent.isNull("IdSeccion")) {
+                                    ent.IdSeccion = jent.optInt("IdSeccion");
+                                } else {
+                                    ent.IdSeccion = null;
+                                }
                                 ent.NumeroEntrenamiento = jent.optInt("NumeroEntrenamiento", 1);
                                 ent.FechaInicio = jent.optLong("FechaInicio", System.currentTimeMillis());
                                 if (jent.has("FechaFin") && !jent.isNull("FechaFin")) {
