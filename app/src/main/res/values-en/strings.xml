@@ -97,6 +97,21 @@
     <string name="empty_paso_2">2. Create sections (e.g. Chest, Back) to organize your exercises.</string>
     <string name="empty_paso_3">3. Choose between Preset or Custom exercises and start tracking.</string>
     <string name="btn_crear_primera_rutina">Create my first routine</string>
+
+    <string name="empty_secciones_titulo">Create your first section</string>
+    <string name="empty_secciones_subtitulo">You don\'t have any sections in this routine yet. Follow these steps to get started:</string>
+    <string name="empty_secciones_paso_1">1. Tap the + button below to create a new section or clone an existing one.</string>
+    <string name="empty_secciones_paso_2">2. Add exercises to your section to organize your session.</string>
+    <string name="empty_secciones_paso_3">3. Start training and log your progress!</string>
+    <string name="btn_crear_primera_seccion">Create your first section</string>
+
+    <string name="empty_ejercicios_titulo">Create your first exercise</string>
+    <string name="empty_ejercicios_subtitulo">You don\'t have any exercises in this section yet. Follow these steps to get started:</string>
+    <string name="empty_ejercicios_paso_1">1. Tap the + button below to add an exercise.</string>
+    <string name="empty_ejercicios_paso_2">2. Choose between Preset exercises or create a Custom one.</string>
+    <string name="empty_ejercicios_paso_3">3. Tap the exercise to start logging your sets.</string>
+    <string name="btn_crear_primer_ejercicio">Create your first exercise</string>
+
     <string name="btn_ver_tutorial_interactivo">View Interactive Tutorial</string>
 
     <string name="guide_paso_1_titulo">1. Create Your First Routine</string>

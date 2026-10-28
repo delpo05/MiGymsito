@@ -102,6 +102,21 @@
     <string name="empty_paso_2">2. Crea secciones (ej. Pecho, Espalda) para organizar tus ejercicios.</string>
     <string name="empty_paso_3">3. Elige entre ejercicios Preestablecidos o Personalizados y comienza.</string>
     <string name="btn_crear_primera_rutina">Crear mi primera rutina</string>
+
+    <string name="empty_secciones_titulo">Crea tu primera sección</string>
+    <string name="empty_secciones_subtitulo">Aún no tienes secciones en esta rutina. Sigue estos pasos para comenzar:</string>
+    <string name="empty_secciones_paso_1">1. Toca el botón + abajo para crear una nueva sección o clonar una existente.</string>
+    <string name="empty_secciones_paso_2">2. Agrega ejercicios a tu sección para organizar tu sesión.</string>
+    <string name="empty_secciones_paso_3">3. ¡Comienza a entrenar y registra tu progreso!</string>
+    <string name="btn_crear_primera_seccion">Crea tu primera sección</string>
+
+    <string name="empty_ejercicios_titulo">Crea tu primer ejercicio</string>
+    <string name="empty_ejercicios_subtitulo">Aún no tienes ejercicios en esta sección. Sigue estos pasos para comenzar:</string>
+    <string name="empty_ejercicios_paso_1">1. Toca el botón + abajo para agregar un ejercicio.</string>
+    <string name="empty_ejercicios_paso_2">2. Elige entre ejercicios Preestablecidos o crea uno Personalizado.</string>
+    <string name="empty_ejercicios_paso_3">3. Toca el ejercicio para iniciar y registrar tus series.</string>
+    <string name="btn_crear_primer_ejercicio">Crea tu primer ejercicio</string>
+
     <string name="btn_ver_tutorial_interactivo">Ver Tutorial Interactivo</string>
 
     <string name="guide_paso_1_titulo">1. Crea tu Primera Rutina</string>

@@ -48,6 +48,7 @@ import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.example.migymsito.utils.InteractiveTutorialDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -63,6 +64,7 @@ public class EjerciciosFragment extends Fragment {
     private Seccion seccionActual;
     private TextView tvTituloGrid;
     private RecyclerView rvEjercicios;
+    private View emptyStateContainer;
     private EjercicioRepository ejercicioRepository;
     private SeccionRepository seccionRepository;
     private EntrenamientoRepository entrenamientoRepository;
@@ -118,9 +120,12 @@ public class EjerciciosFragment extends Fragment {
         }
 
         rvEjercicios = view.findViewById(R.id.rvGenerico);
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
         tvTituloGrid = view.findViewById(R.id.tvTituloGrid);
         btnFinalizarEntrenamiento = view.findViewById(R.id.btnFinalizarEntrenamiento);
         fabAdd = view.findViewById(R.id.fabAdd);
+
+        configurarEmptyState(view);
 
         if (rvEjercicios != null) {
             rvEjercicios.setLayoutManager(new GridLayoutManager(requireContext(), 2));
@@ -549,9 +554,63 @@ public class EjerciciosFragment extends Fragment {
         cargarEjerciciosDesdeDB();
     }
 
+    private void configurarEmptyState(View view) {
+        if (emptyStateContainer == null) return;
+
+        TextView tvTitulo = view.findViewById(R.id.tvEmptyStateTitle);
+        if (tvTitulo != null) tvTitulo.setText(R.string.empty_ejercicios_titulo);
+
+        TextView tvSubtitulo = view.findViewById(R.id.tvEmptyStateSubtitle);
+        if (tvSubtitulo != null) tvSubtitulo.setText(R.string.empty_ejercicios_subtitulo);
+
+        TextView tvPaso1 = view.findViewById(R.id.tvEmptyPaso1);
+        if (tvPaso1 != null) tvPaso1.setText(R.string.empty_ejercicios_paso_1);
+
+        TextView tvPaso2 = view.findViewById(R.id.tvEmptyPaso2);
+        if (tvPaso2 != null) tvPaso2.setText(R.string.empty_ejercicios_paso_2);
+
+        TextView tvPaso3 = view.findViewById(R.id.tvEmptyPaso3);
+        if (tvPaso3 != null) tvPaso3.setText(R.string.empty_ejercicios_paso_3);
+
+        Button btnCrearPrimera = view.findViewById(R.id.btnCrearPrimeraRutina);
+        if (btnCrearPrimera != null) {
+            btnCrearPrimera.setText(R.string.btn_crear_primer_ejercicio);
+            btnCrearPrimera.setOnClickListener(v -> mostrarPopUpAnadirEjercicio());
+        }
+
+        View btnVerTutorial = view.findViewById(R.id.btnVerTutorialInteractivo);
+        if (btnVerTutorial != null) {
+            btnVerTutorial.setOnClickListener(v -> mostrarTutorialInteractivo());
+        }
+    }
+
+    public void mostrarTutorialInteractivo() {
+        if (getContext() == null) return;
+        InteractiveTutorialDialog dialog = new InteractiveTutorialDialog(requireContext(), new InteractiveTutorialDialog.OnTutorialActionListener() {
+            @Override
+            public void onCreateRoutineRequested() {
+                mostrarPopUpAnadirEjercicio();
+            }
+
+            @Override
+            public void onTutorialDismissed() {
+            }
+        });
+        dialog.show();
+    }
+
     private void cargarEjerciciosDesdeDB() {
         if (seccionActual != null && ejercicioRepository != null) {
-            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> adapter.setEjercicios(ejercicios));
+            ejercicioRepository.obtenerEjerciciosPorSeccion(seccionActual.IdSeccion, ejercicios -> {
+                adapter.setEjercicios(ejercicios);
+                if (ejercicios == null || ejercicios.isEmpty()) {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.VISIBLE);
+                    if (rvEjercicios != null) rvEjercicios.setVisibility(View.GONE);
+                } else {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.GONE);
+                    if (rvEjercicios != null) rvEjercicios.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 

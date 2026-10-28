@@ -342,6 +342,9 @@ public class RegistroInteractivoFragment extends Fragment {
                 String[] opciones = {"Masculino", "Femenino", "Otro"};
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(itemView.getContext(), R.layout.dropdown_item, opciones);
                 spinner.setAdapter(adapter);
+                if (viewModel.genero.getValue() == null || viewModel.genero.getValue().isEmpty()) {
+                    viewModel.genero.setValue(opciones[0]);
+                }
                 spinner.setText(viewModel.genero.getValue(), false);
 
                 spinner.setOnItemClickListener((parent, view, position, id) -> viewModel.genero.setValue(opciones[position]));

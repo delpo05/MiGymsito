@@ -122,15 +122,7 @@ public class RutinasFragment extends Fragment {
         emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
         fabAdd = view.findViewById(R.id.fabAdd);
 
-        View btnCrearPrimera = view.findViewById(R.id.btnCrearPrimeraRutina);
-        if (btnCrearPrimera != null) {
-            btnCrearPrimera.setOnClickListener(v -> mostrarPopUpRutina(null));
-        }
-
-        View btnVerTutorial = view.findViewById(R.id.btnVerTutorialInteractivo);
-        if (btnVerTutorial != null) {
-            btnVerTutorial.setOnClickListener(v -> mostrarTutorialInteractivo());
-        }
+        configurarEmptyState(view);
 
         if (rvRutinas != null) {
             rvRutinas.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -381,6 +373,36 @@ public class RutinasFragment extends Fragment {
             return Uri.fromFile(file).toString();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private void configurarEmptyState(View view) {
+        if (emptyStateContainer == null) return;
+
+        TextView tvTitulo = view.findViewById(R.id.tvEmptyStateTitle);
+        if (tvTitulo != null) tvTitulo.setText(R.string.empty_rutinas_titulo);
+
+        TextView tvSubtitulo = view.findViewById(R.id.tvEmptyStateSubtitle);
+        if (tvSubtitulo != null) tvSubtitulo.setText(R.string.empty_rutinas_subtitulo);
+
+        TextView tvPaso1 = view.findViewById(R.id.tvEmptyPaso1);
+        if (tvPaso1 != null) tvPaso1.setText(R.string.empty_paso_1);
+
+        TextView tvPaso2 = view.findViewById(R.id.tvEmptyPaso2);
+        if (tvPaso2 != null) tvPaso2.setText(R.string.empty_paso_2);
+
+        TextView tvPaso3 = view.findViewById(R.id.tvEmptyPaso3);
+        if (tvPaso3 != null) tvPaso3.setText(R.string.empty_paso_3);
+
+        Button btnCrearPrimera = view.findViewById(R.id.btnCrearPrimeraRutina);
+        if (btnCrearPrimera != null) {
+            btnCrearPrimera.setText(R.string.btn_crear_primera_rutina);
+            btnCrearPrimera.setOnClickListener(v -> mostrarPopUpRutina(null));
+        }
+
+        View btnVerTutorial = view.findViewById(R.id.btnVerTutorialInteractivo);
+        if (btnVerTutorial != null) {
+            btnVerTutorial.setOnClickListener(v -> mostrarTutorialInteractivo());
         }
     }
 

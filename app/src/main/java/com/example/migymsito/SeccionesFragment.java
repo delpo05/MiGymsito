@@ -31,6 +31,7 @@ import com.example.migymsito.data.Rutina;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.example.migymsito.utils.InteractiveTutorialDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.List;
 public class SeccionesFragment extends Fragment {
 
     private RecyclerView rvSecciones;
+    private View emptyStateContainer;
     private Rutina rutinaActual;
     private SeccionRepository seccionRepository;
     private EntrenamientoRepository entrenamientoRepository;
@@ -86,8 +88,11 @@ public class SeccionesFragment extends Fragment {
         }
 
         rvSecciones = view.findViewById(R.id.rvGenerico);
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
         fabAdd = view.findViewById(R.id.fabAdd);
         btnFinalizarEntrenamiento = view.findViewById(R.id.btnFinalizarEntrenamiento);
+
+        configurarEmptyState(view);
 
         if (rvSecciones != null) {
             rvSecciones.setLayoutManager(new GridLayoutManager(requireContext(), 2));
@@ -263,9 +268,63 @@ public class SeccionesFragment extends Fragment {
         dialog.show();
     }
 
+    private void configurarEmptyState(View view) {
+        if (emptyStateContainer == null) return;
+
+        TextView tvTitulo = view.findViewById(R.id.tvEmptyStateTitle);
+        if (tvTitulo != null) tvTitulo.setText(R.string.empty_secciones_titulo);
+
+        TextView tvSubtitulo = view.findViewById(R.id.tvEmptyStateSubtitle);
+        if (tvSubtitulo != null) tvSubtitulo.setText(R.string.empty_secciones_subtitulo);
+
+        TextView tvPaso1 = view.findViewById(R.id.tvEmptyPaso1);
+        if (tvPaso1 != null) tvPaso1.setText(R.string.empty_secciones_paso_1);
+
+        TextView tvPaso2 = view.findViewById(R.id.tvEmptyPaso2);
+        if (tvPaso2 != null) tvPaso2.setText(R.string.empty_secciones_paso_2);
+
+        TextView tvPaso3 = view.findViewById(R.id.tvEmptyPaso3);
+        if (tvPaso3 != null) tvPaso3.setText(R.string.empty_secciones_paso_3);
+
+        Button btnCrearPrimera = view.findViewById(R.id.btnCrearPrimeraRutina);
+        if (btnCrearPrimera != null) {
+            btnCrearPrimera.setText(R.string.btn_crear_primera_seccion);
+            btnCrearPrimera.setOnClickListener(v -> mostrarPopUpAnadirSeccion());
+        }
+
+        View btnVerTutorial = view.findViewById(R.id.btnVerTutorialInteractivo);
+        if (btnVerTutorial != null) {
+            btnVerTutorial.setOnClickListener(v -> mostrarTutorialInteractivo());
+        }
+    }
+
+    public void mostrarTutorialInteractivo() {
+        if (getContext() == null) return;
+        InteractiveTutorialDialog dialog = new InteractiveTutorialDialog(requireContext(), new InteractiveTutorialDialog.OnTutorialActionListener() {
+            @Override
+            public void onCreateRoutineRequested() {
+                mostrarPopUpAnadirSeccion();
+            }
+
+            @Override
+            public void onTutorialDismissed() {
+            }
+        });
+        dialog.show();
+    }
+
     private void cargarSeccionesDesdeDB() {
         if (rutinaActual != null && seccionRepository != null) {
-            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> adapter.setSecciones(secciones));
+            seccionRepository.obtenerSeccionesDeRutina(rutinaActual.IdRutina, secciones -> {
+                adapter.setSecciones(secciones);
+                if (secciones == null || secciones.isEmpty()) {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.VISIBLE);
+                    if (rvSecciones != null) rvSecciones.setVisibility(View.GONE);
+                } else {
+                    if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.GONE);
+                    if (rvSecciones != null) rvSecciones.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 
