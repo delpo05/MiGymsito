@@ -1,6 +1,5 @@
 package com.example.migymsito;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -184,63 +183,109 @@ public class EjerciciosFragment extends Fragment {
                 btnFinalizarEntrenamiento.setText("FINALIZAR ENTRENAMIENTO");
                 btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
                 btnFinalizarEntrenamiento.setEnabled(true);
-                
-                btnFinalizarEntrenamiento.setOnClickListener(v -> {
-                    new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-                            .setTitle("Finalizar Entrenamiento")
-                            .setMessage("¿Estás seguro de que deseas finalizar este entrenamiento?")
-                            .setPositiveButton("Finalizar", (dialog, which) -> {
-                                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido3);
-                                if (mp != null) {
-                                    mp.start();
-                                    mp.setOnCompletionListener(MediaPlayer::release);
-                                }
-
-                                btnFinalizarEntrenamiento.setEnabled(false);
-
-                                entrenamientoRepository.finalizarOEliminarSiVacio(
-                                        MainActivity.usuarioLogueado.IdUsuario, finalizado -> {
-                                            if (finalizado != null) {
-                                                if (finalizado) {
-                                                    Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
-                                                    validarYRedirigir();
-                                                } else {
-                                                    Toast.makeText(getContext(), "Entrenamiento sin registros no guardado", Toast.LENGTH_SHORT).show();
-                                                    if (isAdded()) {
-                                                        Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null);
-                                                    }
-                                                }
-                                            } else {
-                                                Toast.makeText(getContext(), "Error al finalizar", Toast.LENGTH_SHORT).show();
-                                                btnFinalizarEntrenamiento.setEnabled(true);
-                                            }
-                                        });
-                            })
-                            .setNegativeButton("Cancelar", null)
-                            .show();
-                });
+                btnFinalizarEntrenamiento.setOnClickListener(v -> mostrarDialogoFinalizarEntrenamiento());
             } else {
                 btnFinalizarEntrenamiento.setText("INICIAR ENTRENAMIENTO");
                 btnFinalizarEntrenamiento.setVisibility(View.VISIBLE);
                 btnFinalizarEntrenamiento.setEnabled(true);
-
-                btnFinalizarEntrenamiento.setOnClickListener(v -> {
-                    String nombreSeccion = seccionActual != null ? seccionActual.NombreSeccion : "";
-                    String msg = nombreSeccion.isEmpty() ? "¿Deseas comenzar un nuevo entrenamiento?" : "¿Deseas comenzar el entrenamiento con la sección \"" + nombreSeccion + "\"?";
-                    new AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-                            .setTitle("Iniciar Entrenamiento")
-                            .setMessage(msg)
-                            .setPositiveButton("Comenzar", (dialog, which) -> {
-                                Integer idSec = seccionActual != null ? seccionActual.IdSeccion : null;
-                                entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, idSec, nuevoEnt -> {
-                                    configurarBotonFinalizar();
-                                });
-                            })
-                            .setNegativeButton("Cancelar", null)
-                            .show();
-                });
+                btnFinalizarEntrenamiento.setOnClickListener(v -> mostrarDialogoIniciarEntrenamiento());
             }
         });
+    }
+
+    private void mostrarDialogoIniciarEntrenamiento() {
+        if (!isAdded() || getContext() == null) return;
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.pop_up_confirmacion_entrenamiento);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloConfirmacion);
+        TextView tvMensaje = dialog.findViewById(R.id.tvMensajeConfirmacion);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarConfirmacion);
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarConfirmacion);
+
+        if (tvTitulo != null) tvTitulo.setText("Iniciar Entrenamiento");
+        if (tvMensaje != null) {
+            String nombreSeccion = seccionActual != null ? seccionActual.NombreSeccion : "";
+            String msg = nombreSeccion.isEmpty() ?
+                    "¿Deseas comenzar un nuevo entrenamiento?" :
+                    "¿Deseas comenzar el entrenamiento con la sección \"" + nombreSeccion + "\"?";
+            tvMensaje.setText(msg);
+        }
+        if (btnAceptar != null) btnAceptar.setText("COMENZAR");
+
+        if (btnCancelar != null) btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        if (btnAceptar != null) {
+            btnAceptar.setOnClickListener(v -> {
+                dialog.dismiss();
+                Integer idSec = seccionActual != null ? seccionActual.IdSeccion : null;
+                entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, idSec, nuevoEnt -> {
+                    configurarBotonFinalizar();
+                });
+            });
+        }
+
+        dialog.show();
+    }
+
+    private void mostrarDialogoFinalizarEntrenamiento() {
+        if (!isAdded() || getContext() == null) return;
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.pop_up_confirmacion_entrenamiento);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloConfirmacion);
+        TextView tvMensaje = dialog.findViewById(R.id.tvMensajeConfirmacion);
+        Button btnCancelar = dialog.findViewById(R.id.btnCancelarConfirmacion);
+        Button btnAceptar = dialog.findViewById(R.id.btnAceptarConfirmacion);
+
+        if (tvTitulo != null) tvTitulo.setText("Finalizar Entrenamiento");
+        if (tvMensaje != null) tvMensaje.setText("¿Estás seguro de que deseas finalizar este entrenamiento?");
+        if (btnAceptar != null) btnAceptar.setText("FINALIZAR");
+
+        if (btnCancelar != null) btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        if (btnAceptar != null) {
+            btnAceptar.setOnClickListener(v -> {
+                dialog.dismiss();
+                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.sonido3);
+                if (mp != null) {
+                    mp.start();
+                    mp.setOnCompletionListener(MediaPlayer::release);
+                }
+
+                if (btnFinalizarEntrenamiento != null) {
+                    btnFinalizarEntrenamiento.setEnabled(false);
+                }
+
+                entrenamientoRepository.finalizarOEliminarSiVacio(
+                        MainActivity.usuarioLogueado.IdUsuario, finalizado -> {
+                            if (finalizado != null) {
+                                if (finalizado) {
+                                    Toast.makeText(getContext(), "¡Entrenamiento finalizado!", Toast.LENGTH_SHORT).show();
+                                    validarYRedirigir();
+                                } else {
+                                    Toast.makeText(getContext(), "Entrenamiento sin registros no guardado", Toast.LENGTH_SHORT).show();
+                                    if (isAdded()) {
+                                        Navigation.findNavController(requireView()).navigate(R.id.rutinasFragment, null);
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(getContext(), "Error al finalizar", Toast.LENGTH_SHORT).show();
+                                if (btnFinalizarEntrenamiento != null) {
+                                    btnFinalizarEntrenamiento.setEnabled(true);
+                                }
+                            }
+                        });
+            });
+        }
+
+        dialog.show();
     }
 
     private void validarYRedirigir() {

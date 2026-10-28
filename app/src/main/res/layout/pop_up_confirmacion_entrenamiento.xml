@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="340dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_dark"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_gravity="center">
+
+    <TextView
+        android:id="@+id/tvTituloConfirmacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:text="Finalizar Entrenamiento"
+        android:textColor="@color/blanco"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/app_font" />
+
+    <TextView
+        android:id="@+id/tvMensajeConfirmacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="¿Estás seguro de que deseas finalizar este entrenamiento?"
+        android:textColor="@color/gris_pista"
+        android:textSize="15sp"
+        android:fontFamily="@font/app_font" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <!-- Botón Cancelar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancelarConfirmacion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="CANCELAR"
+            android:textColor="@color/blanco"
+            app:backgroundTint="#403C3C"
+            app:cornerRadius="12dp"
+            android:fontFamily="@font/app_font"
+            android:textStyle="bold"
+            style="@style/Widget.Material3.Button.TonalButton" />
+
+        <!-- Botón Aceptar (Comenzar / Finalizar) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAceptarConfirmacion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="FINALIZAR"
+            android:textColor="@color/negro"
+            app:backgroundTint="@color/blanco"
+            app:cornerRadius="12dp"
+            android:fontFamily="@font/app_font"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -355,6 +355,9 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                 Double volTarget = volumenesTarget.get(idEjercicio);
                 double vTarget = volTarget != null ? volTarget : 0.0;
 
+                // Solo comparar ejercicios en los que se hicieron registros en el entrenamiento actual/objetivo
+                if (vTarget <= 0) continue;
+
                 Double volBase = volumenesBaseMap.get(idEjercicio);
                 double vBase = volBase != null ? volBase : 0.0;
                 int idEntBaseForExercise = eBase.IdEntrenamiento;
@@ -371,9 +374,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                     }
                 }
 
-                if (vTarget > 0 || vBase > 0) {
-                    filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, idEjercicio, idEntBaseForExercise, vTarget, vBase));
-                }
+                filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, idEjercicio, idEntBaseForExercise, vTarget, vBase));
             }
 
             final int finalTargetId = eTarget.IdEntrenamiento;
