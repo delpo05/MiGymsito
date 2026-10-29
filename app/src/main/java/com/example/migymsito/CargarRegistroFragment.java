@@ -48,6 +48,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.HistorialEjercicioAdapter;
 import com.example.migymsito.adapter.RegistroAdapter;
+import com.example.migymsito.utils.PersonalRecordUtils;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+
+import java.text.SimpleDateFormat;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
 import com.example.migymsito.data.Historial;
@@ -81,6 +86,14 @@ public class CargarRegistroFragment extends Fragment {
     private RecyclerView rvHistorial;
     private RegistroAdapter adapter;
     private final List<Registro> listaHistorial = new ArrayList<>();
+
+    // Componentes para Mejor Puntaje / PR
+    private MaterialCardView cvMejorPuntaje;
+    private MaterialButtonToggleGroup toggleGroupMejorPuntaje;
+    private MaterialButton btnTogglePeso, btnTogglePesoXReps;
+    private TextView tvValorMejorPuntaje, tvDetalleMejorPuntaje;
+    private final List<Registro> historialCompletoEjercicio = new ArrayList<>();
+    private final SimpleDateFormat dateFormatoRecord = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     private RegistroRepository registroRepository;
     private SharedViewModel sharedViewModel;
@@ -211,6 +224,7 @@ public class CargarRegistroFragment extends Fragment {
 
         if (idEjercicio != 0) {
             cargarSeriesDelDia();
+            cargarHistorialCompletoEjercicio();
         }
     }
 
@@ -220,6 +234,22 @@ public class CargarRegistroFragment extends Fragment {
         tvSerieValue = view.findViewById(R.id.tvSerieValue);
         tvUnidadPeso = view.findViewById(R.id.tvUnidadPeso);
         tvColumnaPeso = view.findViewById(R.id.tvColumnaPeso);
+
+        cvMejorPuntaje = view.findViewById(R.id.cvMejorPuntaje);
+        toggleGroupMejorPuntaje = view.findViewById(R.id.toggleGroupMejorPuntaje);
+        btnTogglePeso = view.findViewById(R.id.btnTogglePeso);
+        btnTogglePesoXReps = view.findViewById(R.id.btnTogglePesoXReps);
+        tvValorMejorPuntaje = view.findViewById(R.id.tvValorMejorPuntaje);
+        tvDetalleMejorPuntaje = view.findViewById(R.id.tvDetalleMejorPuntaje);
+
+        if (toggleGroupMejorPuntaje != null) {
+            toggleGroupMejorPuntaje.check(R.id.btnTogglePeso);
+            toggleGroupMejorPuntaje.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if (isChecked) {
+                    actualizarUIMejorPuntaje();
+                }
+            });
+        }
         
         npRepeticiones = view.findViewById(R.id.npRepeticiones);
         npPesoEntero = view.findViewById(R.id.npPesoEntero);
@@ -252,6 +282,55 @@ public class CargarRegistroFragment extends Fragment {
             tvColumnaPeso.setText(R.string.columna_peso_x2);
         } else {
             tvUnidadPeso.setText(R.string.kg);
+        }
+    }
+
+    private void cargarHistorialCompletoEjercicio() {
+        if (idUsuario != 0 && idEjercicio != 0 && registroRepository != null) {
+            registroRepository.obtenerHistorialPorEjercicio(idUsuario, idEjercicio, registros -> {
+                historialCompletoEjercicio.clear();
+                if (registros != null) {
+                    historialCompletoEjercicio.addAll(registros);
+                }
+                actualizarUIMejorPuntaje();
+            });
+        }
+    }
+
+    private void actualizarUIMejorPuntaje() {
+        if (tvValorMejorPuntaje == null || tvDetalleMejorPuntaje == null) return;
+
+        if (historialCompletoEjercicio.isEmpty()) {
+            tvValorMejorPuntaje.setText("--");
+            tvDetalleMejorPuntaje.setText("Sin registros previos");
+            return;
+        }
+
+        boolean esPorPeso = (toggleGroupMejorPuntaje == null || toggleGroupMejorPuntaje.getCheckedButtonId() == R.id.btnTogglePeso);
+
+        if (esPorPeso) {
+            Registro mejor = PersonalRecordUtils.calcularMejorPeso(historialCompletoEjercicio);
+            if (mejor != null) {
+                String unidad = (mejor.UnidadPeso != null && !mejor.UnidadPeso.isEmpty()) ? mejor.UnidadPeso : "kg";
+                tvValorMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s", mejor.PesoRegistro, unidad));
+                String fechaStr = (mejor.FechaRegistro != null) ? dateFormatoRecord.format(new java.util.Date(mejor.FechaRegistro)) : "";
+                tvDetalleMejorPuntaje.setText(String.format(Locale.getDefault(), "%d reps • %s", mejor.Repeticiones, fechaStr));
+            } else {
+                tvValorMejorPuntaje.setText("--");
+                tvDetalleMejorPuntaje.setText("Sin registros previos");
+            }
+        } else {
+            Registro mejorVolumen = PersonalRecordUtils.calcularMejorVolumen(historialCompletoEjercicio);
+            if (mejorVolumen != null) {
+                String unidad = (mejorVolumen.UnidadPeso != null && !mejorVolumen.UnidadPeso.isEmpty()) ? mejorVolumen.UnidadPeso : "kg";
+                double volumen = mejorVolumen.PesoRegistro * mejorVolumen.Repeticiones;
+                tvValorMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s", volumen, unidad));
+                String fechaStr = (mejorVolumen.FechaRegistro != null) ? dateFormatoRecord.format(new java.util.Date(mejorVolumen.FechaRegistro)) : "";
+                tvDetalleMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s × %d reps • %s", mejorVolumen.PesoRegistro, unidad, mejorVolumen.Repeticiones, fechaStr));
+            } else {
+                tvValorMejorPuntaje.setText("--");
+                tvDetalleMejorPuntaje.setText("Sin registros previos");
+            }
         }
     }
 
@@ -758,6 +837,7 @@ public class CargarRegistroFragment extends Fragment {
 
             registroRepository.actualizarRegistro(registro);
             adapter.notifyItemChanged(position);
+            cargarHistorialCompletoEjercicio();
             
             // Si editamos el último registro cargado (el primero en la lista visual),
             // actualizamos los pickers de la pantalla principal para que la siguiente serie
@@ -864,6 +944,7 @@ public class CargarRegistroFragment extends Fragment {
                             Toast.makeText(getContext(), R.string.serie_guardada, Toast.LENGTH_SHORT).show();
                             resetTimer();
                             startTimer();
+                            cargarHistorialCompletoEjercicio();
                         } else {
                             Toast.makeText(getContext(), R.string.error_guardar, Toast.LENGTH_SHORT).show();
                         }
@@ -881,6 +962,7 @@ public class CargarRegistroFragment extends Fragment {
         listaHistorial.remove(0);
         adapter.notifyItemRemoved(0);
         actualizarSerieActual(listaHistorial);
+        cargarHistorialCompletoEjercicio();
     }
 
     private void mostrarHistorialCompleto() {

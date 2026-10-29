@@ -48,9 +48,14 @@ import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.RegistroCardio;
 import com.example.migymsito.data.Seccion;
 import com.example.migymsito.dataRepository.RegistroCardioRepository;
+import com.example.migymsito.utils.PersonalRecordUtils;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +79,13 @@ public class CargarRegistroCardioFragment extends Fragment {
     private CardioHistorialAdapter adapter;
     private final List<RegistroCardio> listaHistorial = new ArrayList<>();
     private TabLayout tlTimerMode;
+
+    // Componentes para Mejor Puntaje Cardio / PR
+    private MaterialCardView cvMejorPuntajeCardio;
+    private MaterialButtonToggleGroup toggleGroupMejorPuntajeCardio;
+    private MaterialButton btnToggleDistanciaCardio, btnToggleDuracionCardio, btnToggleCaloriasCardio;
+    private TextView tvValorMejorPuntajeCardio, tvDetalleMejorPuntajeCardio;
+    private final SimpleDateFormat dateFormatoRecordCardio = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
     private Ejercicio ejercicio;
     private Seccion seccion;
@@ -140,6 +152,37 @@ public class CargarRegistroCardioFragment extends Fragment {
         btnEliminarUltimo = view.findViewById(R.id.btnEliminarUltimoCardio);
         rvHistorial = view.findViewById(R.id.rvCardioHistorial);
         tlTimerMode = view.findViewById(R.id.tlTimerMode);
+
+        cvMejorPuntajeCardio = view.findViewById(R.id.cvMejorPuntajeCardio);
+        toggleGroupMejorPuntajeCardio = view.findViewById(R.id.toggleGroupMejorPuntajeCardio);
+        btnToggleDistanciaCardio = view.findViewById(R.id.btnToggleDistanciaCardio);
+        btnToggleDuracionCardio = view.findViewById(R.id.btnToggleDuracionCardio);
+        btnToggleCaloriasCardio = view.findViewById(R.id.btnToggleCaloriasCardio);
+        tvValorMejorPuntajeCardio = view.findViewById(R.id.tvValorMejorPuntajeCardio);
+        tvDetalleMejorPuntajeCardio = view.findViewById(R.id.tvDetalleMejorPuntajeCardio);
+
+        if (ejercicio != null) {
+            if (!ejercicio.registraDistancia && btnToggleDistanciaCardio != null) {
+                btnToggleDistanciaCardio.setVisibility(View.GONE);
+            }
+            if (!ejercicio.registraCalorias && btnToggleCaloriasCardio != null) {
+                btnToggleCaloriasCardio.setVisibility(View.GONE);
+            }
+        }
+
+        if (toggleGroupMejorPuntajeCardio != null) {
+            if (ejercicio != null && ejercicio.registraDistancia && btnToggleDistanciaCardio != null) {
+                toggleGroupMejorPuntajeCardio.check(R.id.btnToggleDistanciaCardio);
+            } else if (btnToggleDuracionCardio != null) {
+                toggleGroupMejorPuntajeCardio.check(R.id.btnToggleDuracionCardio);
+            }
+
+            toggleGroupMejorPuntajeCardio.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if (isChecked) {
+                    actualizarUIMejorPuntajeCardio();
+                }
+            });
+        }
 
         tilDistancia = view.findViewById(R.id.tilCardioDistancia);
         tilCalorias = view.findViewById(R.id.tilCardioCalorias);
@@ -249,7 +292,68 @@ public class CargarRegistroCardioFragment extends Fragment {
                 listaHistorial.clear();
                 listaHistorial.addAll(registros);
                 adapter.notifyDataSetChanged();
+                actualizarUIMejorPuntajeCardio();
             });
+        }
+    }
+
+    private void actualizarUIMejorPuntajeCardio() {
+        if (tvValorMejorPuntajeCardio == null || tvDetalleMejorPuntajeCardio == null) return;
+
+        if (listaHistorial.isEmpty()) {
+            tvValorMejorPuntajeCardio.setText("--");
+            tvDetalleMejorPuntajeCardio.setText("Sin registros previos");
+            return;
+        }
+
+        int checkedId = (toggleGroupMejorPuntajeCardio != null) ? toggleGroupMejorPuntajeCardio.getCheckedButtonId() : R.id.btnToggleDuracionCardio;
+
+        if (checkedId == R.id.btnToggleDistanciaCardio) {
+            RegistroCardio mejor = PersonalRecordUtils.calcularMejorDistancia(listaHistorial);
+            if (mejor != null && mejor.Distancia != null) {
+                String unidadDist = (mejor.UnidadDistancia != null && !mejor.UnidadDistancia.isEmpty()) ? mejor.UnidadDistancia : "km";
+                tvValorMejorPuntajeCardio.setText(String.format(Locale.getDefault(), "%.2f %s", mejor.Distancia, unidadDist));
+                
+                long dur = mejor.DuracionSegundos;
+                String tiempoStr = String.format(Locale.getDefault(), "%02d:%02d:%02d", dur / 3600, (dur % 3600) / 60, dur % 60);
+                String fechaStr = (mejor.FechaRegistro != null) ? dateFormatoRecordCardio.format(new java.util.Date(mejor.FechaRegistro)) : "";
+                tvDetalleMejorPuntajeCardio.setText(String.format(Locale.getDefault(), "Tiempo: %s • %s", tiempoStr, fechaStr));
+            } else {
+                tvValorMejorPuntajeCardio.setText("--");
+                tvDetalleMejorPuntajeCardio.setText("Sin registros previos");
+            }
+        } else if (checkedId == R.id.btnToggleCaloriasCardio) {
+            RegistroCardio mejor = PersonalRecordUtils.calcularMejorCalorias(listaHistorial);
+            if (mejor != null && mejor.CaloriasQuemadas != null) {
+                tvValorMejorPuntajeCardio.setText(String.format(Locale.getDefault(), "%d kcal", mejor.CaloriasQuemadas));
+                
+                long dur = mejor.DuracionSegundos;
+                String tiempoStr = String.format(Locale.getDefault(), "%02d:%02d:%02d", dur / 3600, (dur % 3600) / 60, dur % 60);
+                String fechaStr = (mejor.FechaRegistro != null) ? dateFormatoRecordCardio.format(new java.util.Date(mejor.FechaRegistro)) : "";
+                tvDetalleMejorPuntajeCardio.setText(String.format(Locale.getDefault(), "Tiempo: %s • %s", tiempoStr, fechaStr));
+            } else {
+                tvValorMejorPuntajeCardio.setText("--");
+                tvDetalleMejorPuntajeCardio.setText("Sin registros previos");
+            }
+        } else {
+            // Duración / Tiempo
+            RegistroCardio mejor = PersonalRecordUtils.calcularMejorDuracion(listaHistorial);
+            if (mejor != null && mejor.DuracionSegundos > 0) {
+                long dur = mejor.DuracionSegundos;
+                String tiempoStr = String.format(Locale.getDefault(), "%02d:%02d:%02d", dur / 3600, (dur % 3600) / 60, dur % 60);
+                tvValorMejorPuntajeCardio.setText(tiempoStr);
+
+                String distStr = (mejor.Distancia != null && mejor.Distancia > 0) ? String.format(Locale.getDefault(), "%.2f %s", mejor.Distancia, (mejor.UnidadDistancia != null ? mejor.UnidadDistancia : "km")) : "";
+                String fechaStr = (mejor.FechaRegistro != null) ? dateFormatoRecordCardio.format(new java.util.Date(mejor.FechaRegistro)) : "";
+                if (!distStr.isEmpty()) {
+                    tvDetalleMejorPuntajeCardio.setText(String.format(Locale.getDefault(), "%s • %s", distStr, fechaStr));
+                } else {
+                    tvDetalleMejorPuntajeCardio.setText(fechaStr);
+                }
+            } else {
+                tvValorMejorPuntajeCardio.setText("--");
+                tvDetalleMejorPuntajeCardio.setText("Sin registros previos");
+            }
         }
     }
 
