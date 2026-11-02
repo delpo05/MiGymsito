@@ -324,9 +324,9 @@ public class CargarRegistroFragment extends Fragment {
             if (mejorVolumen != null) {
                 String unidad = (mejorVolumen.UnidadPeso != null && !mejorVolumen.UnidadPeso.isEmpty()) ? mejorVolumen.UnidadPeso : "kg";
                 double volumen = mejorVolumen.PesoRegistro * mejorVolumen.Repeticiones;
-                tvValorMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s", volumen, unidad));
+                tvValorMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s × %d reps", mejorVolumen.PesoRegistro, unidad, mejorVolumen.Repeticiones));
                 String fechaStr = (mejorVolumen.FechaRegistro != null) ? dateFormatoRecord.format(new java.util.Date(mejorVolumen.FechaRegistro)) : "";
-                tvDetalleMejorPuntaje.setText(String.format(Locale.getDefault(), "%.1f %s × %d reps • %s", mejorVolumen.PesoRegistro, unidad, mejorVolumen.Repeticiones, fechaStr));
+                tvDetalleMejorPuntaje.setText(String.format(Locale.getDefault(), "Total: %.1f %s • %s", volumen, unidad, fechaStr));
             } else {
                 tvValorMejorPuntaje.setText("--");
                 tvDetalleMejorPuntaje.setText("Sin registros previos");

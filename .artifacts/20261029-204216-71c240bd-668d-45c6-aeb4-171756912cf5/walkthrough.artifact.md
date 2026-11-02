@@ -16,11 +16,11 @@ Se ha implementado con éxito la funcionalidad para que el usuario pueda consult
 
 ### 2. Ejercicios de Fuerza (Carga de Repeticiones)
 - **[cargar_registro_activity.xml](file:///C:/Users/delpo/StudioProjects/MiGymsito/app/src/main/res/layout/cargar_registro_activity.xml)**:
-  - Se agregó la tarjeta `cvMejorPuntaje` (**🏆 MEJOR PUNTAJE**) ubicada estratégicamente arriba de los controles de ingreso de serie.
+  - Se agregó la tarjeta `cvMejorPuntaje` (**🏆 MEJOR PUNTAJE**) ubicada arriba de los controles de ingreso de serie.
   - Incluye `MaterialButtonToggleGroup` para conmutar entre **Peso** y **Peso × Reps**.
 - **[CargarRegistroFragment.java](file:///C:/Users/delpo/StudioProjects/MiGymsito/app/src/main/java/com/example/migymsito/CargarRegistroFragment.java)**:
   - Carga los registros históricos del ejercicio y reevalúa el récord personal.
-  - Alterna dinámicamente el valor mostrado según el toggle activo (**Peso** o **Peso × Reps**).
+  - **Visualización en "Peso × Reps"**: Muestra en el texto grande el desglose de la serie (`80.0 kg × 10 reps`) y en el texto pequeño inferior el resultado total calculado y la fecha (`Total: 800.0 kg • 24/10/2024`).
   - Se refresca automáticamente al guardar una nueva serie, o al editar/eliminar una existente.
 
 ---
