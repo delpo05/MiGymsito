@@ -3,6 +3,7 @@ package com.example.migymsito;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -158,13 +159,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void comprobarEntrenamientoActivoYActualizarCronometro() {
-        if (usuarioLogueado == null) return;
+        if (usuarioLogueado == null) {
+            resetStopwatch();
+            return;
+        }
         com.example.migymsito.dataRepository.EntrenamientoRepository entRepo = new com.example.migymsito.dataRepository.EntrenamientoRepository(getApplication());
         entRepo.obtenerEntrenamientoActivo(usuarioLogueado.IdUsuario, entrenamiento -> {
             if (entrenamiento != null && entrenamiento.FechaInicio != null) {
                 long elapsed = System.currentTimeMillis() - entrenamiento.FechaInicio;
                 if (elapsed < 0) elapsed = 0;
                 startStopwatch(elapsed);
+            } else {
+                resetStopwatch();
             }
         });
     }
@@ -199,9 +205,23 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
+            ImageView logoButton = toolbar.findViewById(R.id.toolbar_logo);
+            if (logoButton != null) {
+                logoButton.setOnClickListener(v -> {
+                    if (navController != null) {
+                        if (userRepo != null) {
+                            userRepo.eliminarRutinaSeleccionada();
+                        }
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("cambiarRutina", true);
+                        navController.navigate(R.id.rutinasFragment, bundle);
+                    }
+                });
+            }
+
             TextView tvUsername = toolbar.findViewById(R.id.toolbar_username);
             if (tvUsername != null && usuarioLogueado != null) {
-                tvUsername.setText(usuarioLogueado.NombreUsuario);
+                tvUsername.setText(com.example.migymsito.utils.HeaderUtils.obtenerNombreCortoHeader(usuarioLogueado.NombreUsuario));
             }
 
             containerStopwatch = toolbar.findViewById(R.id.toolbar_stopwatch_container);
@@ -262,6 +282,9 @@ public class MainActivity extends AppCompatActivity {
         isStopwatchRunning = true;
         stopwatchHandler.removeCallbacks(stopwatchRunnable);
         stopwatchHandler.post(stopwatchRunnable);
+        if (containerStopwatch != null) {
+            containerStopwatch.setVisibility(View.VISIBLE);
+        }
         updateStopwatchUI(stopwatchElapsedTime);
     }
 
@@ -279,6 +302,9 @@ public class MainActivity extends AppCompatActivity {
         stopwatchElapsedTime = 0L;
         stopwatchBaseTime = 0L;
         stopwatchHandler.removeCallbacks(stopwatchRunnable);
+        if (containerStopwatch != null) {
+            containerStopwatch.setVisibility(View.GONE);
+        }
         updateStopwatchUI(0L);
     }
 
@@ -374,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
         // Update Toolbar Username
         TextView tvToolbarUsername = findViewById(R.id.toolbar_username);
         if (tvToolbarUsername != null) {
-            tvToolbarUsername.setText(usuarioLogueado.NombreUsuario);
+            tvToolbarUsername.setText(com.example.migymsito.utils.HeaderUtils.obtenerNombreCortoHeader(usuarioLogueado.NombreUsuario));
         }
     }
 
