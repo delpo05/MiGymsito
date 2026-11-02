@@ -27,7 +27,7 @@ Se ha implementado con éxito la funcionalidad para que el usuario pueda consult
 
 ### 3. Ejercicios de Cardio
 - **[fragment_cargar_registro_cardio.xml](file:///C:/Users/delpo/StudioProjects/MiGymsito/app/src/main/res/layout/fragment_cargar_registro_cardio.xml)**:
-  - Se agregó la tarjeta `cvMejorPuntajeCardio` (**🏆 MEJOR PUNTAJE**).
+  - Se agregó la tarjeta `cvMejorPuntajeCardio` (**MEJOR PUNTAJE** sin emoji de trofeo).
   - Incluye `MaterialButtonToggleGroup` para conmutar entre **Distancia**, **Tiempo** y **Calorías**.
 - **[CargarRegistroCardioFragment.java](file:///C:/Users/delpo/StudioProjects/MiGymsito/app/src/main/java/com/example/migymsito/CargarRegistroCardioFragment.java)**:
   - Muestra únicamente los botones toggle correspondientes a las métricas habilitadas para cada tipo de ejercicio (`registraDistancia`, `registraCalorias`).
