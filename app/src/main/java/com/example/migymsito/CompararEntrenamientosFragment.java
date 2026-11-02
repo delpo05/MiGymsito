@@ -52,6 +52,8 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
     private LinearLayout llTablaComparacion;
     private RecyclerView rvComparacion;
     private TextView tvHeaderVolA, tvHeaderVolB;
+    private View cvComparacionTiempo;
+    private TextView tvTiempoLabelA, tvTiempoValA, tvTiempoLabelB, tvTiempoValB, tvTiempoDif;
     private SharedViewModel sharedViewModel;
 
     private RutinaRepository rutinaRepository;
@@ -112,6 +114,13 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
         rvComparacion = view.findViewById(R.id.rv_comparacion);
         tvHeaderVolA = view.findViewById(R.id.tv_header_vol_ent_a);
         tvHeaderVolB = view.findViewById(R.id.tv_header_vol_ent_b);
+
+        cvComparacionTiempo = view.findViewById(R.id.cv_comparacion_tiempo);
+        tvTiempoLabelA = view.findViewById(R.id.tv_tiempo_label_a);
+        tvTiempoValA = view.findViewById(R.id.tv_tiempo_val_a);
+        tvTiempoLabelB = view.findViewById(R.id.tv_tiempo_label_b);
+        tvTiempoValB = view.findViewById(R.id.tv_tiempo_val_b);
+        tvTiempoDif = view.findViewById(R.id.tv_tiempo_dif);
 
         rvComparacion.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -213,6 +222,7 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
         tietEntrenamientoA.setText("");
         tietEntrenamientoB.setText("");
         entrenamientosFinalizados.clear();
+        if (cvComparacionTiempo != null) cvComparacionTiempo.setVisibility(View.GONE);
         llTablaComparacion.setVisibility(View.GONE);
     }
 
@@ -377,11 +387,52 @@ public class CompararEntrenamientosFragment extends Fragment implements Comparac
                 filas.add(new ComparacionAdapter.ComparacionFila(ej.NombreEjercicio, idEjercicio, idEntBaseForExercise, vTarget, vBase));
             }
 
+            long secBase = (eBase.FechaFin != null && eBase.FechaInicio != null && eBase.FechaFin > eBase.FechaInicio)
+                    ? (eBase.FechaFin - eBase.FechaInicio) / 1000 : 0;
+            long secTarget = (eTarget.FechaFin != null && eTarget.FechaInicio != null && eTarget.FechaFin > eTarget.FechaInicio)
+                    ? (eTarget.FechaFin - eTarget.FechaInicio) / 1000 : 0;
+
+            String strValA = secBase > 0 ? formatDuration(secBase) : "-";
+            String strValB = secTarget > 0 ? formatDuration(secTarget) : "-";
+
+            String strDif = "-";
+            int colorDif = Color.WHITE;
+
+            if (secBase > 0 && secTarget > 0) {
+                long diffSec = secTarget - secBase;
+                if (diffSec == 0) {
+                    strDif = "00:00";
+                    colorDif = Color.WHITE;
+                } else if (diffSec < 0) {
+                    strDif = "-" + formatDuration(Math.abs(diffSec));
+                    colorDif = Color.parseColor("#4CAF50");
+                } else {
+                    strDif = "+" + formatDuration(diffSec);
+                    colorDif = Color.parseColor("#FF9800");
+                }
+            }
+
             final int finalTargetId = eTarget.IdEntrenamiento;
+            final String finalStrValA = strValA;
+            final String finalStrValB = strValB;
+            final String finalStrDif = strDif;
+            final int finalColorDif = colorDif;
+
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     if (tvHeaderVolA != null) tvHeaderVolA.setText(String.format("Ent. #%d", nA_final));
                     if (tvHeaderVolB != null) tvHeaderVolB.setText(String.format("Ent. #%d", nB_final));
+                    if (cvComparacionTiempo != null) {
+                        cvComparacionTiempo.setVisibility(View.VISIBLE);
+                        if (tvTiempoLabelA != null) tvTiempoLabelA.setText(String.format("Ent. #%d", nA_final));
+                        if (tvTiempoValA != null) tvTiempoValA.setText(finalStrValA);
+                        if (tvTiempoLabelB != null) tvTiempoLabelB.setText(String.format("Ent. #%d", nB_final));
+                        if (tvTiempoValB != null) tvTiempoValB.setText(finalStrValB);
+                        if (tvTiempoDif != null) {
+                            tvTiempoDif.setText(finalStrDif);
+                            tvTiempoDif.setTextColor(finalColorDif);
+                        }
+                    }
                     llTablaComparacion.setVisibility(View.VISIBLE);
                     rvComparacion.setAdapter(new ComparacionAdapter(filas, item -> mostrarPopUpDetalle(item, finalTargetId, nB_final)));
                 });

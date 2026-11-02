@@ -158,6 +158,10 @@ public class SeccionesFragment extends Fragment {
                     btnFinalizarEntrenamiento.setEnabled(false);
                 }
 
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).resetStopwatch();
+                }
+
                 entrenamientoRepository.finalizarOEliminarSiVacio(MainActivity.usuarioLogueado.IdUsuario, finalizado -> {
                     if (finalizado != null && finalizado) {
                         android.widget.Toast.makeText(getContext(), "¡Entrenamiento finalizado!", android.widget.Toast.LENGTH_SHORT).show();

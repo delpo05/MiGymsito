@@ -37,6 +37,52 @@
             android:src="@drawable/logo_app_header"
             android:contentDescription="Logo de la app" />
 
+        <LinearLayout
+            android:id="@+id/toolbar_stopwatch_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/toolbar_stopwatch_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_stopwatch"
+                app:tint="@color/white"
+                android:contentDescription="Cronómetro" />
+
+            <TextView
+                android:id="@+id/toolbar_stopwatch_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="00:00:00"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace" />
+
+            <ImageView
+                android:id="@+id/toolbar_stopwatch_btn_reset"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/ic_reset"
+                app:tint="@color/white"
+                android:visibility="gone"
+                android:contentDescription="Reiniciar cronómetro" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/toolbar_username"
             android:layout_width="wrap_content"

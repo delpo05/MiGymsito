@@ -228,6 +228,9 @@ public class EjerciciosFragment extends Fragment {
                 dialog.dismiss();
                 Integer idSec = seccionActual != null ? seccionActual.IdSeccion : null;
                 entrenamientoRepository.iniciarNuevoEntrenamiento(MainActivity.usuarioLogueado.IdUsuario, idSec, nuevoEnt -> {
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).startStopwatch(0);
+                    }
                     configurarBotonFinalizar();
                 });
             });
@@ -266,6 +269,10 @@ public class EjerciciosFragment extends Fragment {
 
                 if (btnFinalizarEntrenamiento != null) {
                     btnFinalizarEntrenamiento.setEnabled(false);
+                }
+
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).resetStopwatch();
                 }
 
                 entrenamientoRepository.finalizarOEliminarSiVacio(

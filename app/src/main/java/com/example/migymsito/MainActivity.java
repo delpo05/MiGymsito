@@ -28,6 +28,9 @@ import android.app.AlertDialog;
 import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
@@ -46,6 +49,27 @@ public class MainActivity extends AppCompatActivity {
     public static Usuario usuarioLogueado;
     private UsuarioRepository userRepo;
     public static boolean isAppInForeground = false;
+
+    // Header Stopwatch
+    private final Handler stopwatchHandler = new Handler(Looper.getMainLooper());
+    private long stopwatchBaseTime = 0L;
+    private long stopwatchElapsedTime = 0L;
+    private boolean isStopwatchRunning = false;
+
+    private View containerStopwatch;
+    private TextView tvStopwatchText;
+    private View btnStopwatchReset;
+
+    private final Runnable stopwatchRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isStopwatchRunning) {
+                long currentElapsed = SystemClock.elapsedRealtime() - stopwatchBaseTime;
+                updateStopwatchUI(currentElapsed);
+                stopwatchHandler.postDelayed(this, 500);
+            }
+        }
+    };
 
     private final ActivityResultLauncher<String[]> filePickerLauncher = registerForActivityResult(
             new ActivityResultContracts.OpenDocument(),
@@ -102,12 +126,14 @@ public class MainActivity extends AppCompatActivity {
                     if (user != null) {
                         usuarioLogueado = user;
                         actualizarNombreHeader();
+                        comprobarEntrenamientoActivoYActualizarCronometro();
                         sharedViewModel.notifyUserLoaded();
                     }
                 });
             }
         } else {
             actualizarNombreHeader();
+            comprobarEntrenamientoActivoYActualizarCronometro();
             sharedViewModel.notifyUserLoaded();
         }
 
@@ -128,6 +154,19 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         isAppInForeground = true;
         NotificationHelper.cancelAllNotifications(this);
+        comprobarEntrenamientoActivoYActualizarCronometro();
+    }
+
+    public void comprobarEntrenamientoActivoYActualizarCronometro() {
+        if (usuarioLogueado == null) return;
+        com.example.migymsito.dataRepository.EntrenamientoRepository entRepo = new com.example.migymsito.dataRepository.EntrenamientoRepository(getApplication());
+        entRepo.obtenerEntrenamientoActivo(usuarioLogueado.IdUsuario, entrenamiento -> {
+            if (entrenamiento != null && entrenamiento.FechaInicio != null) {
+                long elapsed = System.currentTimeMillis() - entrenamiento.FechaInicio;
+                if (elapsed < 0) elapsed = 0;
+                startStopwatch(elapsed);
+            }
+        });
     }
 
     @Override
@@ -163,6 +202,122 @@ public class MainActivity extends AppCompatActivity {
             TextView tvUsername = toolbar.findViewById(R.id.toolbar_username);
             if (tvUsername != null && usuarioLogueado != null) {
                 tvUsername.setText(usuarioLogueado.NombreUsuario);
+            }
+
+            containerStopwatch = toolbar.findViewById(R.id.toolbar_stopwatch_container);
+            tvStopwatchText = toolbar.findViewById(R.id.toolbar_stopwatch_text);
+            btnStopwatchReset = toolbar.findViewById(R.id.toolbar_stopwatch_btn_reset);
+
+            if (containerStopwatch != null) {
+                containerStopwatch.setOnClickListener(v -> toggleStopwatch());
+                containerStopwatch.setOnLongClickListener(v -> {
+                    resetStopwatch();
+                    Toast.makeText(MainActivity.this, "Cronómetro reiniciado", Toast.LENGTH_SHORT).show();
+                    return true;
+                });
+            }
+
+            if (btnStopwatchReset != null) {
+                btnStopwatchReset.setOnClickListener(v -> resetStopwatch());
+            }
+
+            updateStopwatchUI(getStopwatchElapsedTime());
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("STOPWATCH_ELAPSED_TIME", getStopwatchElapsedTime());
+        outState.putBoolean("STOPWATCH_IS_RUNNING", isStopwatchRunning);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@androidx.annotation.NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        long savedElapsed = savedInstanceState.getLong("STOPWATCH_ELAPSED_TIME", 0L);
+        boolean savedRunning = savedInstanceState.getBoolean("STOPWATCH_IS_RUNNING", false);
+        if (savedRunning) {
+            startStopwatch(savedElapsed);
+        } else {
+            stopwatchElapsedTime = savedElapsed;
+            updateStopwatchUI(stopwatchElapsedTime);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
+    }
+
+    // Stopwatch Methods
+    public void startStopwatch() {
+        startStopwatch(stopwatchElapsedTime);
+    }
+
+    public void startStopwatch(long initialElapsedMillis) {
+        stopwatchElapsedTime = Math.max(0L, initialElapsedMillis);
+        stopwatchBaseTime = SystemClock.elapsedRealtime() - stopwatchElapsedTime;
+        isStopwatchRunning = true;
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
+        stopwatchHandler.post(stopwatchRunnable);
+        updateStopwatchUI(stopwatchElapsedTime);
+    }
+
+    public void pauseStopwatch() {
+        if (isStopwatchRunning) {
+            stopwatchElapsedTime = SystemClock.elapsedRealtime() - stopwatchBaseTime;
+            isStopwatchRunning = false;
+            stopwatchHandler.removeCallbacks(stopwatchRunnable);
+            updateStopwatchUI(stopwatchElapsedTime);
+        }
+    }
+
+    public void resetStopwatch() {
+        isStopwatchRunning = false;
+        stopwatchElapsedTime = 0L;
+        stopwatchBaseTime = 0L;
+        stopwatchHandler.removeCallbacks(stopwatchRunnable);
+        updateStopwatchUI(0L);
+    }
+
+    public void toggleStopwatch() {
+        if (isStopwatchRunning) {
+            pauseStopwatch();
+        } else {
+            startStopwatch();
+        }
+    }
+
+    public long getStopwatchElapsedTime() {
+        if (isStopwatchRunning) {
+            return SystemClock.elapsedRealtime() - stopwatchBaseTime;
+        }
+        return stopwatchElapsedTime;
+    }
+
+    public boolean isStopwatchRunning() {
+        return isStopwatchRunning;
+    }
+
+    public void updateStopwatchUI(long elapsedMillis) {
+        long totalSeconds = elapsedMillis / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        String formattedTime = String.format(java.util.Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+
+        if (tvStopwatchText != null) {
+            tvStopwatchText.setText(formattedTime);
+        }
+
+        if (btnStopwatchReset != null) {
+            if (!isStopwatchRunning && elapsedMillis > 0) {
+                btnStopwatchReset.setVisibility(View.VISIBLE);
+            } else {
+                btnStopwatchReset.setVisibility(View.GONE);
             }
         }
     }
