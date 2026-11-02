@@ -32,7 +32,7 @@
             android:padding="8dp"
             android:clipToPadding="false"
             app:layout_constraintTop_toBottomOf="@id/tvTituloGrid"
-            app:layout_constraintBottom_toTopOf="@id/btnFinalizarEntrenamiento"
+            app:layout_constraintBottom_toTopOf="@id/layoutBottomContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -41,43 +41,50 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/tvTituloGrid"
-            app:layout_constraintBottom_toTopOf="@id/btnFinalizarEntrenamiento"
+            app:layout_constraintBottom_toTopOf="@id/layoutBottomContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFinalizarEntrenamiento"
+        <LinearLayout
+            android:id="@+id/layoutBottomContainer"
             android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:text="FINALIZAR ENTRENAMIENTO"
-            android:textColor="@color/negro"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/blanco"
-            app:cornerRadius="12dp"
-            android:elevation="4dp"
-            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|end"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            app:srcCompat="@drawable/ic_add"
-            app:tint="@color/negro"
-            app:backgroundTint="@color/blanco"
-            app:fabSize="normal"
-            android:contentDescription="Añadir nuevo"
-            app:layout_constraintBottom_toTopOf="@id/btnFinalizarEntrenamiento"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_goneMarginBottom="24dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFinalizarEntrenamiento"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:text="FINALIZAR ENTRENAMIENTO"
+                android:textColor="@color/negro"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/blanco"
+                app:cornerRadius="12dp"
+                android:elevation="4dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_add"
+                app:tint="@color/negro"
+                app:backgroundTint="@color/blanco"
+                app:fabSize="normal"
+                android:contentDescription="Añadir nuevo" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
