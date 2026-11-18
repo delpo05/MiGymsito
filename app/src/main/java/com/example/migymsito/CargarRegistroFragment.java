@@ -17,9 +17,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.Dialog;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import androidx.activity.OnBackPressedCallback;
@@ -267,6 +274,27 @@ public class CargarRegistroFragment extends Fragment {
         ivEditTimer = view.findViewById(R.id.ivEditTimer);
 
         tvNombreEjercicio.setText(nombreEjercicio);
+
+        TextView tvDescHeader = view.findViewById(R.id.tvDescripcionHeader);
+        if (tvDescHeader != null) {
+            if (ejercicioActual != null && ejercicioActual.DescripcionEjercicio != null && !ejercicioActual.DescripcionEjercicio.trim().isEmpty()) {
+                tvDescHeader.setVisibility(View.VISIBLE);
+                tvDescHeader.setText(ejercicioActual.DescripcionEjercicio.trim());
+                tvDescHeader.setMaxLines(1);
+                tvDescHeader.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                tvDescHeader.setOnClickListener(v -> {
+                    if (tvDescHeader.getMaxLines() == 1) {
+                        tvDescHeader.setMaxLines(10);
+                        tvDescHeader.setEllipsize(null);
+                    } else {
+                        tvDescHeader.setMaxLines(1);
+                        tvDescHeader.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                    }
+                });
+            } else {
+                tvDescHeader.setVisibility(View.GONE);
+            }
+        }
 
         if (tipoDeBarra != null && !tipoDeBarra.equals("Ninguna") && !tipoDeBarra.equals("None")) {
             tvInfoBarra.setText(getString(R.string.info_barra_format, tipoDeBarra, pesoBarra));

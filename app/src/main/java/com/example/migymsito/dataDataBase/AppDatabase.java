@@ -39,7 +39,7 @@ import java.util.concurrent.Executors;
         Historial.class,
         Entrenamiento.class,
         SeccionXejercicio.class
-}, version = 19, exportSchema = false)
+}, version = 20, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
@@ -61,13 +61,20 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    public static final Migration MIGRATION_19_20 = new Migration(19, 20) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE Ejercicio ADD COLUMN DescripcionEjercicio TEXT");
+        }
+    };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "migymsito_db")
-                            .addMigrations(MIGRATION_14_15)
+                            .addMigrations(MIGRATION_14_15, MIGRATION_19_20)
                             .addCallback(sRoomDatabaseCallback)
                             .fallbackToDestructiveMigration()
                             .build();

@@ -19,9 +19,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.Dialog;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -205,6 +212,26 @@ public class CargarRegistroCardioFragment extends Fragment {
 
         if (ejercicio != null) {
             tvNombreEjercicio.setText(ejercicio.NombreEjercicio);
+            TextView tvDescHeader = view.findViewById(R.id.tvDescripcionHeaderCardio);
+            if (tvDescHeader != null) {
+                if (ejercicio.DescripcionEjercicio != null && !ejercicio.DescripcionEjercicio.trim().isEmpty()) {
+                    tvDescHeader.setVisibility(View.VISIBLE);
+                    tvDescHeader.setText(ejercicio.DescripcionEjercicio.trim());
+                    tvDescHeader.setMaxLines(1);
+                    tvDescHeader.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                    tvDescHeader.setOnClickListener(v -> {
+                        if (tvDescHeader.getMaxLines() == 1) {
+                            tvDescHeader.setMaxLines(10);
+                            tvDescHeader.setEllipsize(null);
+                        } else {
+                            tvDescHeader.setMaxLines(1);
+                            tvDescHeader.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                        }
+                    });
+                } else {
+                    tvDescHeader.setVisibility(View.GONE);
+                }
+            }
         }
 
         // Timer por defecto

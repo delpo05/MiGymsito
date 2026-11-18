@@ -30,6 +30,8 @@ public class Ejercicio implements Serializable {
 
     public String ImagenEjercicio;
 
+    public String DescripcionEjercicio;
+
     @NonNull
     public Boolean PesoCorporalEjercicio;
 

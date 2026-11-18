@@ -68,4 +68,13 @@ public class EjercicioPreestablecidoTest {
         assertTrue(e.PesoPorLado);
         assertEquals("FUERZA", e.CategoriaEjercicio);
     }
+
+    @Test
+    public void testAsignacionDescripcionEjercicio() {
+        Ejercicio e = new Ejercicio();
+        e.NombreEjercicio = "Sentadilla libre";
+        e.DescripcionEjercicio = "3x12 - RPE 8";
+
+        assertEquals("3x12 - RPE 8", e.DescripcionEjercicio);
+    }
 }

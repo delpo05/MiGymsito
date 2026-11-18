@@ -339,6 +339,7 @@ public class EjerciciosFragment extends Fragment {
 
         TextView tvTitulo = dialog.findViewById(R.id.tvTituloPopUpEjercicio);
         EditText etNombre = dialog.findViewById(R.id.etNombreEjercicio);
+        EditText etDescripcion = dialog.findViewById(R.id.etDescripcionEjercicio);
         
         // Tipo Selector
         android.widget.RadioGroup rgTipo = dialog.findViewById(R.id.rgTipoEjercicio);
@@ -410,6 +411,9 @@ public class EjerciciosFragment extends Fragment {
         if (ejercicioExistente != null) {
             tvTitulo.setText("Editar ejercicio");
             etNombre.setText(ejercicioExistente.NombreEjercicio);
+            if (etDescripcion != null && ejercicioExistente.DescripcionEjercicio != null) {
+                etDescripcion.setText(ejercicioExistente.DescripcionEjercicio);
+            }
             
             if ("CARDIO".equalsIgnoreCase(ejercicioExistente.CategoriaEjercicio)) {
                 rbCardio.setChecked(true);
@@ -465,11 +469,13 @@ public class EjerciciosFragment extends Fragment {
                 return;
             }
 
+            String descripcion = (etDescripcion != null) ? etDescripcion.getText().toString().trim() : "";
             String categoria = rbCardio.isChecked() ? "CARDIO" : "FUERZA";
 
             if (ejercicioExistente == null) {
                 Ejercicio nuevo = new Ejercicio();
                 nuevo.NombreEjercicio = nombre;
+                nuevo.DescripcionEjercicio = descripcion;
                 nuevo.TipoEjercicio = "Personalizado";
                 nuevo.CategoriaEjercicio = categoria;
                 
@@ -502,6 +508,7 @@ public class EjerciciosFragment extends Fragment {
                 });
             } else {
                 ejercicioExistente.NombreEjercicio = nombre;
+                ejercicioExistente.DescripcionEjercicio = descripcion;
                 ejercicioExistente.CategoriaEjercicio = categoria;
                 ejercicioExistente.ImagenEjercicio = (uriImagenSeleccionada != null) ? uriImagenSeleccionada.toString() : ejercicioExistente.ImagenEjercicio;
                 

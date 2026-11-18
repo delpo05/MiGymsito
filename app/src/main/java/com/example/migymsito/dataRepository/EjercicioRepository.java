@@ -88,6 +88,7 @@ public class EjercicioRepository {
                 Ejercicio nuevoEj = new Ejercicio();
                 nuevoEj.NombreEjercicio = ejercicioEditado.NombreEjercicio;
                 nuevoEj.ImagenEjercicio = ejercicioEditado.ImagenEjercicio;
+                nuevoEj.DescripcionEjercicio = ejercicioEditado.DescripcionEjercicio;
                 nuevoEj.TipoEjercicio = ejercicioEditado.TipoEjercicio;
                 nuevoEj.PesoCorporalEjercicio = ejercicioEditado.PesoCorporalEjercicio;
                 nuevoEj.PesoPorLado = ejercicioEditado.PesoPorLado;

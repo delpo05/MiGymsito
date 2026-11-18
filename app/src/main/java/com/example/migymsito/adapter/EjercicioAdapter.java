@@ -54,6 +54,15 @@ public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.Ejer
         Ejercicio ejercicio = ejercicios.get(position);
         holder.txtNombre.setText(ejercicio.NombreEjercicio);
 
+        if (holder.tvDescripcion != null) {
+            if (ejercicio.DescripcionEjercicio != null && !ejercicio.DescripcionEjercicio.trim().isEmpty()) {
+                holder.tvDescripcion.setVisibility(View.VISIBLE);
+                holder.tvDescripcion.setText(ejercicio.DescripcionEjercicio.trim());
+            } else {
+                holder.tvDescripcion.setVisibility(View.GONE);
+            }
+        }
+
         if (ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
             holder.ivImagen.setVisibility(View.VISIBLE);
             if (holder.layoutPlaceholder != null) holder.layoutPlaceholder.setVisibility(View.GONE);
@@ -100,6 +109,7 @@ public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.Ejer
 
     public static class EjercicioViewHolder extends RecyclerView.ViewHolder {
         TextView txtNombre;
+        TextView tvDescripcion;
         TextView tvOpciones;
         ImageView ivImagen;
         View overlay;
@@ -108,6 +118,7 @@ public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.Ejer
         public EjercicioViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNombre = itemView.findViewById(R.id.tv_nombre_item);
+            tvDescripcion = itemView.findViewById(R.id.tv_descripcion_item);
             tvOpciones = itemView.findViewById(R.id.tv_opciones);
             ivImagen = itemView.findViewById(R.id.iv_item_imagen);
             overlay = itemView.findViewById(R.id.view_overlay);

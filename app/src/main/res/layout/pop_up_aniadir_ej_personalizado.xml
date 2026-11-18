@@ -54,15 +54,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="12dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
             android:text="Nombre"
             android:textColor="@color/gris_oscuro_texto"
-            android:textStyle="bold"
-            android:layout_marginEnd="16dp" />
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etNombreEjercicio"
@@ -70,12 +69,46 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Ingrese el nombre"
+            android:maxLength="50"
             android:textColorHint="@color/gris_pista"
             android:background="@drawable/edittext_bg_gray"
             android:textColor="@color/gris_oscuro_texto"
             android:textCursorDrawable="@drawable/cursor_dark"
             android:textSize="14sp"
             android:inputType="textPersonName" />
+    </LinearLayout>
+
+    <!-- Sección Descripción / Notas (Opcional, multilínea, max 300 caracteres) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Descripción / Notas (Opcional)"
+            android:textColor="@color/gris_oscuro_texto"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp" />
+
+        <EditText
+            android:id="@+id/etDescripcionEjercicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="2"
+            android:maxLines="4"
+            android:maxLength="300"
+            android:gravity="top|start"
+            android:padding="8dp"
+            android:hint="Ej. Instrucciones, técnica o series/reps (opcional)"
+            android:textColorHint="@color/gris_pista"
+            android:background="@drawable/edittext_bg_gray"
+            android:textColor="@color/gris_oscuro_texto"
+            android:textCursorDrawable="@drawable/cursor_dark"
+            android:textSize="13sp"
+            android:inputType="textMultiLine|textCapSentences" />
     </LinearLayout>
 
     <!-- Nueva Sección: Tipo de Ejercicio -->
