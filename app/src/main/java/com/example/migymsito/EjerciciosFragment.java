@@ -40,6 +40,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.migymsito.adapter.EjercicioAdapter;
 import com.example.migymsito.data.Ejercicio;
 import com.example.migymsito.data.Entrenamiento;
@@ -48,6 +49,7 @@ import com.example.migymsito.dataDataBase.AppDatabase;
 import com.example.migymsito.dataRepository.EjercicioRepository;
 import com.example.migymsito.dataRepository.EntrenamientoRepository;
 import com.example.migymsito.dataRepository.SeccionRepository;
+import com.example.migymsito.utils.ImageUtils;
 import com.example.migymsito.utils.InteractiveTutorialDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -810,7 +812,23 @@ public class EjerciciosFragment extends Fragment {
                     
                     TextView tvTipo = row.findViewById(R.id.tv_tipo_ejercicio_previo);
                     if (tvTipo != null) {
-                        tvTipo.setText(e.TipoEjercicio != null ? e.TipoEjercicio : "Error");
+                        tvTipo.setText(e.TipoEjercicio != null ? e.TipoEjercicio : "Preestablecido");
+                    }
+
+                    ImageView ivImagen = row.findViewById(R.id.iv_ejercicio_previo);
+                    if (ivImagen != null) {
+                        if (e.ImagenEjercicio != null && !e.ImagenEjercicio.trim().isEmpty()) {
+                            ivImagen.setVisibility(View.VISIBLE);
+                            Glide.with(p.getContext())
+                                    .load(ImageUtils.parseGlideLoadTarget(p.getContext(), e.ImagenEjercicio))
+                                    .placeholder(R.drawable.cargar_imagen_default)
+                                    .error(R.drawable.cargar_imagen_default)
+                                    .centerCrop()
+                                    .into(ivImagen);
+                        } else {
+                            ivImagen.setVisibility(View.VISIBLE);
+                            ivImagen.setImageResource(R.drawable.cargar_imagen_default);
+                        }
                     }
 
                     row.setOnClickListener(view -> {

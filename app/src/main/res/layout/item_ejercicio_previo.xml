@@ -1,45 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container_item_ejercicio_previo"
     android:layout_width="match_parent"
-    android:layout_height="140dp"
-    android:layout_margin="4dp"
-    android:background="@drawable/card_border_white"
-    android:backgroundTint="#F5F5F5"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_height="190dp"
+    android:layout_margin="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
+    app:strokeColor="#DDDDDD"
+    app:strokeWidth="1dp">
 
-    <!-- Imagen del ejercicio si existe -->
-    <ImageView
-        android:id="@+id/iv_ejercicio_previo"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:scaleType="centerCrop"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
-
-    <!-- Nombre del ejercicio -->
-    <TextView
-        android:id="@+id/tv_nombre_ejercicio_previo"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Nombre Ejercicio"
-        android:textColor="@color/negro"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <!-- Tipo de ejercicio (Personalizado o Preestablecido) -->
-    <TextView
-        android:id="@+id/tv_tipo_ejercicio_previo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:gravity="center"
-        android:text="Tipo"
-        android:textColor="#666666"
-        android:textSize="11sp"
-        android:textStyle="italic" />
+        <!-- Contenedor a ancho completo (120dp alto) para vista previa maximizada de la imagen/GIF -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#EEEEEE"
+            app:strokeWidth="0dp">
 
-</LinearLayout>
+            <ImageView
+                android:id="@+id/iv_ejercicio_previo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/cargar_imagen_default"
+                android:contentDescription="Imagen del ejercicio" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="4dp">
+
+            <!-- Nombre del ejercicio -->
+            <TextView
+                android:id="@+id/tv_nombre_ejercicio_previo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="2"
+                android:text="Nombre Ejercicio"
+                android:textColor="@color/negro"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Tipo de ejercicio (Personalizado o Preestablecido) -->
+            <TextView
+                android:id="@+id/tv_tipo_ejercicio_previo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:text="Tipo"
+                android:textColor="#777777"
+                android:textSize="10sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

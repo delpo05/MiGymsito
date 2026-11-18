@@ -28,6 +28,9 @@ public interface EjercicioDao {
     @Query("SELECT * FROM Ejercicio WHERE IdEjercicio = :id")
     Ejercicio obtenerEjercicioPorId(int id);
 
+    @Query("SELECT * FROM Ejercicio WHERE NombreEjercicio = :nombre LIMIT 1")
+    Ejercicio obtenerEjercicioPorNombre(String nombre);
+
     // Obtiene ejercicios que pertenecen a una sección específica
     @Query("SELECT e.* FROM Ejercicio e INNER JOIN SeccionXejercicio sxe ON e.IdEjercicio = sxe.IdEjercicio WHERE sxe.IdSeccion = :idSeccion")
     List<Ejercicio> obtenerEjerciciosPorSeccion(int idSeccion);

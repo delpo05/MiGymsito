@@ -34,6 +34,9 @@ public interface SeccionDao {
     @Query("SELECT * FROM Seccion WHERE TipoSeccion = 'Preestablecido'")
     List<Seccion> obtenerSeccionesPreestablecidas();
 
+    @Query("SELECT * FROM Seccion WHERE NombreSeccion = :nombre AND TipoSeccion = 'Preestablecido' LIMIT 1")
+    Seccion obtenerSeccionPreestablecidaPorNombre(String nombre);
+
     @Query("SELECT * FROM Seccion WHERE TipoSeccion = 'Personalizado'")
     List<Seccion> obtenerSeccionesPersonalizadas();
 

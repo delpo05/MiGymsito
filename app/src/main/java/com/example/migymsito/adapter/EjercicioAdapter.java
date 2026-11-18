@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.migymsito.R;
 import com.example.migymsito.data.Ejercicio;
+import com.example.migymsito.utils.ImageUtils;
 
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class EjercicioAdapter extends RecyclerView.Adapter<EjercicioAdapter.Ejer
             if (holder.overlay != null) holder.overlay.setVisibility(View.VISIBLE);
 
             Glide.with(holder.itemView.getContext())
-                    .load(Uri.parse(ejercicio.ImagenEjercicio))
+                    .load(ImageUtils.parseGlideLoadTarget(holder.itemView.getContext(), ejercicio.ImagenEjercicio))
                     .placeholder(R.drawable.cargar_imagen_default)
                     .error(R.drawable.cargar_imagen_default)
                     .centerCrop()

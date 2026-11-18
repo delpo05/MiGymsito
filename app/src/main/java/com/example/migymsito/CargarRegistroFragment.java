@@ -48,6 +48,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.migymsito.adapter.HistorialEjercicioAdapter;
 import com.example.migymsito.adapter.RegistroAdapter;
+import com.example.migymsito.utils.ImageUtils;
 import com.example.migymsito.utils.PersonalRecordUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -345,7 +346,7 @@ public class CargarRegistroFragment extends Fragment {
         if (ejercicioActual != null && ejercicioActual.ImagenEjercicio != null && !ejercicioActual.ImagenEjercicio.isEmpty()) {
             cvEjercicioImagen.setVisibility(View.VISIBLE);
             Glide.with(this)
-                    .load(Uri.parse(ejercicioActual.ImagenEjercicio))
+                    .load(ImageUtils.parseGlideLoadTarget(getContext(), ejercicioActual.ImagenEjercicio))
                     .placeholder(R.drawable.cargar_imagen_default)
                     .error(R.drawable.cargar_imagen_default)
                     .centerCrop()
@@ -377,7 +378,7 @@ public class CargarRegistroFragment extends Fragment {
         if (ivEjercicioImagenExpanded == null || flExpandedImageContainer == null) return;
 
         Glide.with(this)
-                .load(Uri.parse(imageUriStr))
+                .load(ImageUtils.parseGlideLoadTarget(getContext(), imageUriStr))
                 .placeholder(R.drawable.cargar_imagen_default)
                 .error(R.drawable.cargar_imagen_default)
                 .fitCenter()

@@ -103,80 +103,140 @@ public abstract class AppDatabase extends RoomDatabase {
         EjercicioDao ejercicioDao = db.ejercicioDao();
         SeccionXejercicioDao sxeDao = db.seccionXejercicioDao();
 
-        if (seccionDao.obtenerSeccionesPreestablecidas().isEmpty()) {
+        // ================= PECHO =================
+        long idPecho = obtenerOInsertarSeccion(seccionDao, "Pecho");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press de banca", idPecho, false, false, "Olímpica (20kg)", 20f, "gif_press_banca");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press inclinado con barra", idPecho, false, false, "Olímpica (20kg)", 20f, "gif_press_inclinado_barra");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press inclinado con mancuernas", idPecho, false, true, null, null, "gif_press_inclinado_mancuernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press declinado con barra", idPecho, false, false, "Olímpica (20kg)", 20f, "gif_press_declinado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Aperturas con mancuernas", idPecho, false, true, null, null, "gif_aperturas_mancuernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Aperturas en máquina (Peck Deck)", idPecho, false, false, null, null, "gif_peck_deck");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Cruce de poleas", idPecho, false, true, null, null, "gif_cruce_poleas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Fondos en paralelas (pecho)", idPecho, true, false, null, null, "gif_fondos_pecho");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Flexiones / Push-ups", idPecho, true, false, null, null, "gif_flexiones");
 
-            // ================= PECHO =================
-            long idPecho = insertarSeccion(seccionDao, "Pecho");
-            insertarEjercicio(ejercicioDao, sxeDao, "Press de banca", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Press inclinado con barra", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Press inclinado con mancuernas", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Aperturas con mancuernas", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Aperturas en máquina", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Cruce de poleas", idPecho);
-            insertarEjercicio(ejercicioDao, sxeDao, "Fondos en paralelas (pecho)", idPecho);
+        // ================= ESPALDA =================
+        long idEspalda = obtenerOInsertarSeccion(seccionDao, "Espalda");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Dominadas", idEspalda, true, false, null, null, "gif_dominadas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Jalón al pecho", idEspalda, false, false, null, null, "gif_jalon_pecho");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Jalón agarre estrecho / neutro", idEspalda, false, false, null, null, "gif_jalon_estrecho");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Remo con barra", idEspalda, false, false, "Olímpica (20kg)", 20f, "gif_remo_barra");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Remo con mancuerna a una mano", idEspalda, false, true, null, null, "gif_remo_mancuerna");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Remo T / Remo apoyado", idEspalda, false, false, null, null, "gif_remo_t");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Remo en máquina", idEspalda, false, false, null, null, "gif_remo_maquina");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Peso muerto convencional", idEspalda, false, false, "Olímpica (20kg)", 20f, "gif_peso_muerto");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Pullover con mancuerna", idEspalda, false, false, null, null, "gif_pullover");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Extensión lumbar / Hiperextensiones", idEspalda, true, false, null, null, "gif_hiperextensiones");
 
-// ================= ESPALDA =================
-            long idEspalda = insertarSeccion(seccionDao, "Espalda");
-            insertarEjercicio(ejercicioDao, sxeDao, "Dominadas", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Jalón al pecho", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Remo con barra", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Remo con mancuernas", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Remo en máquina", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Peso muerto", idEspalda);
-            insertarEjercicio(ejercicioDao, sxeDao, "Pullover con mancuerna", idEspalda);
+        // ================= HOMBROS =================
+        long idHombros = obtenerOInsertarSeccion(seccionDao, "Hombros");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press militar con barra", idHombros, false, false, "Olímpica (20kg)", 20f, "gif_press_militar");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press de hombros con mancuernas", idHombros, false, true, null, null, "gif_press_hombros_mancuernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press Arnold", idHombros, false, true, null, null, "gif_press_arnold");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevaciones laterales", idHombros, false, true, null, null, "gif_elevaciones_laterales");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevaciones laterales en polea", idHombros, false, true, null, null, "gif_elevaciones_laterales_polea");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevaciones frontales", idHombros, false, true, null, null, "gif_elevaciones_frontales");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Pájaros / Deltoides posterior", idHombros, false, true, null, null, "gif_pajaros");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Face pull", idHombros, false, false, null, null, "gif_face_pull");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Encogimientos de hombros (Trapecio)", idHombros, false, true, null, null, "gif_encogimientos");
 
-// ================= BICEPS =================
-            long idBicep = insertarSeccion(seccionDao, "Biceps");
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl con barra", idBicep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl con mancuernas", idBicep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl alternado", idBicep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl martillo", idBicep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl concentrado", idBicep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl en banco inclinado", idBicep);
+        // ================= BÍCEPS =================
+        long idBicep = obtenerOInsertarSeccion(seccionDao, "Bíceps");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl con barra recta", idBicep, false, false, "Estándar (10kg)", 10f, "gif_curl_barra");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl con barra Z", idBicep, false, false, "Z (10kg)", 10f, "gif_curl_barra_z");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl con mancuernas", idBicep, false, true, null, null, "gif_curl_mancuernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl alternado", idBicep, false, true, null, null, "gif_curl_alternado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl martillo", idBicep, false, true, null, null, "gif_curl_martillo");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl concentrado", idBicep, false, false, null, null, "gif_curl_concentrado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl en banco Scott / Predicador", idBicep, false, false, "Z (10kg)", 10f, "gif_curl_scott");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl en banco inclinado", idBicep, false, true, null, null, "gif_curl_inclinado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl en polea baja", idBicep, false, false, null, null, "gif_curl_polea");
 
-// ================= TRICEPS =================
-            long idTricep = insertarSeccion(seccionDao, "Triceps");
-            insertarEjercicio(ejercicioDao, sxeDao, "Extensión en polea", idTricep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Fondos en paralelas (triceps)", idTricep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Press cerrado", idTricep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Patada de triceps", idTricep);
-            insertarEjercicio(ejercicioDao, sxeDao, "Extensión con mancuerna", idTricep);
+        // ================= TRÍCEPS =================
+        long idTricep = obtenerOInsertarSeccion(seccionDao, "Tríceps");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Extensión en polea con cuerda", idTricep, false, false, null, null, "gif_extension_cuerda");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Extensión en polea con barra V", idTricep, false, false, null, null, "gif_extension_barra_v");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press cerrado", idTricep, false, false, "Olímpica (20kg)", 20f, "gif_press_cerrado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Fondos en paralelas (tríceps)", idTricep, true, false, null, null, "gif_fondos_triceps");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Fondos entre bancos", idTricep, true, false, null, null, "gif_fondos_bancos");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Patada de tríceps", idTricep, false, true, null, null, "gif_patada_triceps");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Extensión copa a dos manos", idTricep, false, false, null, null, "gif_extension_copa");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Press francés / Extensión tras nuca", idTricep, false, false, "Z (10kg)", 10f, "gif_press_frances");
 
-// ================= HOMBROS =================
-            long idHombros = insertarSeccion(seccionDao, "Hombros");
-            insertarEjercicio(ejercicioDao, sxeDao, "Press militar", idHombros);
-            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones laterales", idHombros);
-            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones frontales", idHombros);
-            insertarEjercicio(ejercicioDao, sxeDao, "Pájaros", idHombros);
-            insertarEjercicio(ejercicioDao, sxeDao, "Face pull", idHombros);
-            insertarEjercicio(ejercicioDao, sxeDao, "Press con mancuernas", idHombros);
+        // ================= ANTEBRAZOS =================
+        long idAntebrazos = obtenerOInsertarSeccion(seccionDao, "Antebrazos");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl de antebrazo con barra", idAntebrazos, false, false, "Estándar (10kg)", 10f, "gif_curl_antebrazo");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl inverso con barra", idAntebrazos, false, false, "Estándar (10kg)", 10f, "gif_curl_inverso");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Paseo del granjero con mancuernas", idAntebrazos, false, true, null, null, "gif_paseo_granjero");
 
-// ================= PIERNAS =================
-            long idPiernas = insertarSeccion(seccionDao, "Piernas");
-            insertarEjercicio(ejercicioDao, sxeDao, "Sentadilla", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Prensa", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Zancadas", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Peso muerto rumano", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Extensión de cuadriceps", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Curl femoral", idPiernas);
-            insertarEjercicio(ejercicioDao, sxeDao, "Hip thrust", idPiernas);
+        // ================= CUÁDRICEPS =================
+        long idCuadriceps = obtenerOInsertarSeccion(seccionDao, "Cuádriceps");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Sentadilla libre", idCuadriceps, false, false, "Olímpica (20kg)", 20f, "gif_sentadilla");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Sentadilla frontal", idCuadriceps, false, false, "Olímpica (20kg)", 20f, "gif_sentadilla_frontal");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Sentadilla Hack", idCuadriceps, false, false, null, null, "gif_sentadilla_hack");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Prensa de piernas 45°", idCuadriceps, false, false, null, null, "gif_prensa");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Zancadas / Lunges", idCuadriceps, false, true, null, null, "gif_zancadas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Sentadilla Búlgara", idCuadriceps, false, true, null, null, "gif_sentadilla_bulgara");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Extensión de cuadríiceps", idCuadriceps, false, false, null, null, "gif_extension_cuadriceps");
 
-// ================= ABDOMEN =================
-            long idAbdomen = insertarSeccion(seccionDao, "Abdomen");
-            insertarEjercicio(ejercicioDao, sxeDao, "Crunch", idAbdomen);
-            insertarEjercicio(ejercicioDao, sxeDao, "Crunch en máquina", idAbdomen);
-            insertarEjercicio(ejercicioDao, sxeDao, "Elevaciones de piernas", idAbdomen);
-            insertarEjercicio(ejercicioDao, sxeDao, "Plancha", idAbdomen);
-            insertarEjercicio(ejercicioDao, sxeDao, "Russian twist", idAbdomen);
-            insertarEjercicio(ejercicioDao, sxeDao, "Bicicleta abdominal", idAbdomen);
+        // ================= ISQUIOTIBIALES =================
+        long idIsquiotibiales = obtenerOInsertarSeccion(seccionDao, "Isquiotibiales");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Peso muerto rumano con barra", idIsquiotibiales, false, false, "Olímpica (20kg)", 20f, "gif_peso_muerto_rumano");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Peso muerto rumano con mancuernas", idIsquiotibiales, false, true, null, null, "gif_peso_muerto_rumano_mancuernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl femoral tumbado", idIsquiotibiales, false, false, null, null, "gif_curl_femoral_tumbado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Curl femoral sentado", idIsquiotibiales, false, false, null, null, "gif_curl_femoral_sentado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Buenos días con barra", idIsquiotibiales, false, false, "Estándar (10kg)", 10f, "gif_buenos_dias");
 
-        }
+        // ================= GLÚTEOS =================
+        long idGluteos = obtenerOInsertarSeccion(seccionDao, "Glúteos");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Hip thrust con barra", idGluteos, false, false, "Olímpica (20kg)", 20f, "gif_hip_thrust");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Puente de glúteos en suelo", idGluteos, true, false, null, null, "gif_puente_gluteos");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Patada de glúteo en polea", idGluteos, false, true, null, null, "gif_patada_gluteo");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Abducción de cadera en máquina", idGluteos, false, false, null, null, "gif_abduccion_cadera");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Subidas al banco con mancuernas", idGluteos, false, true, null, null, "gif_subidas_banco");
+
+        // ================= GEMELOS =================
+        long idGemelos = obtenerOInsertarSeccion(seccionDao, "Gemelos");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevación de talones de pie", idGemelos, false, false, null, null, "gif_gemelos_pie");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevación de talones sentado", idGemelos, false, false, null, null, "gif_gemelos_sentado");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevación de talones en prensa", idGemelos, false, false, null, null, "gif_gemelos_prensa");
+
+        // ================= ABDOMEN =================
+        long idAbdomen = obtenerOInsertarSeccion(seccionDao, "Abdomen");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Crunch abdominal", idAbdomen, true, false, null, null, "gif_crunch");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Crunch en máquina / polea", idAbdomen, false, false, null, null, "gif_crunch_maquina");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevaciones de piernas colgado", idAbdomen, true, false, null, null, "gif_elevaciones_piernas");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Elevaciones de piernas en suelo", idAbdomen, true, false, null, null, "gif_elevaciones_piernas_suelo");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Plancha isométrica", idAbdomen, true, false, null, null, "gif_plancha");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Rueda abdominal / Ab Wheel", idAbdomen, true, false, null, null, "gif_rueda_abdominal");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Giros rusos / Russian twist", idAbdomen, true, false, null, null, "gif_russian_twist");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Bicicleta abdominal", idAbdomen, true, false, null, null, "gif_bicicleta_abdominal");
+
+        // ================= CARDIO =================
+        long idCardio = obtenerOInsertarSeccion(seccionDao, "Cardio");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Cinta de correr", idCardio, true, true, false, true, true, false, "gif_cinta_correr");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Bicicleta estática", idCardio, true, true, true, false, false, true, "gif_bicicleta_estatica");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Elíptica", idCardio, true, true, false, false, false, true, "gif_eliptica");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Remo ergómetro", idCardio, true, true, false, true, false, true, "gif_remo_ergometro");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Escaladora / Stairmaster", idCardio, true, true, false, false, false, true, "gif_escaladora");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Salto con cuerda", idCardio, false, true, false, false, false, false, "gif_salto_cuerda");
+
+        // ================= FULL BODY / CALENTAMIENTO =================
+        long idFullBody = obtenerOInsertarSeccion(seccionDao, "Full Body / Calentamiento");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Burpees", idFullBody, true, false, null, null, "gif_burpees");
+        insertarEjercicioCardio(ejercicioDao, sxeDao, "Jumping Jacks", idFullBody, false, true, false, false, false, false, "gif_jumping_jacks");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Escaladores / Mountain Climbers", idFullBody, true, false, null, null, "gif_mountain_climbers");
+        insertarEjercicioFuerza(ejercicioDao, sxeDao, "Swing con Pesa Rusa", idFullBody, false, false, null, null, "gif_kettlebell_swing");
     }
 
     /**
-     * Método auxiliar para insertar una sección preestablecida usando el DAO.
+     * Método auxiliar para obtener o insertar una sección preestablecida usando el DAO.
      */
-    private static long insertarSeccion(SeccionDao dao, String nombre) {
+    private static long obtenerOInsertarSeccion(SeccionDao dao, String nombre) {
+        Seccion existente = dao.obtenerSeccionPreestablecidaPorNombre(nombre);
+        if (existente != null) {
+            return existente.IdSeccion;
+        }
         Seccion s = new Seccion();
         s.NombreSeccion = nombre;
         s.TipoSeccion = "Preestablecido";
@@ -185,18 +245,69 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     /**
-     * Método auxiliar para insertar un ejercicio preestablecido y su relación usando los DAOs.
+     * Método auxiliar para insertar un ejercicio de Fuerza preestablecido y su relación si no existe.
      */
-    private static void insertarEjercicio(EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion) {
-        Ejercicio e = new Ejercicio();
-        e.TipoEjercicio = "Preestablecido";
-        e.NombreEjercicio = nombre;
-        e.PesoCorporalEjercicio = false;
-        long idEjercicio = ejDao.insertarEjercicio(e);
+    private static void insertarEjercicioFuerza(
+            EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion,
+            boolean pesoCorporal, Boolean pesoPorLado, String tipoBarra, Float pesoBarra, String imagen) {
 
-        SeccionXejercicio sxe = new SeccionXejercicio();
-        sxe.IdSeccion = (int) idSeccion;
-        sxe.IdEjercicio = (int) idEjercicio;
-        sxeDao.insert(sxe);
+        Ejercicio e = ejDao.obtenerEjercicioPorNombre(nombre);
+        long idEjercicio;
+        if (e == null) {
+            e = new Ejercicio();
+            e.TipoEjercicio = "Preestablecido";
+            e.NombreEjercicio = nombre;
+            e.CategoriaEjercicio = "FUERZA";
+            e.PesoCorporalEjercicio = pesoCorporal;
+            e.PesoPorLado = pesoPorLado;
+            e.TipoDeBarra = tipoBarra;
+            e.PesoBarra = pesoBarra;
+            e.ImagenEjercicio = imagen;
+            idEjercicio = ejDao.insertarEjercicio(e);
+        } else {
+            idEjercicio = e.IdEjercicio;
+        }
+
+        if (sxeDao.getRelacion((int) idSeccion, (int) idEjercicio) == null) {
+            SeccionXejercicio sxe = new SeccionXejercicio();
+            sxe.IdSeccion = (int) idSeccion;
+            sxe.IdEjercicio = (int) idEjercicio;
+            sxeDao.insert(sxe);
+        }
+    }
+
+    /**
+     * Método auxiliar para insertar un ejercicio de Cardio preestablecido y su relación si no existe.
+     */
+    private static void insertarEjercicioCardio(
+            EjercicioDao ejDao, SeccionXejercicioDao sxeDao, String nombre, long idSeccion,
+            boolean distancia, boolean calorias, boolean cadencia, boolean ritmo, boolean inclinacion, boolean resistencia, String imagen) {
+
+        Ejercicio e = ejDao.obtenerEjercicioPorNombre(nombre);
+        long idEjercicio;
+        if (e == null) {
+            e = new Ejercicio();
+            e.TipoEjercicio = "Preestablecido";
+            e.NombreEjercicio = nombre;
+            e.CategoriaEjercicio = "CARDIO";
+            e.PesoCorporalEjercicio = true;
+            e.registraDistancia = distancia;
+            e.registraCalorias = calorias;
+            e.registraCadencia = cadencia;
+            e.registraRitmo = ritmo;
+            e.registraInclinacion = inclinacion;
+            e.registraResistencia = resistencia;
+            e.ImagenEjercicio = imagen;
+            idEjercicio = ejDao.insertarEjercicio(e);
+        } else {
+            idEjercicio = e.IdEjercicio;
+        }
+
+        if (sxeDao.getRelacion((int) idSeccion, (int) idEjercicio) == null) {
+            SeccionXejercicio sxe = new SeccionXejercicio();
+            sxe.IdSeccion = (int) idSeccion;
+            sxe.IdEjercicio = (int) idEjercicio;
+            sxeDao.insert(sxe);
+        }
     }
 }

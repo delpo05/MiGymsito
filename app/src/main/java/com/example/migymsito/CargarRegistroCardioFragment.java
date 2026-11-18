@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import androidx.activity.OnBackPressedCallback;
 import com.bumptech.glide.Glide;
+import com.example.migymsito.utils.ImageUtils;
 import com.google.android.material.card.MaterialCardView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -680,7 +681,7 @@ public class CargarRegistroCardioFragment extends Fragment {
         if (ejercicio != null && ejercicio.ImagenEjercicio != null && !ejercicio.ImagenEjercicio.isEmpty()) {
             cvEjercicioImagenCardio.setVisibility(View.VISIBLE);
             Glide.with(this)
-                    .load(Uri.parse(ejercicio.ImagenEjercicio))
+                    .load(ImageUtils.parseGlideLoadTarget(getContext(), ejercicio.ImagenEjercicio))
                     .placeholder(R.drawable.cargar_imagen_default)
                     .error(R.drawable.cargar_imagen_default)
                     .centerCrop()
@@ -712,7 +713,7 @@ public class CargarRegistroCardioFragment extends Fragment {
         if (ivEjercicioImagenExpandedCardio == null || flExpandedImageContainerCardio == null) return;
 
         Glide.with(this)
-                .load(Uri.parse(imageUriStr))
+                .load(ImageUtils.parseGlideLoadTarget(getContext(), imageUriStr))
                 .placeholder(R.drawable.cargar_imagen_default)
                 .error(R.drawable.cargar_imagen_default)
                 .fitCenter()
